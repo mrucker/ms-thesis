@@ -1,0 +1,11 @@
+Linear Programming (Ng, Russell, Abbeel) (Berkley, Stanford) (http://ai.stanford.edu/~ang/papers/icml00-irl.pdf, http://dl.acm.org/citation.cfm?id=1015430)
+Maximum Margin     (Ratliff and Bagnell) (Carnagie Mellon) (http://martin.zinkevich.org/publications/maximummarginplanning.pdf, http://www.ri.cmu.edu/pub_files/pub4/ratliff_nathan_2007_2/ratliff_nathan_2007_2.pdf)
+Maximum Entropy    (Ziebart and Bagnell) (Carnagie Mellon) (http://www.ri.cmu.edu/pub_files/2008/7/AAAI2008-bziebart.pdf, https://arxiv.org/pdf/1308.3506v1.pdf)
+Inverse Optimal Control
+
+Optimal Control Theory   (Helicopter)             (http://heli.stanford.edu/papers/nips06-aerobatichelicopter.pdf)
+Apprenticeship learning  (Helicopter, Navigation) (http://heli.stanford.edu/papers/nips06-aerobatichelicopter.pdf, http://link.springer.com/chapter/10.1007/978-3-319-50127-7_45)
+Objective Classification (ATC)                    (http://arc.aiaa.org/doi/abs/10.2514/6.2017-1254)
+
+exploration paper
+correlation paper

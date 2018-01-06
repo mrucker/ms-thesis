@@ -1,0 +1,52 @@
+Positive Statement  - Statement of fact/observation
+Normative Statement - Statement of what should be or what is desireable
+
+Game Theory     - Research of optimal decisions when there are multiple agents
+Decision Theory - Research of optimal decisions when there is only one agent
+
+Both Game Theory and Decision Theory have positivist and normative branches of research.
+
+Two broad interpretations of probability: (see https://en.wikipedia.org/wiki/Probability_interpretations)
+	1. Physical probabilities (aka objecive or frequency probabilities)
+	2. Evidential probabilities (aka bayseian probabilities)
+
+In P(H|E) = P(E|H)*P(H)/P(E)
+	P(H|E) is the posterior probability
+	P(E|H) is the likelihood function
+	P(H)   is the prior probability
+
+Likelihood function can be written as L(H|E) and is equal to P(E|H)	
+
+Bayesian Inference uses Bayes' Theorem to update the probability for a hypothesis as new evidence becomes available.
+
+Entropy - Has different meanings in Statistical Mechanics, Thermodynamics and Information theory
+	> Information Theory    -- a measure of how "unkown" a piece of information is. The more we know about a piece of information the less information is transfered when the information is revealed or observed.
+	> Thermodynamics        -- How accessible a system's potential energy is to being transformed into mechanical energy.
+	> Statistical Mechanics -- 
+	
+Random Variable -- an unknown quantity. Even though it is unkown we can come to know certain statistics that can describe its potential values.
+
+RL Classifications
+
+	State
+		Environment State
+		Agent       State
+		Belief      State
+
+	Policy Search -- Are trying to determine the best action
+
+	Value Search  -- Are we trying to determine the best state
+
+	Model Free    -- (classical reinforcement learning)
+	
+	Model Based   -- (classical Operations/Optimal Control)
+	
+Theory of Mind -- the ability to attribute mental states (desires, motivations, goals, perspectives) to oneself and others
+
+Autonomous Moral Agents -- 
+
+Connectionism -- 
+
+Frame Problem -- describes an issue with using first-order logic (FOL) to express facts about a robot in the world. Representing the state of a robot with traditional FOL requires the use of many axioms that simply imply that things in the environment do not change arbitrarily.
+
+First Order Logic -- Predicate logic combined with Quantifiers

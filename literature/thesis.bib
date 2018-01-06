@@ -1,0 +1,329 @@
+% Encoding: UTF-8
+
+@InProceedings{yokoyama2017intent,
+  author    = {Yokoyama, Nobuhiro},
+  title     = {Intent Inference of Aircraft via Inverse Optimal Control Including Second-order Optimality Condition},
+  booktitle = {AIAA Guidance, Navigation, and Control Conference},
+  year      = {2017},
+  pages     = {1254},
+  owner     = {Matt},
+  timestamp = {2017.04.03},
+  url       = {http://arc.aiaa.org/doi/abs/10.2514/6.2017-1254},
+}
+
+@MastersThesis{wijden2016preference,
+  author    = {van der Wijden, Ren{\'e}e},
+  title     = {Preference-driven demonstration ranking for inverse reinforcement learning},
+  school    = {Delft University of Technology},
+  year      = {2016},
+  owner     = {Matt},
+  timestamp = {2017.04.03},
+}
+
+@Article{huang2016using,
+  author    = {Huang, He and Harl{\'e}, Katia and Movellan, Javier and Paulus, Martin},
+  title     = {Using Optimal Control to Disambiguate the Effect of Depression on Sensorimotor, Motivational and Goal-Setting Functions},
+  journal   = {PLOS ONE},
+  year      = {2016},
+  volume    = {11},
+  number    = {12},
+  pages     = {e0167960},
+  owner     = {Matt},
+  publisher = {Public Library of Science},
+  timestamp = {2017.04.03},
+  url       = {http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0167960},
+}
+
+@InProceedings{hadfield2016cooperative,
+  author    = {Hadfield-Menell, Dylan and Russell, Stuart J and Abbeel, Pieter and Dragan, Anca},
+  title     = {Cooperative inverse reinforcement learning},
+  booktitle = {Advances in Neural Information Processing Systems},
+  year      = {2016},
+  pages     = {3909--3917},
+  owner     = {mrucker},
+  timestamp = {2017.04.03},
+  url       = {http://papers.nips.cc/paper/6420-cooperative-inverse-reinforcement-learning},
+}
+
+@TechReport{bagnell2015invitation,
+  author      = {Bagnell, J Andrew},
+  title       = {An invitation to imitation},
+  institution = {DTIC Document},
+  year        = {2015},
+  owner       = {Matt},
+  timestamp   = {2017.04.03},
+  url         = {http://www.ri.cmu.edu/pub_files/2015/3/InvitationToImitation_3_1415.pdf},
+}
+
+@InProceedings{huang2015approximate,
+  author    = {Huang, De-An and Farahmand, Amir Massoud and Kitani, Kris M and Bagnell, James Andrew},
+  title     = {Approximate MaxEnt Inverse Optimal Control and Its Application for Mental Simulation of Human Interactions.},
+  booktitle = {AAAI},
+  year      = {2015},
+  volume    = {15},
+  pages     = {29th},
+  abstract  = {Maximum entropy inverse optimal control (MaxEnt IOC) is an effective means of discovering the underlying cost function of demonstrated human activity and can be used to predict human behavior over low-dimensional state spaces (i.e., forecasting of 2D trajectories). To enable inference in very large state spaces, we introduce an approximate MaxEnt IOC procedure to address the fundamental computational bottleneck stemming from calculating the partition function via dynamic programming. Approximate MaxEnt IOC is based on two components: approximate dynamic programming and Monte Carlo sampling. We analyze this approximation approach and provide a finite-sample error upper bound on its excess loss. We validate the proposed method in the context of analyzing dual-agent interactions from video, where we use approximate MaxEnt IOC to simulate mental images of a single agents body pose sequence (a high-dimensional image space). We experiment with sequences image data taken from RGB and RGBD data and show that it is possible to learn cost functions that lead to accurate predictions in highdimensional problems that were previously intractable.},
+  owner     = {Matt},
+  timestamp = {2017.04.03},
+  url       = {https://pdfs.semanticscholar.org/ab05/a7ebef6cd971e5bcd2e61863b1fd43460593.pdf},
+}
+
+@Article{waugh2013computational,
+  author    = {Waugh, Kevin and Ziebart, Brian D and Bagnell, J Andrew},
+  title     = {Computational rationalization: The inverse equilibrium problem},
+  journal   = {arXiv preprint arXiv:1308.3506},
+  year      = {2013},
+  abstract  = {Modeling the purposeful behavior of imperfect agents from a small number of observations is a challenging task. When restricted to the single-agent decision-theoretic setting, inverse optimal control techniques assume that observed behavior is an approximately optimal solution to an unknown decision problem. These techniques learn a utility function that explains the example behavior and can then be used to accurately predict or imitate future behavior in similar observed or unobserved situations.
+
+In this work, we consider similar tasks in competitive and cooperative multi-agent domains. Here, unlike single-agent settings, a player cannot myopically maximize its reward; it must speculate on how the other agents may act to influence the game's outcome. Employing the game-theoretic notion of regret and the principle of maximum entropy, we introduce a technique for predicting and generalizing behavior.},
+  owner     = {Matt},
+  timestamp = {2017.04.03},
+  url       = {http://arxiv.org/abs/1308.3506},
+}
+
+@Article{araujo2013understanding,
+  author    = {Ara{\'u}jo, Miguel Ramos de and others},
+  title     = {Understanding behavior via inverse reinforcement learning},
+  year      = {2013},
+  abstract  = {The execution of complex activities, comprising sequences of simpler actions, sometimes leads to the clash of conflicting functions that must be maximized. We simultaneously try to fulfill the objective of the task and to maximize our own satisfaction, thereby impacting energy, time and social interactions during the activity. Further differences regarding the way we believe something shall be done create deeper distinction between our actions.
+
+Decisions are motivated by a desire to maximize a given function of satisfaction and objectives, unknown even to the decision maker himself. Were we able to understand individual motivations and to compare such motivations between individuals, and we would be able to actively change the environment so as to increase satisfaction and/or improving performance.
+
+In this work, we approach the problem of providing high-level and intelligible descriptions of the motivations of an agent, based on observations of such an agent during the fulfillment of a complex activity. An algorithm for the analysis of observational records is then proposed. We also present a methodology that allows researchers to converge towards a summary description of the agent’s behavior, through the minimization of an error measure between the current description and the observed behavior.
+
+This work was validated using a synthetic dataset representing the motivations of a passenger in a public transportation network and through a real dataset representing the motivations of taxi drivers during their trips on an urban network.
+
+Our results show that it is possible to recover linear combinations of reward functions when the original function is a linear combination itself. The applicability of the presented algorithm to large datasets is also demonstrated.},
+  owner     = {mrucker},
+  review    = {The author presents an interesting process via IRL to explain some observed behavior. However, there isn't enough evidence provided, in my opinion, to justify the multi step process is necessary. Still probably worth keeping in mind in case future vanilla IRL applications don't work out. Process:
+
+1. Create a reward function by hand based domain knowledge
+2. Algorithmically determine all SxA pairs for which the proposed reward function isn't optimal
+3. If the count of sub-optimal SxA pairs is acceptable exit else repeat.},
+  timestamp = {2017.04.03},
+  url       = {https://repositorio-aberto.up.pt/bitstream/10216/68416/1/000154268.pdf},
+}
+
+@InProceedings{nouri2012cultural,
+  author    = {Nouri, Elnaz and Georgila, Kallirroi and Traum, David R},
+  title     = {A Cultural Decision-Making Model for Negotiation based on Inverse Reinforcement Learning.},
+  booktitle = {CogSci},
+  year      = {2012},
+  abstract  = {We learn culture-specific weights for a multi-attribute model of decision-making in negotiation, using Inverse Reinforcement Learning (IRL). The model takes into account multiple individual and social factors for evaluating the available choices in a decision set, and attempts to account for observed behavior differences across cultures by the different weights that members of those cultures place on each factor. We apply this model to the Ultimatum Game and show that weights learned from IRL surpass both a simple baseline with random weights, and a high baseline considering only one factor of maximizing gain in own wealth in accounting for the behavior of human players from four different cultures. We also show that the weights learned with our model for one culture outperform weights learned for other cultures when playing against opponents of the first culture. We conclude that decision-making in negotiation is a complex, culture-specific process that cannot be explained just by the notion of maximizing one’s own utility, but which can be learned using IRL techniques.},
+  owner     = {mrucker},
+  timestamp = {2017.04.03},
+  url       = {https://mindmodeling.org//cogsci2012/papers/0366/paper0366.pdf},
+}
+
+@InProceedings{zhifei2012review,
+  author       = {Zhifei, Shao and Joo, Er Meng},
+  title        = {A review of inverse reinforcement learning theory and recent advances},
+  booktitle    = {Evolutionary Computation (CEC), 2012 IEEE Congress on},
+  year         = {2012},
+  pages        = {1--8},
+  organization = {IEEE},
+  abstract     = {A major challenge faced by machine learning community is the decision making problems under uncertainty. Reinforcement Learning (RL) techniques provide a powerful solution for it. An agent used by RL interacts with a dynamic environment and finds a policy through a reward function, without using target labels like Supervised Learning (SL). However, one fundamental assumption of existing RL algorithms is that reward function, the most succinct representation of the designer's intention, needs to be provided beforehand. In practice, the reward function can be very hard to specify and exhaustive to tune for large and complex problems, and this inspires the development of Inverse Reinforcement Learning (IRL), an extension of RL, which directly tackles this problem by learning the reward function through expert demonstrations. IRL introduces a new way of learning policies by deriving expert's intentions, in contrast to directly learning policies, which can be redundant and have poor generalization ability. In this paper, the original IRL algorithms and its close variants, as well as their recent advances are reviewed and compared.},
+  owner        = {mrucker},
+  review       = {A great general review of IRL Algorithms -MR},
+  timestamp    = {2017.04.03},
+  url          = {http://ieeexplore.ieee.org/abstract/document/6256507/},
+}
+
+@Article{abbeel2010autonomous,
+  author    = {Abbeel, Pieter and Coates, Adam and Ng, Andrew Y},
+  title     = {Autonomous helicopter aerobatics through apprenticeship learning},
+  journal   = {The International Journal of Robotics Research},
+  year      = {2010},
+  volume    = {29},
+  number    = {13},
+  pages     = {1608--1639},
+  owner     = {mrucker},
+  publisher = {SAGE Publications Sage UK: London, England},
+  timestamp = {2017.04.03},
+  url       = {http://journals.sagepub.com/doi/abs/10.1177/0278364910371999},
+}
+
+@Article{ratliff2009learning,
+  author    = {Ratliff, Nathan D and Silver, David and Bagnell, J Andrew},
+  title     = {Learning to search: Functional gradient techniques for imitation learning},
+  journal   = {Autonomous Robots},
+  year      = {2009},
+  volume    = {27},
+  number    = {1},
+  pages     = {25--53},
+  abstract  = {Programming robot behavior remains a challenging task. While it is often easy to abstractly define or even demonstrate a desired behavior, designing a controller that embodies the same behavior is difficult, time consuming, and ultimately expensive. The machine learning paradigm offers the promise of enabling “programming by demonstration” for developing high-performance robotic systems. Unfortunately, many “behavioral cloning” (Bain & Sammut, 1995; Pomerleau, 1989; LeCun et al., 2006) approaches that utilize classical tools of supervised learning (e.g. decision trees, neural networks, or support vector machines) do not fit the needs of modern robotic systems. These systems are often built atop sophisticated planning algorithms that efficiently reason far into the future; consequently, ignoring these planning algorithms in lieu of a supervised learning approach often leads to myopic and poor-quality robot performance.
+
+While planning algorithms have shown success in many real-world applications ranging from legged locomotion (Chestnutt et al., 2003) to outdoor unstructured navigation (Kelly et al., 2004; Stentz et al., 2007), such algorithms rely on fully specified cost functions that map sensor readings and environment models to quantifiable costs. Such cost functions are usually manually designed and programmed. Recently, a set of techniques has been developed that explore learning these functions from expert human demonstration. These algorithms apply an inverse optimal control approach to find a cost function for which planned behavior mimics an expert’s demonstration.
+
+The work we present extends the Maximum Margin Planning (MMP) (Ratliff et al., 2006a) framework to admit learning of more powerful, non-linear cost functions. These algorithms, known collectively as LEARCH (LEArning to seaRCH ), are simpler to implement than most existing methods, more effi- cient than previous attempts at non-linearization (Ratliff et al., 2006b), more naturally satisfy common constraints on the cost function, and better represent our prior beliefs about the function’s form. We derive and discuss the framework both mathematically and intuitively, and demonstrate practical realworld performance with three applied case-studies including legged locomotion, grasp planning, and autonomous outdoor unstructured navigation. The latter study includes hundreds of kilometers of autonomous traversal through complex natural environments. These case-studies address key challenges in applying the algorithm in practical settings that utilize state-of-the-art planners, and which may be constrained by efficiency requirements and imperfect expert demonstration.},
+  owner     = {Matt},
+  publisher = {Springer},
+  timestamp = {2017.04.03},
+  url       = {http://www.ri.cmu.edu/pub_files/2009/7/learch.pdf},
+}
+
+@InProceedings{ziebart2009human,
+  author    = {Ziebart, Brian D and Maas, Andrew L and Bagnell, J Andrew and Dey, Anind K},
+  title     = {Human Behavior Modeling with Maximum Entropy Inverse Optimal Control.},
+  booktitle = {AAAI Spring Symposium: Human Behavior Modeling},
+  year      = {2009},
+  pages     = {92},
+  abstract  = {In our research, we view human behavior as a structured sequence of context-sensitive decisions. We develop a conditional probabilistic model for predicting human decisions given the contextual situation. Our approach employs the principle of maximum entropy within the Markov Decision Process framework. Modeling human behavior is reduced to recovering a context-sensitive utility function that explains demonstrated behavior within the probabilistic model.
+
+In this work, we review the development of our probabilistic model (Ziebart et al. 2008a) and the results of its application to modeling the context-sensitive route preferences of drivers (Ziebart et al. 2008b). We additionally expand the approach’s applicability to domains with stochastic dynamics, present preliminary experiments on modeling time-usage, and discuss remaining challenges for applying our approach to other human behavior modeling problems.},
+  owner     = {Matt},
+  timestamp = {2017.04.03},
+  url       = {http://www.ri.cmu.edu/pub_files/2008/4/human-behavior-bziebart.pdf},
+}
+
+@InProceedings{ziebart2008maximum,
+  author    = {Ziebart, Brian D and Maas, Andrew L and Bagnell, J Andrew and Dey, Anind K},
+  title     = {Maximum Entropy Inverse Reinforcement Learning},
+  booktitle = {AAAI},
+  year      = {2008},
+  pages     = {1433--1438},
+  abstract  = {Recent research has shown the benefit of framing problems of imitation learning as solutions to Markov Decision Problems. This approach reduces learning to the problem of recovering a utility function that makes the behavior induced by a near-optimal policy closely mimic demonstrated behavior. In this work, we develop a probabilistic approach based on the principle of maximum entropy. Our approach provides a well-defined, globally normalized distribution over decision sequences, while providing the same performance guarantees as existing methods.
+
+We develop our technique in the context of modeling realworld navigation and driving behaviors where collected data is inherently noisy and imperfect. Our probabilistic approach enables modeling of route preferences as well as a powerful new approach to inferring destinations and routes based on partial trajectories.},
+  owner     = {Matt},
+  timestamp = {2017.04.03},
+  url       = {http://www.ri.cmu.edu/pub_files/2008/7/AAAI2008-bziebart.pdf},
+}
+
+@Article{ratliff2007boosting,
+  author    = {Ratliff, Nathan and Bradley, David and Bagnell, J Andrew and Chestnutt, Joel},
+  title     = {Boosting structured prediction for imitation learning},
+  journal   = {Robotics Institute},
+  year      = {2007},
+  pages     = {54},
+  abstract  = {The Maximum Margin Planning (MMP) (Ratliff et al., 2006) algorithm solves imitation learning problems by learning linear mappings from features to cost functions in a planning domain. The learned policy is the result of minimum-cost planning using these cost functions. These mappings are chosen so that example policies (or trajectories) given by a teacher appear to be lower cost (with a lossscaled margin) than any other policy for a given planning domain. We provide a novel approach, MMPBOOST , based on the functional gradient descent view of boosting (Mason et al., 1999; Friedman, 1999a) that extends MMP by “boosting” in new features. This approach uses simple binary classification or regression to improve performance of MMP imitation learning, and naturally extends to the class of structured maximum margin prediction problems. (Taskar et al., 2005) Our technique is applied to navigation and planning problems for outdoor mobile robots and robotic legged locomotion.},
+  owner     = {Matt},
+  timestamp = {2017.04.03},
+  url       = {http://www.ri.cmu.edu/pub_files/pub4/ratliff_nathan_2007_2/ratliff_nathan_2007_2.pdf},
+}
+
+@Article{ratliff2006maximum,
+  author    = {Ratliff, Nathan and Bagnell, Andrew and Zinkevich, Martin},
+  title     = {Maximum Margin Planning},
+  journal   = {Twenty Second International Conference on Machine Learning},
+  year      = {2006},
+  abstract  = {Imitation learning of sequential, goaldirected behavior by standard supervised techniques is often difficult. We frame learning such behaviors as a maximum margin structured prediction problem over a space of policies. In this approach, we learn mappings from features to cost so an optimal policy in an MDP with these cost mimics the expert’s behavior. Further, we demonstrate a simple, provably efficient approach to structured maximum margin learning, based on the subgradient method, that leverages existing fast algorithms for inference. Although the technique is general, it is particularly relevant in problems where A* and dynamic programming approaches make learning policies tractable in problems beyond the limitations of a QP formulation. We demonstrate our approach applied to route planning for outdoor mobile robots, where the behavior a designer wishes a planner to execute is often clear, while specifying cost functions that engender this behavior is a much more difficult task.},
+  owner     = {mrucker},
+  timestamp = {2017.04.03},
+  url       = {http://dl.acm.org/citation.cfm?id=1143936},
+}
+
+@Article{abbeel2004apprenticeship,
+  author    = {Abbeel, Pieter and Ng, Andrew Y.},
+  title     = {Apprenticeship learning via inverse reinforcement learning},
+  journal   = {ICML '04 Proceedings of the twenty-first international conference on Machine learning},
+  year      = {2004},
+  abstract  = {We consider learning in a Markov decision process where we are not explicitly given a reward function, but where instead we can observe an expert demonstrating the task that we want to learn to perform. This setting is useful in applications (such as the task of driving) where it may be difficult to write down an explicit reward function specifying exactly how different desiderata should be traded off. We think of the expert as trying to maximize a reward function that is expressible as a linear combination of known features, and give an algorithm for learning the task demonstrated by the expert. Our algorithm is based on using "inverse reinforcement learning" to try to recover the unknown reward function. We show that our algorithm terminates in a small number of iterations, and that even though we may never recover the expert's reward function, the policy output by the algorithm will attain performance close to that of the expert, where here performance is measured with respect to the expert's unknown reward function.},
+  owner     = {mrucker},
+  timestamp = {2017.04.03},
+  url       = {http://dl.acm.org/citation.cfm?id=1015430},
+}
+
+@Article{ng2000algorithms,
+  author    = {Ng, Andrew Y., and Stuart J. Russell},
+  title     = {Algorithms for inverse reinforcement learning},
+  journal   = {Icml},
+  year      = {2000},
+  abstract  = {This paper addresses the problem of inverse reinforcement learning (IRL) in Markov decision processes, that is, the problem of extracting a reward function given observed, optimal behavior. IRL may be useful for apprenticeship learning to acquire skilled behavior, and for ascertaining the reward function being optimized by a natural system. We first characterize the set of all reward functions for which a given policy is optimal. We then derive three algorithms for IRL. The first two deal with the case where the entire policy is known; we handle tabulated reward functions on a finite state space and linear functional approximation of the reward function over a potentially infinite state space. The third algorithm deals with the more realistic case in which the policy is known only through a finite set of observed trajectories. In all cases, a key issue is degeneracy—the existence of a large set of reward functions for which the observed policy is optimal. To remove degeneracy, we suggest some natural heuristics that attempt to pick a reward function that maximally differentiates the observed policy from other, sub-optimal policies. This results in an efficiently solvable linear programming formulation of the IRL problem. We demonstrate our algorithms on simple discrete/finite and continuous/infinite state problems.},
+  owner     = {Kiana},
+  review    = {One of the earliest proposals of the IRL problem. Formulates the task as identifying reward functions that maximize the difference between the observed policy and any other policy. Implemented via linear programming.},
+  timestamp = {2017.04.03},
+  url       = {http://ai.stanford.edu/~ang/papers/icml00-irl.pdf},
+}
+
+@InProceedings{russell1998learning,
+  author       = {Russell, Stuart},
+  title        = {Learning agents for uncertain environments},
+  booktitle    = {Proceedings of the eleventh annual conference on Computational learning theory},
+  year         = {1998},
+  pages        = {101--103},
+  organization = {ACM},
+  abstract     = {This talk proposes a very simple “baseline architecture” for a learning agent that can handle stochastic, partially observable environments. The architecture uses reinforcement learning together with a method for representing temporal processes as graphical models. I will discuss methods for leaming the parameters and structure of such representations from sensory inputs, and for computing posterior probabilities. Some open problems remain before we can try out the complete agent; more arise when we consider scaling up.
+
+A second theme of the talk will be whether reinforcement learning can provide a good model of animal and human learning. To answer this question, we must do inverse reinforcement learning: given the observed behaviour, what reward signal, if any, is being optimized? This seems to be a very interesting problem for the COLT, UAI, and ML communities, and has been addressed in econometrics under the heading of structural estimation of Markov decision processes.},
+  owner        = {Matt},
+  timestamp    = {2017.04.03},
+  url          = {http://dl.acm.org/citation.cfm?id=279964},
+}
+
+@Article{galata2001learning,
+  author    = {Galata, Aphrodite and Johnson, Neil and Hogg, David},
+  title     = {Learning variable-length Markov models of behavior},
+  journal   = {Computer Vision and Image Understanding},
+  year      = {2001},
+  volume    = {81},
+  number    = {3},
+  pages     = {398--413},
+  owner     = {mrucker},
+  publisher = {Elsevier},
+  review    = {Uses a modelling technique they call variable length markov models. I think this means that can shrink or expand dynamically depending on the task at hand. They offer this as a superior method for modeling time dependent sequences of behavior than hidden markov models. The paper seems to be well liked, but it is very heavy in gemotric movements and is trying to model human movements that happens in a few seconds.},
+  timestamp = {2017.06.07},
+  url       = {http://ac.els-cdn.com/S1077314200908944/1-s2.0-S1077314200908944-main.pdf?_tid=220750c0-4b91-11e7-a644-00000aab0f01&acdnat=1496847417_e922ef8d522ff77362a913934905e009},
+}
+
+@Book{wickens1982models,
+  title     = {Models for behavior: Stochastic processes in psychology},
+  publisher = {WH Freeman \& Co Ltd},
+  year      = {1982},
+  author    = {Wickens, Thomas D},
+  owner     = {mrucker},
+  review    = {Seems to have a good review (http://www.jstor.org/stable/pdf/1422829.pdf) but nobody seems to talk about it and the book is now out of print?},
+  timestamp = {2017.06.07},
+}
+
+@Article{dong2012tracking,
+  author    = {Dong, Wen and Lepri, Bruno and Pentland, Sandy},
+  title     = {Tracking co-evolution of behavior and relationships with mobile phones},
+  journal   = {Tsinghua Science and Technology},
+  year      = {2012},
+  volume    = {17},
+  number    = {2},
+  pages     = {136--151},
+  owner     = {mrucker},
+  publisher = {TUP},
+  timestamp = {2017.06.07},
+  url       = {http://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=6180039},
+}
+
+@Article{conte2012manifesto,
+  author    = {Conte, Rosaria and Gilbert, Nigel and Bonelli, Giulia and Cioffi-Revilla, Claudio and Deffuant, Guillaume and Kertesz, Janos and Loreto, Vittorio and Moat, Suzy and Nadal, Jean-Pierre and Sanchez, Anxo and others},
+  title     = {Manifesto of computational social science},
+  journal   = {European Physical Journal-Special Topics},
+  year      = {2012},
+  volume    = {214},
+  pages     = {p--325},
+  owner     = {mrucker},
+  timestamp = {2017.06.12},
+  url       = {https://hal.archives-ouvertes.fr/hal-01072485/},
+}
+
+@Article{liang2009learning,
+  author    = {Liang, Yu-Ming and Shih, Sheng-Wen and Shih, Arthur Chun-Chieh and Liao, Hong-Yuan Mark and Lin, Cheng-Chung},
+  title     = {Learning atomic human actions using variable-length Markov models},
+  journal   = {IEEE Transactions on Systems, Man, and Cybernetics, Part B (Cybernetics)},
+  year      = {2009},
+  volume    = {39},
+  number    = {1},
+  pages     = {268--280},
+  owner     = {mrucker},
+  publisher = {IEEE},
+  timestamp = {2017.06.13},
+  url       = {http://ieeexplore.ieee.org/abstract/document/4695986/},
+}
+
+@Comment{jabref-meta: databaseType:bibtex;}
+
+@Comment{jabref-meta: groupstree:
+0 AllEntriesGroup:;
+1 ExplicitGroup:Inverse Reinforcement Learning\;0\;abbeel2004apprenticeship\;abbeel2010autonomous\;araujo2013understanding\;bagnell2015invitation\;hadfield2016cooperative\;huang2015approximate\;huang2016using\;ng2000algorithms\;nouri2012cultural\;ratliff2006maximum\;ratliff2007boosting\;ratliff2009learning\;russell1998learning\;waugh2013computational\;wijden2016preference\;yokoyama2017intent\;zhifei2012review\;ziebart2008maximum\;ziebart2009human\;;
+1 ExplicitGroup:Modeling\;0\;;
+2 ExplicitGroup:Modeling Behavior\;0\;dong2012tracking\;galata2001learning\;liang2009learning\;wickens1982models\;;
+2 ExplicitGroup:Modeling Society\;0\;conte2012manifesto\;;
+}
+
+@Comment{jabref-meta: groupsversion:3;}

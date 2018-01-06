@@ -1,0 +1,40 @@
+What Do We Want To Do With Reward???
+	Colaborate!!!
+
+predict (recommend) -- intervene (modify) -- classify (understand) -- ***collaborate (support)***
+
+Policy = dynamics * rewards
+ 
+Reward
+  - Sparse (values, ends not means, structure) -- Some work suggests IRL learns policy better in this case
+  - Dense  (desire, means and ends, agency) -- Some work suggests IRL learns rewards better in this case
+  
+If we had a reward without transition probabilities what would that tell us?
+If we had transition probabilities without a reward what would that tell us?
+
+Social Cognitive Theory
+Rational Choice Theory
+
+Can we design a causal experiment to show a link between IRL rewards and behavior?
+
+Behavioral Policy
+	> True Dynamics, True Rewards
+	> Believed Dynamics, Believed Rewards
+
+How would this kind of modeling improve over things like...
+	... learning reward and classifying on that substantially different from learning policy and classifying on that?
+	... determining the change in distribution of a random variable based on a predictor (e.g., hours spent studying to grades instead of reward to grades)?
+	... something about decision support systems?
+	
+--------------------------------------------------------------------------
+
+Collaboration
+Broad implication
+Equilibrium between agents
+Trade off between dense and sparse rewards (dystal and proximal)
+
+Research Questions
+Hypothesis
+Title or SA
+
+--------------------------------------------------------------------------

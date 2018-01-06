@@ -1,0 +1,19 @@
+City as the agent. Crime as the IRL we are trying to predict?
+IRL as population/business growth with apredictor?
+Turing an RL utility function into Natural Language?
+
+Even if the IRL utility function isn't true to reality can it still be used to control behavior?
+
+Is our goal to determine an agent's objectives or to predict how an agent would behave in a new situation? 
+
+Rather than punishing crime more can we make it less rewarding? What state features map to crime reward?
+Use IRL to learn how to design vibrant cities and communities?
+USE IRL to 
+
+Problem of generalization?
+
+City spends its resources in the way that is most lucrative... If crime is most lucrative
+
+City x many action points... Where in the city is it more lucrative to spend action points
+
+Is apprenticeship learning the same thing as pursuing objectives which are beneficial to a foreign agent?
