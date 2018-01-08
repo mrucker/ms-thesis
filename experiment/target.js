@@ -6,7 +6,6 @@ function Target(canvas)
     var r = 0;
     var g = 200;
     var b = 0;
-    var a = 1;
 
     return new TargetBase(x,y,d,r,g,b,canvas);
 }
@@ -37,11 +36,10 @@ function TargetBase(x,y,d,r,g,b,canvas)
     this.draw = function(){
         context.save();
         context.fillStyle = 'rgba('+r+','+g+','+b+','+this.opacity()+')';
-        context.fill(circlePath);
-        
-        context.fillStyle = 'rgb(0,0,0)';
-        context.font = '30px Arial';
-        context.fillText('('+Math.floor(x)+','+Math.floor(y)+')',30+x-d/2,y);
+        context.fill(circlePath);        
+        //context.fillStyle = 'rgb(0,0,0)';
+        //context.font = '30px Arial';
+        //context.fillText('('+Math.floor(x)+','+Math.floor(y)+')',30+x-d/2,y);
         context.restore();
     }
 
