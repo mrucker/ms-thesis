@@ -1,2 +1,4 @@
-    #c { border: 1px solid black; }
-    #c { position:absolute; width:100%; height:100%; } /* https://stackoverflow.com/a/3707579/1066291 */
+*          { margin: 0; padding: 0;}
+body, html { height:100%; }
+#c         { border: 1px solid black; }
+#c         { position:absolute; display:block; width:calc(100% - 2px); height:calc(100% - 2px); } /* https://stackoverflow.com/a/3707579/1066291 */
