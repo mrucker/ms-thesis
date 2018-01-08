@@ -56,9 +56,8 @@ function drawCanvas(canvas)
 
 function drawTargets()
 {
-    targets.forEach(function(target){
-        if(!target.dead()) target.draw();
-    });
-    
-    
+    targets.forEach(function(target){ target.draw(); });
+     
+    targets = targets.filter(function(target) {return !target.isDead();} );
+       
 }

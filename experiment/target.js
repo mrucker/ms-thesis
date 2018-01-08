@@ -7,7 +7,7 @@ function Target(canvas)
     var g = 200;
     var b = 0;
     var a = 1;
-    
+
     return new TargetBase(x,y,d,r,g,b,canvas);
 }
 
@@ -43,29 +43,27 @@ function TargetBase(x,y,d,r,g,b,canvas)
         context.font = '30px Arial';
         context.fillText('('+Math.floor(x)+','+Math.floor(y)+')',30+x-d/2,y);
         context.restore();
-        
-        
     }
-    
+
     this.opacity = function() {
         var aliveTime = Date.now() - createTime;
-        
+
         if( aliveTime <= fadeInTime){
             return aliveTime/fadeInTime;
         }
-        
+
         if( fadeInTime <= aliveTime && aliveTime <= fadeInTime+fadeOffTime){
             return 1;
         }
-        
+
         if( fadeInTime+fadeOffTime <= aliveTime && aliveTime <= fadeInTime+fadeOffTime+fadeOutTime){
             return (fadeInTime+fadeOffTime+fadeOutTime - aliveTime) / fadeOutTime;
         }
 
         return 0;
     }
-    
-    this.dead = function() {
+
+    this.isDead = function() {
         return (Date.now() - createTime) > (fadeInTime+fadeOffTime+fadeOutTime);
     }
 }
