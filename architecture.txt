@@ -1,0 +1,10 @@
+
+1(HTML5 Canvas) -> 2(JavaScript) -> 3(AWS API Gateway) -> 4(AWS Lambda) -> 5(AWS DynamoDB)
+
+"Front" (1,2)
+"Back"  (3,4,5)
+
+Securing Data Writes
+    > https://gamedev.stackexchange.com/questions/40015/how-do-i-protect-sending-scores-from-html5-games-to-my-server
+    > https://security.stackexchange.com/questions/147043/how-to-approach-replacing-md5-for-transporting-unity-game-data-to-a-remote-serve#147047
+    > https://security.stackexchange.com/questions/148425/sending-a-client-side-high-score-to-a-server-securely
