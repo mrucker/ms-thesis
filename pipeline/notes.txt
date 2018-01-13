@@ -1,0 +1,1 @@
+aws s3 sync experiment s3://thesis.markrucker.net/ --delete
