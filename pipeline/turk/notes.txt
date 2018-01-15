@@ -1,0 +1,35 @@
+>Models for External Survey
+    >> https://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_ExternalQuestionArticle.html
+    >> Survey Link (see example here https://requestersandbox.mturk.com/create/projects/new)
+
+>Starting the external HIT
+    Here are a list of example parameters that will be passed to the externel URL via querystring
+        > assignmentId
+        > hitId
+        > turkSubmitTo
+        > workerId
+    And the full example url: https://example.com/survey?gameid=01523&assignmentId=123EXAMPLE&hitId=456EXAMPLE&turkSubmitTo=https://www.mturk.com/&workerId=AZEXAMPLE
+
+>Ending the external HIT
+    Your website can do many things inside the frame, but eventually it must cause the Worker's browser to load the "externalSubmit" URL in the frame with the results in POST data. The easiest way to do this is with an HTML form whose fields contain the HIT results, with a submit button that the Worker will click. If an external HIT prevents the Worker from submitting results back to Amazon Mechanical Turk using the "externalSubmit" mechanism, the Worker may not be able to claim rewards or continue doing work without restarting their session. Amazon Mechanical Turk reserves the right to remove any external HITs that are not functioning properly.
+    
+>IFRAME limitations
+    Your HIT will be rendered inside an IFRAME that has certain limitations. The IFRAME operates in HTML5 "sandbox" mode that has extra restrictions on the content that can appear in the frame. This limits your ability to execute certain code and to use technologies such as Adobe Flash. To ensure your HITs work as expected, we recommend you test them first in the Requester Sandbox.
+    
+>Testing my HIT
+    >>https://requester.mturk.com/developer/sandbox
+    >>https://requestersandbox.mturk.com
+    >>https://workersandbox.mturk.com
+    
+>Linking AWS with API
+    You have to link your AWS root account to Amazon Mechanical Turk. After that, you can create an IAM user to use the programatic MechanicalTurk-API.
+    
+>Security Best Practices
+    /**
+    * Before connecting to MTurk, set up your AWS account and IAM settings as described here:
+    * https://blog.mturk.com/how-to-use-iam-to-control-api-access-to-your-mturk-account-76fe2c2e66e2
+    *
+    * Follow AWS best practices for setting credentials from here:
+    * http://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/setting-credentials-node.html
+    */
+    AWS.config.loadFromPath('./config.json');

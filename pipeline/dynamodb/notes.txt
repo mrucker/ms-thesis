@@ -1,3 +1,5 @@
+!!!!BE SURE TO FIGURE OUT HOW TO TURN ON DYNAMIC RESIZING OF RESOURCES!!!!!
+
 Experiments
     >Experiment 1
         If I create the ThesisParticipants table with a partition key on Id and no sort key the second command below will overwrite the first item's Name
