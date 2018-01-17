@@ -1,7 +1,12 @@
 DynamoDB
-    >> 1 WCU = 1 write per second.                             [$0.47 per month]
-    >> 1 RCU = 1 read per second (2 for eventual consistency). [$0.09 per month]
-    >> 1 GIG = 1 gigabyte of storage.                          [$0.25 per month]
+    >> Free Tier
+        >> 25 WCU
+        >> 25 RCU
+        >> 25 GB of indexed storage
+    >> Beyond Free Tier
+        >> 1 WCU = 1 write per second.                             [$0.47 per month]
+        >> 1 RCU = 1 read per second (2 for eventual consistency). [$0.09 per month]
+        >> 1 GIG = 1 gigabyte of storage.                          [$0.25 per month]
     
 LambdaDB
     >> 1 Milliion requests free, $0.20 per million requests after that   [requests]
