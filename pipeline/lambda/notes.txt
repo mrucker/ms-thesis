@@ -1,3 +1,14 @@
+Sample HTTP Response for node.js
+    var response = {
+        statusCode: 200,
+        headers: {
+            "x-custom-header" : "my custom header value"
+        },
+        body: JSON.stringify('Hello from Lambda')
+    };
+
 > Lots of useful information about DynamoDB JavaScript API -- https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB.html
 > Lots of useful information about Lambda API              -- https://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-handler.html
 > Lots of useful information about Gateway integration     -- https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-integrations.html
+
+https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-output-format

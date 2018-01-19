@@ -16,10 +16,10 @@ Experiments
     
 Tables
     >ThesisParticipants
-        >> Id (Number)
+        >> Id (String)
     >ThesisExperiments
-        >> ParticipantId (Number)
-        >> Id (Number)
+        >> ParticipantId (String)
+        >> Id (String)                
         >> StartTime
     >ThesisObservations
         >> ExperimentId (Number)

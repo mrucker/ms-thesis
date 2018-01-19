@@ -2,7 +2,7 @@ function Experiment(participant)
 {
     var id = 0;
     
-    this.beginExperiment = function() {        
+    this.beginExperiment = function() {
         //create an experiment in dynamoDB passing along participant.getId();
         //set the id value to the dynamoDB.Id;
         //begin passive background observing

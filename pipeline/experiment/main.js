@@ -35,7 +35,7 @@ $(document).ready( function () {
         experiment.endExperiment();
     };
     
-    timer.stopAfter(2000, stopEverything);
+    timer.stopAfter(10000, stopEverything);
     
     startEverything();
 });

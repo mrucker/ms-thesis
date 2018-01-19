@@ -1,2 +1,40 @@
-https://api.thesis.markrucker.net
-https://docs.aws.amazon.com/apigateway/latest/developerguide/how-to-edge-optimized-custom-domain-name.html
+How to use custom domains with API Gateway
+    https://docs.aws.amazon.com/apigateway/latest/developerguide/how-to-edge-optimized-custom-domain-name.html
+    
+Integrating API Gateway with Lambda functions
+    https://docs.aws.amazon.com/apigateway/latest/developerguide/getting-started-with-lambda-integration.html
+
+Integrating API Gateway with DynamoDB
+    (I think the directions are here at this location, but it isn't immediately apparent)
+    https://docs.aws.amazon.com/apigateway/latest/developerguide/getting-started-aws-proxy.html
+
+Method Proxy   -- In AWS method proxy integration, all request information is passed through to the method handler
+Resource Proxy -- Same as AWS method proxy but the path information is also proxied. Because the path information is proxied you can't add anymore resources under it.
+   
+My API's custom domain
+    https://api.thesis.markrucker.net
+
+The general community's idea on REST API's 
+    http://www.restapitutorial.com/lessons/httpmethods.html
+    https://en.wikipedia.org/wiki/Representational_state_transfer#Architectural_constraints
+    https://stackoverflow.com/a/2022938/1066291
+
+HTTP Verbs
+    > Any    (Unique to AWS -- represents any Method)
+    > Delete (delete)[idempodent]
+    > Get    (read)  [nullipotent]
+    > Head
+    > Options
+    > Patch
+    > Post   (create)
+    > Put    (update)[idempodent]
+
+My REST API
+    /Participants
+        > POST  [create participant]
+    /Experiments
+        > POST  [create experiment]
+    /Experiments/{id}
+        > PUT   [update experiment]
+    /Observations
+        > PATCH [create observation]
