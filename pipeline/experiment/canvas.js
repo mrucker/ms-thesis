@@ -3,7 +3,8 @@ function Canvas(canvas)
     //for more information on the resize event and the devicePixelRatio for High-DPI screens see:
     //details -- https://webglfundamentals.org/webgl/lessons/webgl-resizing-the-canvas.html
     //example -- https://www.aregooglesbouncingballshtml5.com/
-    
+
+    var callbacks          = {};
     var context2d          = canvas.getContext('2d');
     var devicePixelRatio   = window.devicePixelRatio;
     var boundingClientRect = canvas.getBoundingClientRect();
@@ -13,21 +14,6 @@ function Canvas(canvas)
     canvas.height      = Math.floor($(window).height() * devicePixelRatio);
     canvas.width       = Math.floor($(window).width()  * devicePixelRatio);
     boundingClientRect = canvas.getBoundingClientRect();
-
-    var onResize = function () {        
-        canvas.height      = Math.floor($(window).height() * devicePixelRatio);
-        canvas.width       = Math.floor($(window).width()  * devicePixelRatio);
-        boundingClientRect = canvas.getBoundingClientRect();
-    };
-        
-    var animate = function() {
-        that.wipe();
-        that.draw();
-        
-        if(isAnimating) {
-            window.requestAnimationFrame(animate);
-        }
-    };
     
     this.getBoundingClientRect = function() {
         return boundingClientRect;
@@ -60,13 +46,38 @@ function Canvas(canvas)
         window.removeEventListener('resize', onResize);
     };
     
-    this.addEventListener = function(eventName, onEventName) {
-        canvas.addEventListener(eventName, onEventName);
+    this.addEventListener = function(type, callback) {
+        callbacks[type] = [callback].concat(callbacks[type] || []);        
+        canvas.addEventListener(type, proxyCallback);
+    };
+    
+    this.removeEventListener = function(type, callback) {
+        canvas.removeEventListener(type, proxyCallback);
+        callbacks[type] = undefined;
+    }
+
+    this.draw = function(canvas) {}
+    
+    this.wipe = function (canvas) {
+        canvas.getContext2d().clearRect(0,0, this.getWidth(), this.getHeight());
+    }
+    
+    function onResize () {
+        canvas.height      = Math.floor($(window).height() * devicePixelRatio);
+        canvas.width       = Math.floor($(window).width()  * devicePixelRatio);
+        boundingClientRect = canvas.getBoundingClientRect();
     };
         
-    this.draw = function() {}
+    function animate() {
+        that.wipe(that);
+        that.draw(that);
+        
+        if(isAnimating) {
+            window.requestAnimationFrame(animate);
+        }
+    };
     
-    this.wipe = function () {
-        context2d.clearRect(0,0, this.getWidth(), this.getHeight());
+    function proxyCallback(e) {
+        callbacks[e.type].forEach(function(callback) { callback.call(that, e); })
     }
 }

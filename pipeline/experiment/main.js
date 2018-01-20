@@ -5,18 +5,16 @@ $(document).ready( function () {
         return;//if canvas unsupported code here
     }
     
-    var mouse   = new Mouse(canvas);
-    var timer   = new Timer(canvas);
-    var targets = new Targets(canvas, mouse);
+    var timer   = new Timer(true);
+    var mouse   = new Mouse(canvas);    
+    var targets = new Targets(mouse);
     
     var participant = new Participant();
     var experiment  = new Experiment(participant);
-
-    //experiment.beginExperiment();
     
-    canvas.draw = function() {
-        targets.draw();
-        timer.draw();
+    canvas.draw = function(canvas) {
+        targets.draw(canvas);
+        timer.draw(canvas);
     };
     
     var startEverything = function() {

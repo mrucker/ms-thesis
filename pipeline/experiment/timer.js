@@ -1,13 +1,9 @@
-function Timer(canvas)
+function Timer(isCountdown)
 {
-    var r = 50;
-    var g = 50;
-    var b = 50;
-    var startTime = undefined;
-    var stopTime  = undefined;
-    var context   = canvas.getContext2d();
-    var stopAfter = undefined;
-    var stopEvent = undefined;
+    var startTime    = undefined;
+    var stopTime     = undefined;
+    var stopAfter    = undefined;
+    var stopCallback = undefined;
 
     this.resetTiming = function() {
         startTime = undefined;
@@ -25,29 +21,47 @@ function Timer(canvas)
     }
     
     this.stopAfter = function(milliseconds, callback){
-        stopAfter = milliseconds;
-        onStop    = callback;
+        stopAfter    = milliseconds;
+        stopCallback = callback;
     }
     
-    this.draw = function(){
-        context.save();
-        context.fillStyle = 'rgb('+r+','+g+','+b+')';
-        context.font      = '48px Arial';
-        context.fillText(timeAsText(),0,canvas.getHeight());
-        context.restore();
-        
+    this.draw = function(canvas){
+                
         if( isAfter() ) {
             stopTime = startTime + stopAfter;
-            onStop();
+            myDraw(canvas);
+            stopCallback();
+        }
+        else {
+            myDraw(canvas);
         }
     };
     
-    function timeAsText() {
-        var milSinceStart = runTime();
-        var minSinceStart = Math.floor(milSinceStart/(1000*60)).toString();
-        var secSinceStart = Math.floor((milSinceStart/1000)%60).toString();
+    function myDraw(canvas){
+        var context   = canvas.getContext2d();
         
-        return padZeros(minSinceStart,2) + ":" + padZeros(secSinceStart,2);
+        context.save();
+        context.fillStyle = 'rgb(100,100,100)';
+        context.font      = '48px Arial';
+        context.fillText(timeAsText(),canvas.getWidth()-125,canvas.getHeight());
+        context.restore();
+    }
+    
+    function timeAsText() {
+        
+        var milSinceStart = isCountdown ? stopAfter - runTime() : runTime();
+        var secSinceStart = milSinceStart/1000;
+        
+        var minModifier = isCountdown ? Math.floor : Math.floor;
+        var secModifier = isCountdown ? Math.ceil  : Math.floor;
+        
+        var minPart = minModifier(secSinceStart/60);
+        var secPart = secModifier(secSinceStart%60);
+        
+        var minPartAsText = padZeros(minPart.toString(),2);
+        var secPartAsText = padZeros(secPart.toString(),2);
+        
+        return minPartAsText + ":" + secPartAsText;
     }
     
     function isAfter() {        
