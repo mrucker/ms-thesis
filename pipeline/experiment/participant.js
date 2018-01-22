@@ -1,18 +1,20 @@
 function Participant(canvas)
 {
     var storageId = readIdStore();
-    var createdId = generateId();
+    var createdId = Id.generate();
     
     var id = storageId || createdId;
     
     if(!storageId) {
         writeIdStore(id);
-    
-        var xhttp = new XMLHttpRequest();
-        xhttp.open("POST", "https://api.thesis.markrucker.net/v1/participants", true);
-        xhttp.send(id);
+
+        $.ajax({
+            url   :"https://api.thesis.markrucker.net/v1/participants",
+            method:"POST",
+            data  :id
+        });
     }
-    
+
     this.getId = function() { return id };
     
     function readIdStore() {
