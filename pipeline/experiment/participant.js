@@ -21,7 +21,7 @@ function Participant(canvas)
         }
 
         var participantIdStamp = new Date(window.localStorage.getItem('participantIdStamp'));
-        var participantIdStale = new Date("Mon, 22 Jan 2018 01:20:03 GMT");
+        var participantIdStale = new Date("Mon, 22 Jan 2018 01:46:07 GMT");
         
         if(participantIdStamp < participantIdStale) {
             window.localStorage.removeItem('participantIdValue');
