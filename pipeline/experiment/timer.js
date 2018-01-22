@@ -41,9 +41,11 @@ function Timer(isCountdown)
         var context   = canvas.getContext2d();
         
         context.save();
-        context.fillStyle = 'rgb(100,100,100)';
-        context.font      = '48px Arial';
-        context.fillText(timeAsText(),canvas.getWidth()-125,canvas.getHeight());
+        context.fillStyle    = 'rgb(100,100,100)';
+        context.font         = '48px Arial';
+        context.textAlign    = 'right';
+        context.textBaseline = 'bottom';
+        context.fillText(timeAsText(),canvas.getWidth(),canvas.getHeight());
         context.restore();
     }
     
