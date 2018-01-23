@@ -1,0 +1,20 @@
+Minimal Risk [1]
+    'The federal regulations define “minimal risk” as: “the probability and magnitude of harm or discomfort anticipated in the research are not greater in and of themselves than those ordinarily encountered in daily life or during the performance of routine physical or psychological examinations or tests.”  This offers some ambiguities.' 
+
+Types of Harm [2]
+    Psychological Harm
+        > E.g., collecting information about sexual abuse may emotionally upset the study participants
+    Physical Harm
+        > E.g., an experimental vaccine or medication
+    Legal Harm
+        > E.g., if studying drug addicts, records about study participants drug use can't be protected if requested in a court of law
+    Social Harm
+        > E.g., studying HIV patients who haven't made their diagnosis known in their social circles        
+    Economic Harm
+        > E.g., time taken away from the participant's place of employment
+        
+I think my study easily fits the definition of "minimal risk" and therefore doesn't require an IRB review. Still I need to carefully detail the risk as described here [3]
+
+[1] http://www.virginia.edu/vpr/irb/sbs/resources_guide_risk_define_minimal.html
+[2] http://www.virginia.edu/vpr/irb/sbs/resources_guide_risk_define_types.html
+[3] http://www.virginia.edu/vpr/irb/sbs/resources_guide_risk_review_protocol.html

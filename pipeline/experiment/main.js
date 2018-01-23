@@ -5,6 +5,10 @@ $(document).ready( function () {
         return;//if canvas unsupported code here
     }
     
+    //Too unreliable. Works very inconsistently from browser to browser.
+    //window.addEventListener('unload', function() { return "abcd"; });
+    //window.addEventListener('beforeunload', function() { return "Dude, are you sure you want to refresh? Think of the kittens!"; });
+    
     var timer   = new Timer(true);
     var mouse   = new Mouse(canvas);    
     var targets = new Targets(mouse);

@@ -1,0 +1,10 @@
+General Payment Rules [1]
+    > Consent
+        >> "Generally the Board requests that a participant be either given the entire payment or that the payment be prorated according to amount of participation given."
+        >> "Payment policy should not be such that it coerces or compels a participant to complete the study even though they may wish to withdraw."
+    > Disbursement
+        >> "In your protocol, you will need to describe how payment will be issued and what you will do to protect confidentiality and/or anonymity."
+
+Using Window.Unload I should be able to track when a participant closes their tab. This should allow partial payments reducing the second consent issue above.
+        
+[1] http://www.virginia.edu/vpr/irb/sbs/resources_guide_pay_rules.html

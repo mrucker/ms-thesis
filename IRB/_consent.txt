@@ -1,0 +1,16 @@
+Likely exempt from consent requirements
+    > Anonymous Test?   [2]
+    > Anonymous Survey? [1]
+    
+    
+    
+"If you are conducting an anonymous survey, it will likely qualify for exemption which means that you are not required to collect signatures on a consent form. However, you should provide the participant with information about the study before they proceed. At minimum, you should identify who you are, what information you will collect, how long it will take to do so, and what the result will be. You should inform participants that their data are anonymous and there is no risk to participating. Often the Board will require that you provide the participant with the (General Consent Form)[3] with the signature section removed, as this document covers all of the essential points for informing a participant about a study." [1]
+
+
+
+
+
+
+[1] http://www.virginia.edu/vpr/irb/sbs/resources_guide_data_method_surveys.html
+[2] http://www.virginia.edu/vpr/irb/sbs/resources_guide_data_method_test.html
+[3] file://IRB-SBS General Consent Template.docx

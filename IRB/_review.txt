@@ -1,0 +1,7 @@
+Even studies exempt from IRB Review need to be submitted to IRB
+    "Why do I submit an exempt protocol? If a protocol is exempt from IRB review, why does the IRB still review it? In order to determine if a protocol meets the requirements for exemption, a neutral third party experienced in IRB review needs to make this determination and the IRB is equipped to make such a review. Some exempt studies involve participants that are considered risk-sensitive, so it is important that these studies still receive a careful review even if they are ultimately considered minimally risky. An exempt protocol goes through the same pre-review process as an approved study. Our experienced staff often receives protocols that are not exempt but could be if a few changes are made to the study protocol. We work with researchers to help them meet the requirements for exemption where possible by reducing risks, thus saving time and future hassle for the researcher while still protecting participants." [1]
+    
+    
+    
+    
+[1] http://www.virginia.edu/vpr/irb/sbs/submissions_review_ex_exemption.html
