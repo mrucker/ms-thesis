@@ -12,7 +12,7 @@ $(document).ready( function () {
     var timer   = new Timer(true);
     var mouse   = new Mouse(canvas);    
     var targets = new Targets(mouse);
-    var count   = new Count();
+    var counter = new Counter();
     
     var participant = new Participant();
     var experiment  = new Experiment(participant);
@@ -23,34 +23,35 @@ $(document).ready( function () {
     
     canvas.draw = function(canvas) {
         targets.draw(canvas);
+        counter.draw(canvas);
         timer.draw(canvas);
-        count.draw(canvas);
+                
     };
     
     var startAnimation = function() {
-        count.startCounting();
-        mouse.startTracking();
         canvas.startAnimating();
+        counter.startCounting();
         targets.startAppearing();
     };
     
     var startExperiment = function () {
         timer.startTiming();
+        mouse.startTracking();
         experiment.beginExperiment();
     }
     
     var stopEverything = function() {        
-        timer.stopTiming();
-        count.stopCounting();
+        timer.stopTiming();        
         mouse.stopTracking();
         canvas.stopAnimating();
+        counter.stopCounting();
         targets.stopAppearing();
         experiment.endExperiment();
         dialog3.dialog("open");
     };
     
-    count.stopAfter(    3, startExperiment);
-    timer.stopAfter(10000, stopEverything);
+    counter.stopAfter(    3, startExperiment);
+    timer  .stopAfter(10000, stopEverything);
     
     dialog1.dialog({ 
         autoOpen   : false , 
@@ -78,7 +79,12 @@ $(document).ready( function () {
         draggable  : false ,
         dialogClass: "no-x",
         buttons    : [
-            { text: "Repeat" , click: function() { dialog3.dialog("close"); startAnimation(); } },
+            { text: "Repeat" , click: function() { 
+                dialog3.dialog("close"); 
+                timer.resetTiming();
+                counter.resetCounting();
+                startAnimation(); 
+            } },
             { text: "Updates", click: function() {  } }
         ]
     });

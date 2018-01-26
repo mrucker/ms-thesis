@@ -1,4 +1,4 @@
-function Count()
+function Counter()
 {
     var isCountdown = true;
     var startTime   = undefined;
@@ -12,6 +12,11 @@ function Count()
     
     this.stopCounting = function() {
         stopTime = Date.now();
+    }
+    
+    this.resetCounting = function() {
+        startTime = undefined;
+        stopTime  = undefined;
     }
     
     this.stopAfter = function(count, callback){

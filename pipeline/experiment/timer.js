@@ -8,7 +8,6 @@ function Timer(isCountdown)
     this.resetTiming = function() {
         startTime = undefined;
         stopTime  = undefined;
-        stopAfter = undefined;
     }
     
     this.startTiming = function() {
