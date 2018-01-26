@@ -12,7 +12,7 @@ $(document).ready( function () {
     var timer   = new Timer(true);
     var mouse   = new Mouse(canvas);    
     var targets = new Targets(mouse);
-    var counter = new Counter();
+    var counter = new Counter(3);
     
     var participant = new Participant();
     var experiment  = new Experiment(participant);
@@ -50,7 +50,7 @@ $(document).ready( function () {
         dialog3.dialog("open");
     };
     
-    counter.stopAfter(    3, startExperiment);
+    counter.stopAfter( 3000, startExperiment);
     timer  .stopAfter(10000, stopEverything);
     
     dialog1.dialog({ 

@@ -1,4 +1,4 @@
-function Counter()
+function Counter(countFrom)
 {
     var isCountdown = true;
     var startTime   = undefined;
@@ -19,8 +19,8 @@ function Counter()
         stopTime  = undefined;
     }
     
-    this.stopAfter = function(count, callback){
-        stopAfter    = count*1000;
+    this.stopAfter = function(milliseconds, callback){
+        stopAfter    = milliseconds;
         stopCallback = callback;
     }
     
@@ -55,18 +55,13 @@ function Counter()
     function countAsText() {
         
         var milSinceStart = isCountdown ? stopAfter - runTime() : runTime();
-        var secSinceStart = milSinceStart/1000;
+        var cntSinceStart = milSinceStart/(stopAfter/countFrom);
+                
+        var cntModifier   = isCountdown ? Math.ceil  : Math.floor;        
+        var cntPart       = cntModifier(cntSinceStart);        
+        var cntPartAsText = padZeros(cntPart.toString(),2);
         
-        //var minModifier = isCountdown ? Math.floor : Math.floor;
-        var secModifier = isCountdown ? Math.ceil  : Math.floor;
-        
-        //var minPart = minModifier(secSinceStart/60);
-        var secPart = secModifier(secSinceStart);
-        
-        //var minPartAsText = padZeros(minPart.toString(),2);
-        var secPartAsText = padZeros(secPart.toString(),2);
-        
-        return secPart <= 0 ? "GO!" : secPartAsText;
+        return cntPart <= 0 ? "GO!" : cntPartAsText;
     }
     
     function isAfter() {
