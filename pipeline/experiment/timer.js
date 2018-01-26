@@ -65,12 +65,12 @@ function Timer(isCountdown)
         return minPartAsText + ":" + secPartAsText;
     }
     
-    function isAfter() {        
+    function isAfter() {
         return runTime() > stopAfter;
     }
     
     function runTime() {
-        return (stopTime || Date.now()) - startTime;
+        return (stopTime || Date.now()) - (startTime || Date.now());
     }
 
     function padZeros(number, pad_size) {
