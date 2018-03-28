@@ -1,4 +1,4 @@
-$(document).ready( function () {            
+$(document).ready( function () {
     var canvas  = new Canvas(document.querySelector('#c'));
 
     if (!canvas.getContext2d) {
