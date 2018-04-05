@@ -1,0 +1,47 @@
+I would like to use IRL to help people perform better on a continuous control task...
+
+Step 1: Run experiments without any intervention
+    
+    Data Gathered:
+        > Gather performance baselines
+        > Gather state trajectory observations for IRL
+    
+    Questions Answered:
+        > Is reward function alone predictive of performance outcomes?
+        > Are there clear reward function clusters for high performers?
+        > How many clusters of reward functions are there?
+    
+    Still To Do:
+        1. What should the task be?
+        2. How do we design the MDP model for IRL?
+            > How to discretize the actions?
+                > 500 cardinal directions?
+                > go to circles on screen?
+                > go to a 100x100 grid location on screen
+                > left click
+                > right click
+            > Which features to have in state?
+    
+Step 2: Design an intervention 
+    
+    Possible Interventions:
+        > Try to modify a person's reward function by modifying task in some way
+            > Direct strategic teaching before starting the task ("People who do X, Y and Z tend to perform best")
+            > How do we provide real time feedback on reward?
+                > "You need to value speed over accuracy more..." Meaningless? Would people know how to do this?
+                > 
+        > Try to modify a person's action set available to them
+            > Does Policy_{r1} + Policy_{r2} == Policy_{r1+r2}?
+        > Try to take actions on behalf of the user by inferring their goals
+        
+        
+        Can we assue that the state transition is wellformed? That is, a small action always results in a small change in state?
+        IRL Reward might be helpful to understand why some people behave one way over another, but does it make sense to drive interventions?
+            > Some people might not be able to carry out certain reward functions
+        
+Step 3: Run experiments with interventions
+    >
+An MDP with a policy is a Markov Chain. A Markov Chain can be represented as a Finite State Machine (FSM, aka Finite State Automota).
+    
+
+    
