@@ -1,5 +1,6 @@
 function Mouse(canvas)
 {
+    var moves    = 0;
     var position = { x:0, y:0};    
     
     this.startTracking = function () {
@@ -17,6 +18,10 @@ function Mouse(canvas)
     this.getY = function() {
         return position.y;
     };
+    
+    this.getData = function() {
+        return [this.getX(), this.getY()];
+    }
 
     this.draw = function(canvas) {
         var context = canvas.getContext2d();
@@ -33,13 +38,13 @@ function Mouse(canvas)
     };
     
     function onMouseMove(e) {
-        position = canvasRelativePosition.call(this,e);  
+        position = canvasRelativePosition(this,e);
     }
 
-    function canvasRelativePosition(e) {
-        var canvasBound = this.getBoundingClientRect();
-        var relative_x  = (e.clientX - canvasBound.left) * this.getDevicePixelRatio();
-        var relative_y  = (e.clientY - canvasBound.top ) * this.getDevicePixelRatio();
+    function canvasRelativePosition(canvas, e) {
+        var canvasBound = canvas.getBoundingClientRect();
+        var relative_x  = (e.clientX - canvasBound.left) * canvas.getDevicePixelRatio();
+        var relative_y  = (e.clientY - canvasBound.top ) * canvas.getDevicePixelRatio();
         
         return { x: relative_x, y: relative_y };
     };

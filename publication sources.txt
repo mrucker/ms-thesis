@@ -1,0 +1,17 @@
+MOUSE
+    (1996 Graham)         -- CHI                  , Kineseology, 2 authors, Simon Fraser University
+    (1999 Douglas)        -- CHI                  , CS         , 3 authors, University of Oregon & University of Guelph
+    (2001 MacKenzie)      -- CHI                  , CS         , 3 authors, York University & Industry Partners
+    (2004 Blakrishnan)    -- IJHCS                , CS         , 1 author , University of Toronto
+    (2008 Casiez)         -- HCI Journal          , CS         , 4 authors, Univresity of Lille
+    (2009 Wobbrock)       -- CHI                  , CS         , 2 authors, University of Washington (UW)
+    (2012 Ziebart)        -- IUI                  , CS         , 3 authors, CMU
+
+IRL
+    (2008 Ziebart Behav)  -- AAAI Spring Symposium, CS         , 4 authors, CMU
+    (2008 Ziebart Maxent) -- AAAI                 , CS         , 4 authors, CMU
+    (2004 Abbeel)         -- ICML                 , CS         , 2 authors, Stanford
+    (2011 Levine)         -- NIPS                 , CS         , 3 authors, Stanford & UW
+
+MOTIVATION
+    (2018 Hamari)         -- UMUAI                , ??         , 3 authors, Tampere University

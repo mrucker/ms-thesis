@@ -10,26 +10,27 @@ $(document).ready( function () {
     //window.addEventListener('beforeunload', function() { return "Dude, are you sure you want to refresh? Think of the kittens!"; });
     
     var timer   = new Timer(true);
-    var mouse   = new Mouse(canvas);    
+    var mouse   = new Mouse(canvas);
     var targets = new Targets(mouse);
     var counter = new Counter(3);
     
     var participant = new Participant();
-    var experiment  = new Experiment(participant);
+    var experiment  = new Experiment(participant, mouse, targets);
     
     var dialog1 = $( "#dialog1" );
     var dialog2 = $( "#dialog2" );
     var dialog3 = $( "#dialog3" );   
     
     canvas.draw = function(canvas) {
+        experiment.makeObservation();
+        
         targets.draw(canvas);
         counter.draw(canvas);
-        timer.draw(canvas);
-                
+        timer  .draw(canvas);
     };
     
     var startAnimation = function() {
-        canvas.startAnimating();
+        canvas .startAnimating();
         counter.startCounting();
         targets.startAppearing();
     };

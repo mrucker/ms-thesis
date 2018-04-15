@@ -59,7 +59,7 @@ function Canvas(canvas)
     this.draw = function(canvas) {}
     
     this.wipe = function (canvas) {
-        canvas.getContext2d().clearRect(0,0, this.getWidth(), this.getHeight());
+        //canvas.getContext2d().clearRect(0,0, this.getWidth(), this.getHeight());
     }
     
     function onResize () {

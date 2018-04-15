@@ -1,0 +1,120 @@
+Human-Computer Interaction (HCI) journal
+    > https://www.tandfonline.com/toc/hhci20/current
+    > 2016 Impact Factor 4.667
+    > 6 issues published a year
+    
+Computer Human Interaction (CHI)
+    > https://chi2018.acm.org/
+    > https://scholar.google.es/citations?view_op=top_venues&hl=en&vq=eng_humancomputerinteraction
+    > https://dl.acm.org/event.cfm?id=RE151
+    > In 2017 they had 2400 submissions with 25% accepted [https://dl.acm.org/citation.cfm?id=3025453#source]
+    > Papers due around September
+    
+Intelligent User Interface (IUI)
+    > http://iui.acm.org/2018/
+    > Looks like the papers can only be 3 pages long?
+    > In 2017 272 submissions with 23% accepted [https://dl.acm.org/citation.cfm?id=3030024#source]
+    > Papers due around October
+    
+User Modeling, Adaptation and Personalization Conference (UMAP)
+    > http://www.um.org/umap2018/
+    > In 2017 they had 80 submissions with 36% accepted [https://dl.acm.org/citation.cfm?id=3079628#source]
+    > Papers due around March
+
+User Modeling and User-Adapted Interaction (UMUAI) journal
+    > https://link.springer.com/journal/11257
+    > Impact factor of 3.625
+    > 4 issues published a year
+    
+Neural Information Processing Systems (NIPS)
+    > https://nips.cc/
+    > https://medium.com/machine-learning-in-practice/nips-accepted-papers-stats-26f124843aa0
+    > https://nips.cc/Conferences/2015/PaperInformation/EvaluationCriteria
+    > In 2015 accepted 21% [https://twitter.com/Hassan_Sawaf/status/674012958981165056]
+    > Papers due around May
+    
+International Conference on Machine Learning (ICML)
+    > https://icml.cc/
+    > Acceptanceed appears to be around 23% [http://brenocon.com/icml_accepts_plot.html]
+    > Papers due around February
+    
+Arxiv
+    > https://arxiv.org/help/general
+    > a public repository for unpublished research papers
+    > hosted and maintained by Cornell University Library
+    > Welcomes papers on an incredibly wide array of subject matter
+    
+Winter Simulation Conference (WSC)
+    > https://informs-sim.org/
+    > Papers due around April
+    > In 2016 they had 254 subbmissions with 70% accepted [https://dl.acm.org/citation.cfm?id=1162708#source]
+    
+The Journal of Artificial Societies and Social Simulation (JASSS)
+    > http://jasss.soc.surrey.ac.uk/admin/about.html
+    > Impact Factor 1.733
+    > Seems important to its community
+    
+Journal for Machine Learning Research (JMLR)
+    > http://www.jmlr.org/
+    > 1 issue published a year 
+    > Impact Factor 2.45 (2015)
+    
+Artificial Intelligence (journal)
+    > https://www.journals.elsevier.com/artificial-intelligence
+    > Impact Factor 4.797
+    
+Association for the Advancement of Artificial Intelligence (AAAI conference)
+    > http://www.aaai.org/
+    > In 2017 they had 2590 submissions with 25% accepted [https://feifang.info/2017/08/26/acceptance-rate-info/, http://www.aaai.org/Conferences/AAAI/aaai.php]
+    > Papers due around September
+
+Special Interest Group Information Retrieval (SIGIR)
+    > http://sigir.org/sigir2018/
+    > In 2017 they had 362 subbmissions with 22% accepted [https://dl.acm.org/citation.cfm?id=2911451#source]
+    > Papers due around January
+    
+Knowledge Discovery and Data Mining (KDD)
+    > http://www.kdd.org/
+    > In 2017 they had 748 submissions with 9% accepted [https://dl.acm.org/citation.cfm?id=2939672#source]
+    > Papers due around February
+    
+Web Search and Data Mining (WSDM)
+    > http://www.wsdm-conference.org
+    > In 2018 they had 514 subbmissions with 16% accepted [https://dl.acm.org/citation.cfm?id=3159652#source]
+    > Papers due around August
+    
+World Wide Web Conference (WWW)
+    > https://www2018.thewebconf.org/    
+    > In 2017 they had 966 submissions with 17% accepted [https://dl.acm.org/citation.cfm?id=2872427#source]
+    > Papers due around October
+    
+Conference on Information and Knowledge Management (CIKM)
+    > http://www.cikm2018.units.it
+    > In 2016 they had 855 submissions with 20% accepted [https://dl.acm.org/citation.cfm?id=3132847#source]
+    > Papers due around February
+    
+Pervasive and Ubiquitous Computing (UBICOMP)
+    > http://ubicomp.org/
+    > In 2016 they had 389 submissions with 26% accepted [https://dl.acm.org/citation.cfm?id=2971648#source]
+    > Papers for the conference come from the IMWUT journal (published March, June, September and December)
+
+Systems and Information Engineering Design Symposium (SIEDS)
+    > Every year at UVA
+    > Primarily for system analysis (specifically undergrad capstone projects)
+
+Machine Learning and Applications (ICMLA)
+    > http://www.icmla-conference.org/icmla18/
+    > In 2016 25% accepted. Couldn't find submission count. [www.icmla-conference.org/icmla16/papers.pdf]
+    > Papers due around July
+    
+International Conference on Decision Support System Technology (ICDSST)
+    > https://icdsst2018.wordpress.com/ 
+    > https://ewgdss.wordpress.com/
+    > I couldn't find acceptance rates. Very confusing publication practices. Papers seem to be in many journals, and their proceedings are hard to find.
+    > Papers due around December
+
+International Conference on Systems, Man and Cybernetics (SMC)
+    > http://www.ieeesmc.org/
+    > In 2016 they had 1506 submissions with 55% accepted [http://www.ieeesmc.org/publications/enewsletter/56-2016/november/405-report-on-the-ieee-systems-man-and-cybernetics-2016-international-conference]
+    > They also have three journals that they sponsor. Of the three the "Cybernetics Transactions" seems closest to my research interests.
+    > Papers due around March
