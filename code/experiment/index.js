@@ -10,10 +10,10 @@ $(document).ready( function () {
     //window.addEventListener('beforeunload', function() { return "Dude, are you sure you want to refresh? Think of the kittens!"; });
     
     var timer   = new Timer(true);
+    var counter = new Counter(3, true);
     var mouse   = new Mouse(canvas);
     var targets = new Targets(mouse);
-    var counter = new Counter(3);
-    
+
     var participant = new Participant();
     var experiment  = new Experiment(participant, mouse, targets);
     
@@ -24,9 +24,10 @@ $(document).ready( function () {
     canvas.draw = function(canvas) {
         experiment.makeObservation();
         
-        targets.draw(canvas);
-        counter.draw(canvas);
-        timer  .draw(canvas);
+        targets   .draw(canvas);
+        counter   .draw(canvas);
+        timer     .draw(canvas);
+        experiment.draw(canvas);
     };
     
     var startAnimation = function() {
@@ -48,11 +49,12 @@ $(document).ready( function () {
         counter.stopCounting();
         targets.stopAppearing();
         experiment.endExperiment();
+        experiment.saveObservation();
         dialog3.dialog("open");
     };
     
     counter.stopAfter( 3000, startExperiment);
-    timer  .stopAfter(10000, stopEverything);
+    timer  .stopAfter(15000, stopEverything);
     
     dialog1.dialog({ 
         autoOpen   : false , 
@@ -82,8 +84,11 @@ $(document).ready( function () {
         buttons    : [
             { text: "Repeat" , click: function() { 
                 dialog3.dialog("close"); 
-                timer.resetTiming();
-                counter.resetCounting();
+                
+                experiment.reset();
+                timer     .reset();
+                counter   .reset();
+                
                 startAnimation(); 
             } },
             { text: "Updates", click: function() {  } }

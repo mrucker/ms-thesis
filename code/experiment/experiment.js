@@ -4,19 +4,41 @@ function Experiment(participant, mouse, targets)
     var startTime    = undefined;
     var stopTime     = undefined;
     var observations = [];
+    var touchedEver  = [];
+    var touchedPrev  = [];
     
-    this.isStarted = function() { return startTime != undefined; };
-    this.isStopped = function() { return stopTime  != undefined; };
+    this.isStarted      = function() { return startTime != undefined; };
+    this.isStopped      = function() { return stopTime  != undefined; };
     
     var post = $.ajax({
         url   :"https://api.thesis.markrucker.net/v1/participants/" + participant.getId() + "/experiments",
         method:"POST",
         data  :id
     });
+    
+    this.draw = function(canvas) {
+        var context   = canvas.getContext2d();
+        
+        context.save();
+        context.fillStyle    = 'rgb(100,100,100)';
+        context.font         = '48px Arial';
+        context.textAlign    = 'right';
+        context.textBaseline = 'top';
+        context.fillText(touchedEver.length, canvas.getWidth(), 0);
+        context.restore();
+    }
 
+
+    this.reset = function() {
+        startTime    = undefined;
+        stopTime     = undefined;
+        observations = [];        
+        touchedEver  = [];
+    }
+    
     this.beginExperiment = function() {
 
-        startTime = new Date().toUTCString();
+        startTime    = new Date().toUTCString();
         
         post.done(function(data){
             $.ajax({
@@ -38,7 +60,24 @@ function Experiment(participant, mouse, targets)
                 data  :JSON.stringify({"stopTime":stopTime})
             });
         });
-        
+    }
+
+    this.makeObservation = function() {
+        if(this.isStarted() && !this.isStopped()) {
+            
+            var observation = {"mouseData": mouse.getData(), "targetData": targets.getData() };            
+            var touchedNow  = observation.targetData.filter(function(t) { return t[3] == 1; }).map(function(t) { return t.slice(0,2); });
+            var newTouches  = touchedNow.filter(function(tn) { return !touchedEver.some(function(t) { return t[0] == tn[0] && t[1] == tn[1]; }) });
+            
+            observations.push(observation);
+            
+            if(newTouches.length > 0) {
+                touchedEver = touchedEver.concat(newTouches);
+            }
+        }
+    };
+    
+    this.saveObservation = function() {
         var states = observations.map(function(observation, i) {
             
             var mpX = observation.mouseData[0];
@@ -56,24 +95,15 @@ function Experiment(participant, mouse, targets)
             
             return [mpX, mpY, mvX, mvY, maX, maY, mjX, mjY].concat(top5[0]).concat(top5[1]).concat(top5[2]).concat(top5[3]).concat(top5[4]);
         });
-        
+
         var actions = states.map(function(state, i) {
             return i==0 ? [0,0] : state.slice(0,2).map(function(s,ii) { return s-states[i-1][ii]; });
         });
-        
-        
-        
-        console.log(JSON.stringify(states));
-        console.log(JSON.stringify(actions));
-    }
 
-    this.makeObservation = function() {
-        if(this.isStarted() && !this.isStopped()) {
-            observations.push({"mouseData": mouse.getData(), "targetData": targets.getData() });
-        }
-    };
-
-    function saveObservation() {
+        touchedPrev.push(touchedEver.length);
         
+        console.log(JSON.stringify(touchedPrev).replace(',','\r\n').replace('[','').replace(']',''));
+        //console.log(JSON.stringify(states));
+        //console.log(JSON.stringify(actions));
     };
 }

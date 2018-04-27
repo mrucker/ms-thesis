@@ -11,8 +11,8 @@ $(document).ready( function () {
     var width   = canvas.getWidth();
     var height  = canvas.getHeight();
     
-    var colWidth  = 20; //width/125; //10;
-    var rowHeight = 20; //height/100; //10;
+    var colWidth  = 30; //width/125; //10;
+    var rowHeight = 30; //height/100; //10;
 
     var cols = width/colWidth;
     var rows = height/rowHeight;
@@ -45,7 +45,7 @@ $(document).ready( function () {
         context.font         = '48px Arial';
         context.textAlign    = 'right';
         context.textBaseline = 'bottom';
-        context.fillText(Math.floor(mouse.getX()/20) + "," + Math.floor(mouse.getY()/20),canvas.getWidth(),canvas.getHeight());
+        context.fillText(Math.floor(mouse.getX()/colWidth) + "," + Math.floor(mouse.getY()/rowHeight),canvas.getWidth(),canvas.getHeight());
         context.restore();
     };
 

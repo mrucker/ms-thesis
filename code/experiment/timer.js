@@ -5,27 +5,26 @@ function Timer(isCountdown)
     var stopAfter    = undefined;
     var stopCallback = undefined;
 
-    this.resetTiming = function() {
-        startTime = undefined;
-        stopTime  = undefined;
-    }
-    
     this.startTiming = function() {
         startTime = Date.now();
         stopTime  = undefined;
     }
-    
+
     this.stopTiming = function() {
         stopTime = Date.now();
     }
-    
+
+    this.reset = function() {
+        startTime = undefined;
+        stopTime  = undefined;
+    }
+
     this.stopAfter = function(milliseconds, callback){
         stopAfter    = milliseconds;
         stopCallback = callback;
     }
-    
+
     this.draw = function(canvas){
-                
         if( isAfter() ) {
             stopTime = startTime + stopAfter;
             myDraw(canvas);
@@ -35,7 +34,7 @@ function Timer(isCountdown)
             myDraw(canvas);
         }
     };
-    
+
     function myDraw(canvas){
         var context   = canvas.getContext2d();
         

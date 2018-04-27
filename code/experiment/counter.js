@@ -1,57 +1,66 @@
-function Counter(countFrom)
+function Counter(countFrom, isCountdown)
 {
-    var isCountdown = true;
-    var startTime   = undefined;
-    var stopTime    = undefined;
-    var stopAfter   = undefined;
-    
+    var startTime = undefined;
+    var stopTime  = undefined;
+    var stopAfter = undefined;
+    var timeout   = undefined;
+
     this.startCounting = function() {
         startTime = Date.now();
         stopTime  = undefined;
+
+        timeout = setTimeout(stopCallback, stopAfter);
     }
-    
+
     this.stopCounting = function() {
         stopTime = Date.now();
+        clearTimeout(timeout);
     }
-    
-    this.resetCounting = function() {
+
+    this.reset = function() {
         startTime = undefined;
         stopTime  = undefined;
     }
-    
+
     this.stopAfter = function(milliseconds, callback){
         stopAfter    = milliseconds;
         stopCallback = callback;
     }
     
     this.draw = function(canvas){
-                
-        if( isAfter() ) {
-            stopTime = startTime + stopAfter;
-            myDraw(canvas);
-            stopCallback();
+
+        if( !isAfter() ) {
+            drawCount(canvas);
         }
-        
-        if(stopTime == undefined) {
-            myDraw(canvas);
+
+        if(isAfter() && (runTime() - stopAfter) < 500) {
+            drawGo(canvas);
         }
     };
-    
-    function myDraw(canvas){
+
+    function drawGo(canvas) {
+        drawText(canvas, "GO!");
+    }
+
+    function drawCount(canvas) {
+        drawText(canvas, countAsText());
+    }
+
+    function drawText(canvas, text) {
         var context   = canvas.getContext2d();
         
-        context.save();
+        context.save();        
         
         context.translate(canvas.getWidth()/2, canvas.getHeight()/2)        
         context.fillStyle    = 'rgb(100,100,100)';
         context.font         = '100px Arial';
         context.textAlign    = 'center';
         context.textBaseline = 'middle';
-        context.fillText(countAsText(),0,0);
+        context.fillText(text,0,0);
         
         context.restore();
     }
-    
+
     function countAsText() {
         
         var milSinceStart = isCountdown ? stopAfter - runTime() : runTime();
@@ -61,15 +70,19 @@ function Counter(countFrom)
         var cntPart       = cntModifier(cntSinceStart);        
         var cntPartAsText = padZeros(cntPart.toString(),2);
         
-        return cntPart <= 0 ? "GO!" : cntPartAsText;
+        return cntPartAsText;
     }
-    
+
     function isAfter() {
-        return runTime() > stopAfter + 500;
+        return runTime() > stopAfter;
     }
-    
+
     function runTime() {
-        return (stopTime || Date.now()) - startTime;
+        var now = Date.now();
+        
+        if(!startTime) return 0;
+        
+        return (!startTime) ? 0 : (stopTime || Date.now()) - startTime;
     }
 
     function padZeros(number, pad_size) {
