@@ -1,7 +1,7 @@
 function Targets(mouse)
 {
     var targets = [];
-    var process = poissonProcess.create(100, function () { targets.push(new Target(mouse))} );
+    var process = poissonProcess.create(200, function () { targets.push(new Target(mouse))} );
 
     this.startAppearing = function() {
         process.start();
@@ -24,11 +24,11 @@ function Targets(mouse)
 
 function Target(mouse)
 {
-    var d = 200;
+    var d = 300;
     var x = null;
     var y = null;
     var r = 0;
-    var g = 200;
+    var g = 100;
     var b = 0;
 
     return new TargetBase(x,y,d,r,g,b, mouse);

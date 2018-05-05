@@ -1,7 +1,7 @@
 function Mouse(canvas)
 {
     var moves    = 0;
-    var position = { x:0, y:0};    
+    var position = { x:undefined, y:undefined};
     
     this.startTracking = function () {
         canvas.addEventListener('mousemove', onMouseMove, false);
@@ -9,6 +9,7 @@ function Mouse(canvas)
 
     this.stopTracking = function () {
         canvas.removeEventListener('mousemove', onMouseMove, false);
+        position = { x:undefined, y:undefined};
     };
 
     this.getX = function() {
