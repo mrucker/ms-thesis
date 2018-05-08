@@ -18,7 +18,13 @@ function Targets(mouse)
     }
 
     this.getData = function() {
-        return targets.map(function(target) { return target.getData().map(Math.round); });
+        //this is a little janky, but because the targets are positioned relative to the canvas they don't have a position until 
+        //the next time the canvas is redrawn. Therefore it is possible for the target to exist and not have a position so we ignore it until it does.
+        return targets.filter(function(target) { return target.getX() != null && target.getY() != null;  }).map(function(target) { return target.getData().map(Math.round); });
+    }
+    
+    this.touchCount = function() {
+        return targets.filter(function(target) { return target.isNewTouch(); }).length;
     }
 }
 
@@ -36,19 +42,30 @@ function Target(mouse)
 
 function TargetBase(x,y,d,r,g,b, mouse)
 {
-    var fadeInTime  = 0;
-    var fadeOffTime = 500;
-    var fadeOutTime = 500;
-    var createTime  = Date.now();
-    var that        = this;
+    var fadeInTime    = 0;
+    var fadeOffTime   = 500;
+    var fadeOutTime   = 500;
+    var createTime    = Date.now();
+    var touchedBefore = false;
+    var self          = this;
 
     this.getX        = function() { return x; };
     this.getY        = function() { return y; };
     this.getAge      = function() { return Date.now() - createTime; };
-    this.getData     = function() { return [this.getX(), this.getY(), this.getAge(), this.isTouched()*1]; };
+    this.getData     = function() { return [self.getX(), self.getY(), self.getAge()]; };
     this.getLifeSpan = function() { return fadeInTime + fadeOffTime + fadeOutTime; }; 
-    this.isDead      = function() { return this.getAge() > this.getLifeSpan() };
+    this.isDead      = function() { return self.getAge() > self.getLifeSpan() };
 
+    this.isNewTouch = function() {
+        
+        if (self.isTouched() && !touchedBefore) {
+            touchedBefore = true;
+            return true;
+        }
+        
+        return false;
+    }
+    
     this.isTouched  = function() {
         var targetX = x;
         var targetY = y;
@@ -60,8 +77,11 @@ function TargetBase(x,y,d,r,g,b, mouse)
 
     this.draw = function(canvas){
 
-        x = x || (canvas.getWidth()  - d) * Math.random() + d/2; //[d/2, height-d/2]
-        y = y || (canvas.getHeight() - d) * Math.random() + d/2; //[d/2, width -d/2]
+        var circleArea   = (canvas.getWidth()*canvas.getHeight()) * (Math.PI*Math.pow(d/2,2)/(1500*3000));
+        var circleRadius = Math.sqrt((circleArea/Math.PI))
+    
+        x = x || (canvas.getWidth()  - circleRadius*2) * Math.random() + circleRadius; //[d/2, height-d/2]
+        y = y || (canvas.getHeight() - circleRadius*2) * Math.random() + circleRadius; //[d/2, width -d/2]
 
         var context   = canvas.getContext2d();
 
@@ -70,7 +90,7 @@ function TargetBase(x,y,d,r,g,b, mouse)
         context.fillStyle = fillStyle();
         context.beginPath();
         context.moveTo(x,y);
-        context.arc(x, y, d/2, 0, 2 * Math.PI);
+        context.arc(x, y, circleRadius, 0, 2 * Math.PI);
         context.fill();
 
         context.restore();
@@ -84,13 +104,13 @@ function TargetBase(x,y,d,r,g,b, mouse)
         return 'rgba('+ rgb() +','+ opacity() +')';
     }
     
-    function rgb() {
-        return that.isTouched() ? [200,0,0].join(',') : [r,g,b].join(',');
+    function rgb() {        
+        return self.isTouched() ? [200,0,0].join(',') : [r,g,b].join(',');
         //return [r,g,b].join(',');
     }
 
     function opacity() {
-        var aliveTime = that.getAge();
+        var aliveTime = self.getAge();
 
         if( aliveTime <= fadeInTime){
             return aliveTime/fadeInTime;

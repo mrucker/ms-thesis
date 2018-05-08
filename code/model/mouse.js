@@ -35,6 +35,9 @@ function Mouse(canvas)
         var relative_x  = (e.clientX - canvasBound.left) * canvas.getDevicePixelRatio();
         var relative_y  = (e.clientY - canvasBound.top ) * canvas.getDevicePixelRatio();
         
-        return { x: relative_x, y: relative_y };
+        console.log(canvasBound.left);
+        console.log(e.clientX);
+        
+        return { x: e.relative_x, y: e.relative_y };
     };
 }

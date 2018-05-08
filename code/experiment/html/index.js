@@ -15,7 +15,7 @@ $(document).ready( function () {
     var targets = new Targets(mouse);
 
     var participant = new Participant();
-    var experiment  = new Experiment(participant, mouse, targets);
+    var experiment  = new Experiment(participant, mouse, targets, canvas);
     
     var dialog1 = $( "#dialog1" );
     var dialog2 = $( "#dialog2" );
@@ -30,15 +30,19 @@ $(document).ready( function () {
         experiment.draw(canvas);
     };
     
+    //canvas .startAnimating();
+    //targets.startAppearing();
+    //mouse  .startTracking();
+    
     var startAnimation = function() {
         canvas .startAnimating();
         counter.startCounting();
         targets.startAppearing();
+        mouse.startTracking();
     };
     
     var startExperiment = function () {
         timer.startTiming();
-        mouse.startTracking();
         experiment.beginExperiment();
     }
     
@@ -49,7 +53,7 @@ $(document).ready( function () {
         counter.stopCounting();
         targets.stopAppearing();
         experiment.endExperiment();
-        experiment.saveObservation();
+        experiment.saveObservation(canvas.getWidth(), canvas.getHeight());
         dialog3.dialog("open");
     };
     
@@ -77,7 +81,7 @@ $(document).ready( function () {
     });
     
     dialog3.dialog({
-        autoOpen   : false , 
+        autoOpen   : false ,
         modal      : true  ,
         draggable  : false ,
         dialogClass: "no-x",
@@ -92,9 +96,14 @@ $(document).ready( function () {
                 startAnimation(); 
             } },
             { text: "Updates", click: function() {  } }
-        ]
+        ],
     });
     
     dialog1.dialog("open");
     
+    $(window).resize(function() {
+        $("#dialog1").dialog("option", "position", {my: "center", at: "center", of: window});
+        $("#dialog2").dialog("option", "position", {my: "center", at: "center", of: window});
+        $("#dialog3").dialog("option", "position", {my: "center", at: "center", of: window});
+    });
 });
