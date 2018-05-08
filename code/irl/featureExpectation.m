@@ -1,72 +1,101 @@
-function expectedFeatures = featureExpectation(featureExpert, firstLocation, targetData, actions, reward, gamma)
+function [bestPath,bestFeatures] = featureExpectation(firstLocation, targetData, actions, reward, gamma)
 
-    pruneCount   = 0;
-    visitCount   = 0;
-    finalDepth   = size(targetData,1)-1;
-    bestFeatures = featureExpert;
+    pruneCount  = 0;
+    visitCount  = 0;
+    finalDepth  = size(targetData,1)-1;
+    actionCount = size(actions,2);
     
-    visitTime = 0;
-    makeTime  = 0;
-    growTime  = 0;
-    pruneTime = 0;
-    
-    
-    first = struct('depth',0, 'locations',[], 'features',[],  'parentFeatures',[]);
+    bestPath     = horzcat(zeros(2,finalDepth),firstLocation);
+    bestFeatures = zeros(6,1);    
+
+    visitTime   = 0;
+    makeTime    = 0;
+    growTime    = 0;
+    pruneTime   = 0;
+    featureTime = 0;
+    reshapeTime = 0;
+
+    first = struct('depth',0, 'locations',[], 'features',[]);
     
     first.depth            = 0;
     first.locations        = firstLocation;
     first.features         = features(first.locations, targetData{first.depth+1});
-    first.parentFeatures   = [0,0,0,0,0,0]'; %[d1,d2,d3,d4,touched,age]
     
     stack = {first};
     
-    while ~isempty(stack)
-    
-        tic
-        visitCount = visitCount + 1;
-        current = stack{end};
-        stack(end) = [];
-        visitTime = visitTime + toc;
-
-        for a = actions
-            
-            tic
-
-            next = struct('depth',0, 'locations',current.locations, 'features',[],  'parentFeatures',[]);            
-            
-            next.depth              = current.depth+1;
-            next.locations(:,2:end) = next.locations(:,1:end-1);
-            next.locations(:,1)     = next.locations(:,1) + a;            
-            next.features           = features(next.locations, targetData{next.depth+1});
-            next.parentFeatures     = current.parentFeatures + gamma^current.depth * current.features;
-            makeTime = makeTime + toc;
-            
-            tic
-            if prunable(bestFeatures, next.parentFeatures, next.features, next.depth, finalDepth, gamma, reward)
-                pruneCount = pruneCount + 400^(next.depth-finalDepth);
-                continue;
-            end
-            pruneTime = pruneTime + toc;
-            
-            %if we didn't prune above, and we're on the leaf node now, we know this path is better than the current best
-            if next.depth == finalDepth
-                bestFeatures = next.parentFeatures + gamma^next.depth * next.features;
-                continue;
-            end
-            
-            tic
-            stack{end+1} = next;
-            growTime = growTime + toc;
-        end        
+    if first.depth == finalDepth
+        bestFeatures = first.features;
+        bestPath     = first.locations;
+        return;
     end
     
-    expectedFeatures = bestFeatures;
+    while ~isempty(stack)
+    
+        myTic();            
+            current    = stack{end};
+            stack(end) = [];
+            visitCount = visitCount + 1;
+        visitTime = visitTime + myToc();
+        
+        myTic();
+            nextDepth          = current.depth+1;
+            nextHistory        = current.locations(:,1:3);
+            nextLocations      = current.locations(:,1) + actions; 
+            nextFeatures       = features(horzcat(nextLocations,nextHistory),targetData{nextDepth+1});
+            nextFeatures       = vertcat(nextFeatures(1:end-5)', repmat(nextFeatures(end-4:end),1,actionCount));
+            nextFeatures       = current.features + gamma^nextDepth * nextFeatures;            
+        featureTime = featureTime + myToc();
+        
+        myTic();
+            isPrunable    = prunable(bestFeatures, nextFeatures, nextDepth, finalDepth, gamma, reward);
+            prunableCount = sum(isPrunable);
+            pruneCount    = pruneCount + (prunableCount) * (1+actionCount^(nextDepth-finalDepth));
+        pruneTime = pruneTime + myToc();
+        
+        for a = find(~isPrunable)'
+            
+            myTic();            
+                thisFeatures  = nextFeatures(:,a);
+                thisLocations = horzcat(nextLocations(:,a), current.locations);
+            reshapeTime = reshapeTime + myToc();
+            
+            %if we didn't prune above, and we're on the leaf node now, we know this path is better than the current best
+            if nextDepth == finalDepth
+                if (bestFeatures - thisFeatures)' * reward < 0
+                    bestFeatures = thisFeatures;
+                    bestPath     = thisLocations;
+                end
+                continue;
+            end
+            
+            myTic();            
+                next = struct('depth',nextDepth, 'locations',thisLocations, 'features',thisFeatures);
+            makeTime = makeTime + myToc();
+            
+            myTic();
+                stack{end+1} = next;
+            growTime = growTime + myToc();
+        end        
+    end
 end
 
-function p = prunable(bestFeatures, parentFeatures, currentFeatures, currentDepth, finalDepth, gamma, reward)
+function myTic()
+    %tic
+end
+
+function t = myToc()
+    t = 0;    
+    %t = toc;   
+end
+
+function p = prunable(bestFeatures, currentFeatures, currentDepth, finalDepth, gamma, reward)
+
+    %Assumes that R \in [0,1]; This is a heuristic
+    potentialRemainingReward = ((1-gamma^finalDepth)/(1-gamma) - (1-gamma^currentDepth)/(1-gamma));    
+    rewardGainedOnPathSoFar  = currentFeatures' * reward;        
+    rewardFromBestPathEver   = bestFeatures' * reward;
+    notPossibleToBeatBest    = rewardFromBestPathEver - (rewardGainedOnPathSoFar + potentialRemainingReward) > 0;
     
-    % There may be an incorrect calculation here regarding the partial geometric series terminating at finalDepth
-    % R(best)-R(parents)-\sum_{i=depth+1}_{finalDepth}gamma^i >= gamma^depth*R(current)    
-    p = ((bestFeatures - parentFeatures)' * reward - ((1-gamma^finalDepth)/(1-gamma) - (1-gamma^currentDepth)/(1-gamma))) > gamma^currentDepth*currentFeatures'*reward;
+    p = notPossibleToBeatBest;
         
 end
