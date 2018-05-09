@@ -17,12 +17,12 @@ function [bestPath,bestFeatures] = featureExpectation(firstLocation, targetData,
     growTime    = 0;
         
     if finalDepth == 0
-        bestFeatures = features(firstLocation(1:2), firstLocation(3:8), targetData{1});
+        bestFeatures = features(firstLocation, targetData{1});
         bestPath     = firstLocation;
     else
         depth    = [0];
         location = reshape(firstLocation,[],1);
-        feature  = features(firstLocation(1:2), firstLocation(3:8), targetData{1});
+        feature  = features(firstLocation, targetData{1});
         
         bestPath     = [];
         bestFeatures = [];
@@ -48,12 +48,15 @@ function [bestPath,bestFeatures] = featureExpectation(firstLocation, targetData,
             nextLocations      = currentLocation(1:2) + actions;
         featureTime(1) = featureTime(1) + myToc();
         myTic();
-            nextFeatures = features(nextLocations, nextHistory, targetData{nextDepth+1});
-            assert(all((nextFeatures' * reward)< 1), 'my pruning bounds will not work if we can ever get more reward than 1 on any step');
+            nextFeatures       = features(horzcat(nextLocations,nextHistory),targetData{nextDepth+1});
         featureTime(2) = featureTime(2) + myToc();
         
         myTic();
-            nextFeatures = currentFeatures + gamma^nextDepth * nextFeatures;
+            nextFeatures       = vertcat(nextFeatures(1:actionCount)', repmat(nextFeatures(end-4:end),1,actionCount));
+            assert(all((nextFeatures' * reward)< 1), 'my pruning bounds will not work if we can ever get more reward than 1 on any step');
+        featureTime(3) = featureTime(3) + myToc();
+        myTic();
+            nextFeatures       = currentFeatures + gamma^nextDepth * nextFeatures;
         featureTime(4) = featureTime(4) + myToc();
 
         myTic();

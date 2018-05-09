@@ -1,8 +1,9 @@
+% Abbeel & Ng algorithm implementation (projection version) with my kernel stuff.
 function irl_result = algorithm5run(params, trajectories, verbosity)
 
     fprintf(1,'Start of Algorithm5 \n');
 
-    params = setDefaults(params);
+    params = setDefaults(params);    
 
     if params.seed ~= 0
         rng(params.seed);
@@ -26,22 +27,26 @@ function irl_result = algorithm5run(params, trajectories, verbosity)
       1 -3  3 -1  0  0; %jerk
       0  0  0  0  1  0; %touched
       0  0  0  0  0  1; %age
-    ];        
+    ];
+
+    ff = k(F,F, params);
 
     maxD = params.maxdist; %makes sure all distances \in [0,1]
     maxT = 1;              %makes sure touches between [0,1]  (because we average 1 is the max)
-    maxA = params.maxage;  %makes sure age is between [0,1]   (because we average 1000 is the max)
+    maxA = 1000;           %makes sure age is between [0,1]   (because we average 1000 is the max)
+    maxAge      = 1000;                                             %makes sure all ages      \in [0,1]
+    normalizer  = (1/maxDistance) * diag([1,1,1/2,1/4,1,1/maxAge]); %makes sure all features will be between [0,1]
+
+    diag([1/params.maxdist,1/params.maxdist,1/params.maxdist,1/params.maxdist,1/])
     
     %column [1,2,3,4]/maxDistance
     %column [5]/maxTouch
     %column [6]/maxAge
-    %Each row divided by max(sum(postive)) [note, this means a reward is always R <= 1, that is no lower bound]
-    F = diag(1./sum(F.*(F>0),2)) * F * diag([1/maxD,1/maxD,1/maxD,1/maxD,1/maxT,1/maxA]);
-    %ff = k(F,F, params);
-    ff = eye(6) * diag([1/maxD,1/maxD,1/maxD,1/maxD,1/maxA,1/maxT]);
+    %row 1 divided by max(sum(postive), sum(negative))        
     
-    %I used this when doing kernels, it just doesn't seem to work well at all.
-    %ff = diag(1./sum(ff.*(ff>0),2)) * ff * diag([1/maxD,1/maxD,1/maxD,1/maxD,1/maxT,1/maxA]);
+    
+    
+    F = F * normalizer;
 
     %[d1,d2,d3,d4,touched,age]
     sE = zeros(6,1);
@@ -53,7 +58,7 @@ function irl_result = algorithm5run(params, trajectories, verbosity)
     for n=1:N
         pE = reshape(trajectories{1+start,n}(3:8),[],3);
         for t=1:T
-            st = features(trajectories{t+start,n}(1:2), trajectories{t+start,n}(3:8), trajectories{t+start,n}(9:end));
+            st = features(trajectories{t+start,n}(1:8), trajectories{t+start,n}(9:end));
             sE = sE + (1/N) * params.gamma^(t-1) * st;
             pE = horzcat(trajectories{t+start,n}(1:2), pE);
         end
@@ -75,10 +80,10 @@ function irl_result = algorithm5run(params, trajectories, verbosity)
     rand_r = rand(1,6)';    
     rand_r = rand_r - min(rand_r);
     rand_r = rand_r/sum(rand_r);
-    rand_r = ff' * rand_r;
+    rand_r = F' * rand_r;
     
     
-    [rand_p, rand_s] = featureExpectation(startLocation, targetStepData, actions, rand_r, params.gamma);
+    [rand_p, rand_s] = featureExpectation(F, startLocation, targetStepData, actions, rand_r, params.gamma);
     mdp_time = mdp_time + toc;
 
     rs = {rand_r};
@@ -95,7 +100,7 @@ function irl_result = algorithm5run(params, trajectories, verbosity)
         rs{i}         = ff*(sE-sb{i-1});
         %rs{i}         = rs{i} - min(rs{i});
         %rs{i}         = rs{i}/sum(rs{i});
-        [ps{i},ss{i}] = featureExpectation(startLocation, targetStepData, actions, rs{i}, params.gamma);
+        [ps{i},ss{i}] = featureExpectation(F, startLocation, targetStepData, actions, rs{i}, params.gamma);
         mdp_time = mdp_time + toc;
 
         ts{i} = sqrt(sE'*ff*sE + sb{i-1}'*ff*sb{i-1} - 2*sE'*ff*sb{i-1});
@@ -137,7 +142,7 @@ function irl_result = algorithm5run(params, trajectories, verbosity)
 
     -diff(ps{idx},1,2)
     -diff(pE(:,1:4),1,2)
-    [v,i] = min(sqdist(sE,cell2mat(ss)))
+    [v,i] = min(sqdist(F*sE,F*cell2mat(ss)))
     
     irl_result = r;
 end
