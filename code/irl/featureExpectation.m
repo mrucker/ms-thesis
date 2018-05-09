@@ -1,83 +1,89 @@
 function [bestPath,bestFeatures] = featureExpectation(firstLocation, targetData, actions, reward, gamma)
 
+    depth    = [];    
+    location = [];
+    feature  = [];
+    
     pruneCount  = 0;
     visitCount  = 0;
     finalDepth  = size(targetData,1)-1;
-    actionCount = size(actions,2);
-    
-    bestPath     = horzcat(zeros(2,finalDepth),firstLocation);
-    bestFeatures = zeros(6,1);    
+    actionCount = size(actions,2);        
 
-    visitTime   = 0;
-    makeTime    = 0;
-    growTime    = 0;
+    visitTime   = 0;    
+    featureTime = [0,0,0,0,0];
     pruneTime   = 0;
-    featureTime = 0;
-    reshapeTime = 0;
-
-    first = struct('depth',0, 'locations',[], 'features',[]);
-    
-    first.depth            = 0;
-    first.locations        = firstLocation;
-    first.features         = features(first.locations, targetData{first.depth+1});
-    
-    stack = {first};
-    
-    if first.depth == finalDepth
-        bestFeatures = first.features;
-        bestPath     = first.locations;
-        return;
+    growTime    = 0;
+        
+    if finalDepth == 0
+        bestFeatures = features(firstLocation, targetData{1});
+        bestPath     = firstLocation;
+    else
+        depth    = [0];
+        location = reshape(firstLocation,[],1);
+        feature  = features(firstLocation, targetData{1});
+        
+        bestPath     = horzcat(zeros(2,finalDepth),firstLocation);
+        bestFeatures = zeros(6,1);
     end
     
-    while ~isempty(stack)
+    while ~isempty(feature)
     
         myTic();            
-            current    = stack{end};
-            stack(end) = [];
+            currentDepth    = depth(:,end);
+            currentLocation = location(:,end);
+            currentFeatures = feature(:,end);
+            
+            depth   (:,end) = [];
+            location(:,end) = [];
+            feature (:,end) = [];
+
             visitCount = visitCount + 1;
         visitTime = visitTime + myToc();
-        
+
         myTic();
-            nextDepth          = current.depth+1;
-            nextHistory        = current.locations(:,1:3);
-            nextLocations      = current.locations(:,1) + actions; 
+            nextDepth          = currentDepth+1;
+            nextHistory        = reshape(currentLocation(1:6),[],3);
+            nextLocations      = currentLocation(1:2) + actions;
+        featureTime(1) = featureTime(1) + myToc();
+        myTic();
             nextFeatures       = features(horzcat(nextLocations,nextHistory),targetData{nextDepth+1});
-            nextFeatures       = vertcat(nextFeatures(1:end-5)', repmat(nextFeatures(end-4:end),1,actionCount));
-            nextFeatures       = current.features + gamma^nextDepth * nextFeatures;            
-        featureTime = featureTime + myToc();
+        featureTime(2) = featureTime(2) + myToc();
         
         myTic();
-            isPrunable    = prunable(bestFeatures, nextFeatures, nextDepth, finalDepth, gamma, reward);
-            prunableCount = sum(isPrunable);
-            pruneCount    = pruneCount + (prunableCount) * (1+actionCount^(nextDepth-finalDepth));
-        pruneTime = pruneTime + myToc();
+            nextFeatures       = vertcat(nextFeatures(1:actionCount)', repmat(nextFeatures(end-4:end),1,actionCount));
+        featureTime(3) = featureTime(3) + myToc();
+        myTic();
+            nextFeatures       = currentFeatures + gamma^nextDepth * nextFeatures;
+        featureTime(4) = featureTime(4) + myToc();
+
+        myTic();
+            isPrunable    = prunable(bestFeatures, nextFeatures, nextDepth, finalDepth, gamma, reward);            
+            pruneCount    = pruneCount + sum(isPrunable) * (1+actionCount^(nextDepth-finalDepth));
+            
+            pruneIndexes = find(~isPrunable);
+            allFeatures  = nextFeatures(:,pruneIndexes);
+            allLocations = vertcat(nextLocations(:,pruneIndexes),repmat(currentLocation(1:6),1,sum(~isPrunable)));        
         
-        for a = find(~isPrunable)'
-            
-            myTic();            
-                thisFeatures  = nextFeatures(:,a);
-                thisLocations = horzcat(nextLocations(:,a), current.locations);
-            reshapeTime = reshapeTime + myToc();
-            
-            %if we didn't prune above, and we're on the leaf node now, we know this path is better than the current best
             if nextDepth == finalDepth
-                if (bestFeatures - thisFeatures)' * reward < 0
-                    bestFeatures = thisFeatures;
-                    bestPath     = thisLocations;
+                [val,index] = max(allFeatures' * reward);
+                if val > bestFeatures'*reward
+                    bestFeatures = allFeatures(:,index);
+                    bestPath     = allLocations(:,index);
                 end
                 continue;
             end
-            
-            myTic();            
-                next = struct('depth',nextDepth, 'locations',thisLocations, 'features',thisFeatures);
-            makeTime = makeTime + myToc();
-            
-            myTic();
-                stack{end+1} = next;
-            growTime = growTime + myToc();
-        end        
+        pruneTime = pruneTime + myToc();
+        
+        myTic();
+            count = sum(~isPrunable);
+            depth    = [depth   , ones(1, count)*nextDepth];
+            location = [location, reshape(allLocations,[],count)];
+            feature  = [feature, allFeatures];
+        growTime = growTime + myToc();                
     end
 end
+
+%[visitTime,featureTime,pruneTime,growTime] / sum([visitTime,featureTime,pruneTime,growTime])
 
 function myTic()
     %tic
@@ -91,7 +97,7 @@ end
 function p = prunable(bestFeatures, currentFeatures, currentDepth, finalDepth, gamma, reward)
 
     %Assumes that R \in [0,1]; This is a heuristic
-    potentialRemainingReward = ((1-gamma^finalDepth)/(1-gamma) - (1-gamma^currentDepth)/(1-gamma));    
+    potentialRemainingReward = gamma^(finalDepth-currentDepth)/(1-gamma);
     rewardGainedOnPathSoFar  = currentFeatures' * reward;        
     rewardFromBestPathEver   = bestFeatures' * reward;
     notPossibleToBeatBest    = rewardFromBestPathEver - (rewardGainedOnPathSoFar + potentialRemainingReward) > 0;

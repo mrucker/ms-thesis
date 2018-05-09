@@ -18,7 +18,11 @@ function f = features(cursorData, targetData)
     %[d1,d2,d3,d4,touched,age]
     f = zeros(numLengths+2,1);
     
-    distances = sqrt(sqdist(cursorData, targetData(1:2,:)));
+    x1 = cursorData;
+    x2 = targetData(1:2,:);
+    
+    distances = sqrt(dot(x2,x2,1)+dot(x1,x1,1)'-2*(x1'*x2));
+
     f(1:numLengths) = sum(distances,2);
     f(numLengths+1) = sum(distances(1,:) < targetRadius);
     f(numLengths+2) = sum(targetData(3,:));       
