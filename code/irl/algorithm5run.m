@@ -14,11 +14,7 @@ function irl_result = algorithm5run(params, trajectories, verbosity)
     mdp_time = 0;
     mix_time = 0;
 
-    % Initialize variables.
-    [T,N] = size(trajectories);
-
-    T = min([T,params.steps+1]);
-
+    % Initialize variables.    
     F = [
       1  0  0  0  0  0; %distance
       1 -1  0  0  0  0; %velocity
@@ -49,6 +45,8 @@ function irl_result = algorithm5run(params, trajectories, verbosity)
 
     start = 0;
     
+    [T,N] = size(trajectories);
+    T = min([T,params.steps+1]);
     tic;
     for n=1:N
         pE = reshape(trajectories{1+start,n}(3:8),[],3);
@@ -137,7 +135,7 @@ function irl_result = algorithm5run(params, trajectories, verbosity)
 
     -diff(ps{idx},1,2)
     -diff(pE(:,1:4),1,2)
-    [v,i] = min(sqdist(sE,cell2mat(ss)))
+    [~,i] = min(sqdist(sE,cell2mat(ss)))
     
     irl_result = r;
 end
@@ -180,8 +178,8 @@ function a = createActionsMatrix()
     dx = -10:5:10;
     dy = -10:5:10;
 
-    dx = dx*1/5;
-    dy = dy*1/5;
+    dx = dx*1;
+    dy = dy*1;
     
     a = vertcat(reshape(repmat(dx,numel(dx),1), [1,numel(dx)^2]), reshape(repmat(dy',1,numel(dy)), [1,numel(dy)^2]));
 end
