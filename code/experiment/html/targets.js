@@ -48,6 +48,7 @@ function TargetBase(x,y,d,r,g,b, mouse)
     var createTime    = Date.now();
     var touchedBefore = false;
     var self          = this;
+    
 
     this.getX        = function() { return x; };
     this.getY        = function() { return y; };
@@ -105,10 +106,29 @@ function TargetBase(x,y,d,r,g,b, mouse)
     }
     
     function rgb() {        
+        
+        var f = features();
+        
         return self.isTouched() ? [200,0,0].join(',') : [r,g,b].join(',');
+
         //return [r,g,b].join(',');
     }
 
+    function features() {
+        var mouseHist    = new ma.dl.matrix(mouse.getHistory());
+        var targetLoc    = new ma.dl.vector([x,y]);
+        var mouseHistDot = new ma.dl.vector(mouse.getHistoryDot());        
+        var targetLocDot = Math.pow(x,2) + Math.pow(y,2);
+        
+        var x1   = new ma.dl.scalar(targetLocDot);
+        var x2   = mouseHistDot;
+        var x1x2 = mouseHist.mul(targetLoc);
+        
+        var distances = x1.add(x2).sub(x1x2.mul(new ma.dl.scalar(2))).sqrt();
+        
+        return distances.concat(new ma.dl.vector([self.isTouched()*1]));
+    }
+    
     function opacity() {
         var aliveTime = self.getAge();
 

@@ -1,8 +1,10 @@
 function Mouse(canvas)
 {
-    var moves    = 0;
-    var position = { x:undefined, y:undefined};
-    var self     = this;
+    var moves      = 0;
+    var position   = { x:undefined, y:undefined};
+    var self       = this;
+    var history    = [[0,0],[0,0],[0,0],[0,0]];
+    var historyDot = [0,0,0,0]
     
     this.startTracking = function () {
         canvas.addMouseMoveListener(onMouseMove);
@@ -20,6 +22,14 @@ function Mouse(canvas)
     this.getY = function() {
         return position.y;
     };
+    
+    this.getHistory = function() {
+        return history;
+    }
+    
+    this.getHistoryDot = function() {
+        return historyDot;
+    }
     
     this.getData = function() {
         return [self.getX(), self.getY()];
@@ -41,5 +51,13 @@ function Mouse(canvas)
     
     function onMouseMove(x,y) {
         position = {"x":x, "y":y };
+        
+        history.push([x,y]);
+        historyDot.push(Math.pow(x,2) + Math.pow(y,2));
+        
+        if(history.length > 4) {
+            history.shift();
+            historyDot.shift();
+        }
     }
 }

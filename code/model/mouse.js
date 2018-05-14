@@ -38,6 +38,6 @@ function Mouse(canvas)
         console.log(canvasBound.left);
         console.log(e.clientX);
         
-        return { x: e.relative_x, y: e.relative_y };
+        return { x: relative_x, y: relative_y };
     };
 }

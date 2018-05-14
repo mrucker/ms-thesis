@@ -14,89 +14,71 @@ function irl_result = algorithm5run(params, trajectories, verbosity)
     mdp_time = 0;
     mix_time = 0;
 
-    % Initialize variables.    
-    F = [
-      1  0  0  0  0  0; %distance
-      1 -1  0  0  0  0; %velocity
-      1 -2  1  0  0  0; %acceleration
-      1 -3  3 -1  0  0; %jerk
-      0  0  0  0  1  0; %touched
-      0  0  0  0  0  1; %age
-    ];        
+    ft  = @(a,b,c) features(a,b,c,params);
+    fe = @(a,b,c,d,e,f) mean(cell2mat(arrayfun(@(a_i) featureExpectation_bb(a(:,a_i), b, c, d, e, f, ft),1:size(a,2), 'UniformOutput', false)),2);
 
-    maxD = params.maxdist; %makes sure all distances \in [0,1]
-    maxT = 1;              %makes sure touches between [0,1]  (because we average 1 is the max)
-    maxA = params.maxage;  %makes sure age is between [0,1]   (because we average 1000 is the max)
-    
-    %column [1,2,3,4]/maxDistance
-    %column [5]/maxTouch
-    %column [6]/maxAge
-    %Each row divided by max(sum(postive)) [note, this means a reward is always R <= 1, that is no lower bound]
-    F = diag(1./sum(F.*(F>0),2)) * F * diag([1/maxD,1/maxD,1/maxD,1/maxD,1/maxT,1/maxA]);
-    %ff = k(F,F, params);
-    ff = eye(6) * diag([1/maxD,1/maxD,1/maxD,1/maxD,1/maxA,1/maxT]);
-    
-    %I used this when doing kernels, it just doesn't seem to work well at all.
-    %ff = diag(1./sum(ff.*(ff>0),2)) * ff * diag([1/maxD,1/maxD,1/maxD,1/maxD,1/maxT,1/maxA]);
+    sE = 0;
+    %pE = [];
 
-    %[d1,d2,d3,d4,touched,age]
-    sE = zeros(6,1);
-    pE = [];
-
-    start = 0;
     
-    [T,N] = size(trajectories);
-    T = min([T,params.steps+1]);
+    
+    %[T,N] = size(trajectories);
+    
+    start    = params.start;
+    steps    = params.steps;
+    episodes = params.episodes;
+    
     tic;
-    for n=1:N
-        pE = reshape(trajectories{1+start,n}(3:8),[],3);
-        for t=1:T
-            st = features(trajectories{t+start,n}(1:2), trajectories{t+start,n}(3:8), trajectories{t+start,n}(9:end));
-            sE = sE + (1/N) * params.gamma^(t-1) * st;
-            pE = horzcat(trajectories{t+start,n}(1:2), pE);
+    for n= 0:(episodes-1)
+        %pE = reshape(trajectories{1+start,n}(3:8),[],3);
+        for t= 0:steps
+            st = ft(trajectories{start+t+n}(1:2), trajectories{start+t+n}(3:8), trajectories{start+t+n}(9:end));
+            sE = sE + (st * params.gamma^t)/episodes;
+            %pE = horzcat(trajectories{t+start,n}(1:2), pE);
         end
     end
-    exp_time = exp_time + toc;    
+    exp_time = exp_time + toc;
 
     actions        = createActionsMatrix();
-    startLocation  = reshape(trajectories{1+start,1}(1:8), [], 4);
-    targetStepData = cell(T,1);    
+    startLocations = [];
+    targetStepData = cell(episodes+steps,1);
 
-    for t=1:T
-        targetStepData{t} = trajectories{t+start,1}(9:end);
+    for n = 0:(episodes-1)
+        startLocations(:,n+1) = trajectories{start+n}(1:8);
+    end
+
+    for t=1:episodes+steps
+        targetStepData{t} = trajectories{start+t-1,1}(9:end);
         targetStepData{t} = reshape(targetStepData{t}, [], numel(targetStepData{t})/3);
     end
 
     % Generate random policy.
     tic;
-    %come back to this...
-    rand_r = rand(1,6)';    
-    rand_r = rand_r - min(rand_r);
+    rand_r = rand(1,size(sE,1))';
     rand_r = rand_r/sum(rand_r);
-    rand_r = ff' * rand_r;
-    
-    
-    [rand_p, rand_s] = featureExpectation(startLocation, targetStepData, actions, rand_r, params.gamma);
+    rand_s = fe(startLocations, targetStepData, steps, actions, rand_r, params.gamma);
     mdp_time = mdp_time + toc;
 
     rs = {rand_r};
-    ps = {rand_p};
+    %ps = {rand_p};
     ss = {rand_s};
     sb = {rand_s};
-    ts = {0};
+    ts = {Inf};
 
+    if verbosity ~= 0
+        fprintf(1,'Completed IRL iteration, i=%d, t=%f\n',1,ts{1});
+    end;
+    
     i = 2;
 
     while 1
 
         tic;
-        rs{i}         = ff*(sE-sb{i-1});
-        %rs{i}         = rs{i} - min(rs{i});
-        %rs{i}         = rs{i}/sum(rs{i});
-        [ps{i},ss{i}] = featureExpectation(startLocation, targetStepData, actions, rs{i}, params.gamma);
+        rs{i}    = (sE-sb{i-1});
+        ss{i}    = fe(startLocations, targetStepData, steps, actions, rs{i}, params.gamma);
         mdp_time = mdp_time + toc;
 
-        ts{i} = sqrt(sE'*ff*sE + sb{i-1}'*ff*sb{i-1} - 2*sE'*ff*sb{i-1});
+        ts{i} = sqrt(sE'*sE + sb{i-1}'*sb{i-1} - 2*sE'*sb{i-1});
 
         if verbosity ~= 0
             fprintf(1,'Completed IRL iteration, i=%d, t=%f\n',i,ts{i});
@@ -109,15 +91,15 @@ function irl_result = algorithm5run(params, trajectories, verbosity)
         i = i + 1;
 
         tic;
-        sn       = (ss{i-1}-sb{i-2})'*ff*(sE-sb{i-2});
-        sd       = (ss{i-1}-sb{i-2})'*ff*(ss{i-1}-sb{i-2});
+        sn       = (ss{i-1}-sb{i-2})'*(sE-sb{i-2});
+        sd       = (ss{i-1}-sb{i-2})'*(ss{i-1}-sb{i-2});
         sc       = sn/sd;
         sb{i-1}  = sb{i-2} + sc*(ss{i-1}-sb{i-2});
         svm_time = svm_time + toc;
     end;
 
     tic;
-    [~,idx] = max(mixPolicies(sE, ss, ff));
+    [~,idx] = max(mixPolicies(sE, ss));
     mix_time = mix_time + toc;
 
     t  = ts{idx};
@@ -133,32 +115,40 @@ function irl_result = algorithm5run(params, trajectories, verbosity)
     fprintf(1,'mdp_time=%f \n',mdp_time);
     fprintf(1,'mix_time=%f \n',mix_time);
 
-    -diff(ps{idx},1,2)
-    -diff(pE(:,1:4),1,2)
-    [~,i] = min(sqdist(sE,cell2mat(ss)))
+    [~,i] = min(sqdist(sE,cell2mat(ss)));
+    %-diff(ps{idx},1,2)
+    %-diff(ps{i},1,2)
+    %-diff(pE(:,1:4),1,2)
+
+    ss{i}
+    ss{idx}
+    sE
+    rs{i}
+    rs{idx}
+
     
     irl_result = r;
 end
 
 function p = setDefaults(params)
     % Fill in default parameters.
-    if ~isfield(params,'seed') 
+    if ~isfield(params,'seed')
         params.('seed') = 0;
     end
 
-    if ~isfield(params,'kernel') 
+    if ~isfield(params,'kernel')
         params.('kernel') = 1;
     end
 
-    if ~isfield(params,'sigma') 
+    if ~isfield(params,'sigma')
         params.('sigma') = 1;
     end
 
-    if ~isfield(params,'gamma') 
+    if ~isfield(params,'gamma')
         params.('gamma') = .9;
     end
 
-    if ~isfield(params,'epsilon') 
+    if ~isfield(params,'epsilon')
         params.('epsilon') = .01;
     end
 
@@ -175,23 +165,32 @@ function a = createActionsMatrix()
 
     %all combinations of (dx,dy) for dx,dy \in [-10,10]
 
-    dx = -10:5:10;
-    dy = -10:5:10;
+    dx = -1:1:1;
+    dy = -1:1:1;
 
-    dx = dx*1;
-    dy = dy*1;
+    dx = dx*100;
+    dy = dy*100;
+    
+    dx = [100,50,10,2,0];
+    dy = [100,50,10,2,0];
+    
+    dx = horzcat(dx,0,-dx);
+    dy = horzcat(dy,0,-dy);
+        
+    %dx = 1:2;
+    %dy = [1,1];
     
     a = vertcat(reshape(repmat(dx,numel(dx),1), [1,numel(dx)^2]), reshape(repmat(dy',1,numel(dy)), [1,numel(dy)^2]));
 end
 
-function l = mixPolicies(sE, ss, ff)
+function l = mixPolicies(sE, ss)
 
     s_mat = cell2mat(ss);
     s_cnt = size(s_mat,2);
 
-    ssffss = s_mat'*ff*s_mat;
-    seffse = sE'*ff*sE;
-    seffss = sE'*ff*s_mat;
+    ssffss = s_mat'*s_mat;
+    seffse = sE'*sE;
+    seffss = sE'*s_mat;
 
     % In Abbeel & Ng's algorithm, we should use lambda to construct a stochastic policy. 
     % However for our purposes, we'll simply pick the reward with the largest lambda weight.

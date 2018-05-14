@@ -11,8 +11,8 @@ $(document).ready( function () {
     var width   = canvas.getWidth();
     var height  = canvas.getHeight();
     
-    var colWidth  = 30; //width/125; //10;
-    var rowHeight = 30; //height/100; //10;
+    var colWidth  = 400; //width/125; //10;
+    var rowHeight = 400; //height/100; //10;
 
     var cols = width/colWidth;
     var rows = height/rowHeight;
