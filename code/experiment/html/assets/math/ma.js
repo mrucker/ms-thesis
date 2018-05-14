@@ -166,37 +166,37 @@ ma.scalar.prototype = new ma();
 ma.vector.prototype = new ma();
 ma.matrix.prototype = new ma();
 
-ma.dl = function(tensor) {
+ma.tf = function(tensor) {
     this.getTensor = function() {
         return tensor;
     }
 };
-ma.dl.scalar = function(number) {
+ma.tf.scalar = function(number) {
     
-    ma.dl.call(this, number.rankType ? number : dl.scalar(number));
+    ma.tf.call(this, number.rankType ? number : tf.scalar(number));
     
     this.add = function(that) {
         var thisTensor = this.getTensor();
         var thatTensor = that.getTensor();
         
         if(thatTensor.rankType == "2" && (thatTensor.shape[0] == 1 || thatTensor.shape[1] == 1)) {
-            return new ma.dl.vector(this.getTensor().add(that.getTensor()));
+            return new ma.tf.vector(this.getTensor().add(that.getTensor()));
         }
         else {
-            return new ma.dl.scalar(this.getTensor().add(that.getTensor()));
+            return new ma.tf.scalar(this.getTensor().add(that.getTensor()));
         }
     };
     
     this.sub = function(object) {
-        return new ma.dl.scalar(this.getTensor().sub(object.getTensor()));
+        return new ma.tf.scalar(this.getTensor().sub(object.getTensor()));
     };
 
     this.mul = function(object) {
-        return new ma.dl.scalar(this.getTensor().mul(object.getTensor()));
+        return new ma.tf.scalar(this.getTensor().mul(object.getTensor()));
     };
     
     this.div = function(object) {
-        return new ma.dl.scalar(this.getTensor().div(object.getTensor()));
+        return new ma.tf.scalar(this.getTensor().div(object.getTensor()));
     };
     
     this.print = function() {
@@ -207,57 +207,57 @@ ma.dl.scalar = function(number) {
         return this.getTensor().dataSync()[0];
     };
 };
-ma.dl.vector = function(array) {
+ma.tf.vector = function(array) {
     
-    //ma.dl.call(this, array.rankType ? array : dl.tensor2d(array, [array.length,1]));
-    ma.dl.call(this, array.rankType ? array : dl.tensor2d(array, [array.length,1]));
+    //ma.tf.call(this, array.rankType ? array : tf.tensor2d(array, [array.length,1]));
+    ma.tf.call(this, array.rankType ? array : tf.tensor2d(array, [array.length,1]));
     
     this.shape = function() {
         return this.getTensor().shape;
     };
     
     this.norm = function(ord) {
-        return new ma.dl.scalar(this.getTensor().norm(ord));
+        return new ma.tf.scalar(this.getTensor().norm(ord));
     }
     
     this.trn = function() {
-        return new ma.dl.vector(this.getTensor().transpose());
+        return new ma.tf.vector(this.getTensor().transpose());
     };
     
     this.mul = function(that) {
 
         var thisTensor = this.getTensor();
-        var thatTensor = dl.cast(that.getTensor(), thisTensor.dtype);
+        var thatTensor = tf.cast(that.getTensor(), thisTensor.dtype);
 
         if(thatTensor.rankType == "0") {
-            return new ma.dl.vector(thisTensor.mul(thatTensor));
+            return new ma.tf.vector(thisTensor.mul(thatTensor));
         }
 
         if(thatTensor.rankType == "2" && thisTensor.shape[0] == 1 && thatTensor.shape[1] == 1) {
-            return new ma.dl.scalar(thisTensor.matMul(thatTensor));
+            return new ma.tf.scalar(thisTensor.matMul(thatTensor));
         }
 
         if(thatTensor.rankType == "2" && (thisTensor.shape[0] == 1 || thatTensor.shape[1] == 1)) {
-            return new ma.dl.vector(thisTensor.matMul(thatTensor));
+            return new ma.tf.vector(thisTensor.matMul(thatTensor));
         }
 
-        return new ma.dl.matrix(thisTensor.matMul(thatTensor));
+        return new ma.tf.matrix(thisTensor.matMul(thatTensor));
     };
     
     this.add = function(object) {
-        return new ma.dl.vector(this.getTensor().add(object.getTensor()));
+        return new ma.tf.vector(this.getTensor().add(object.getTensor()));
     };
     
     this.sub = function(object) {
-        return new ma.dl.vector(this.getTensor().sub(object.getTensor()));
+        return new ma.tf.vector(this.getTensor().sub(object.getTensor()));
     };
     
     this.sqrt = function() {
-        return new ma.dl.vector(this.getTensor().sqrt());
+        return new ma.tf.vector(this.getTensor().sqrt());
     }
 
     this.concat = function(object) {
-        return new ma.dl.vector(this.getTensor().concat(object.getTensor()));
+        return new ma.tf.vector(this.getTensor().concat(object.getTensor()));
     }
     
     this.print = function() {
@@ -269,9 +269,9 @@ ma.dl.vector = function(array) {
     };
 };
 
-ma.dl.matrix = function(matrix) {
+ma.tf.matrix = function(matrix) {
 
-    ma.dl.call(this, matrix.rankType ? matrix : dl.tensor2d(matrix));
+    ma.tf.call(this, matrix.rankType ? matrix : tf.tensor2d(matrix));
          
     this.shape = function(dim) {
 
@@ -282,51 +282,51 @@ ma.dl.matrix = function(matrix) {
     };
     
     this.div = function(den) {
-        return new ma.dl.matrix(this.getTensor().div(den.getTensor()));
+        return new ma.tf.matrix(this.getTensor().div(den.getTensor()));
     }
 
     this.mul = function(that) {        
         
         var thisTensor = this.getTensor();
-        var thatTensor = dl.cast(that.getTensor(), thisTensor.dtype);
+        var thatTensor = tf.cast(that.getTensor(), thisTensor.dtype);
 
         if(thatTensor.rankType == "0") {
-            return new ma.dl.matrix(thisTensor.mul(thatTensor));
+            return new ma.tf.matrix(thisTensor.mul(thatTensor));
         }
         
         if(thatTensor.rankType == "2" && thatTensor.shape[1] == 1) {
-            return new ma.dl.vector(thisTensor.matMul(thatTensor));
+            return new ma.tf.vector(thisTensor.matMul(thatTensor));
         }
         
-        return new ma.dl.matrix(thisTensor.matMul(thatTensor));
+        return new ma.tf.matrix(thisTensor.matMul(thatTensor));
     };
     
     this.add = function(that) {
-        return new ma.dl.matrix(this.getTensor().add(that.getTensor()))
+        return new ma.tf.matrix(this.getTensor().add(that.getTensor()))
     }
     
     this.sub = function(that) {
-        return new ma.dl.matrix(this.getTensor().sub(that.getTensor()))
+        return new ma.tf.matrix(this.getTensor().sub(that.getTensor()))
     }
     
     this.exp = function() {
-        return new ma.dl.matrix(this.getTensor().exp());
+        return new ma.tf.matrix(this.getTensor().exp());
     }
     
     this.sqrt = function() {
-        return new ma.dl.matrix(this.getTensor().sqrt());
+        return new ma.tf.matrix(this.getTensor().sqrt());
     }
     
     this.pow = function(exp) {
-        return new ma.dl.matrix(this.getTensor().pow(dl.scalar(exp)));
+        return new ma.tf.matrix(this.getTensor().pow(tf.scalar(exp)));
     }
     
     this.trn = function() {
-        return new ma.dl.matrix(this.getTensor().transpose());
+        return new ma.tf.matrix(this.getTensor().transpose());
     }
     
     this.col = function(index) {
-        return new ma.dl.vector(this.getTensor().slice([0,index],[this.shape(0),1]));
+        return new ma.tf.vector(this.getTensor().slice([0,index],[this.shape(0),1]));
     }
     
     this.diag = function() {
@@ -336,7 +336,7 @@ ma.dl.matrix = function(matrix) {
         for( i = 0; i <  this.shape(0); i++) {
             d.push(this.getTensor().slice([i,i],[1,1]))
         }
-        return new ma.dl.vector();
+        return new ma.tf.vector();
     }
     
     this.print = function() {

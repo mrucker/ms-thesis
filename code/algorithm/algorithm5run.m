@@ -14,7 +14,7 @@ function irl_result = algorithm5run(params, trajectories, verbosity)
     mdp_time = 0;
     mix_time = 0;
 
-    ft  = @(a,b,c) features(a,b,c,params);
+    ft = @(a,c,d) features(a,c,d,params);
     fe = @(a,b,c,d,e,f) mean(cell2mat(arrayfun(@(a_i) featureExpectation_bb(a(:,a_i), b, c, d, e, f, ft),1:size(a,2), 'UniformOutput', false)),2);
 
     sE = 0;

@@ -50,6 +50,7 @@ function [bestFeatures] = featureExpectation_bb(firstLocation, targetData, final
 
         myTic();
             nextFeatures = feat(nextLocations, nextHistory, targetData{nextDepth+1});
+            %nextFeatures = repmat([0;0;0;0;0], 1, 121);
             assert(all((nextFeatures' * reward)< 1), 'my pruning bounds will not work if we can ever get more reward than 1 on any step');
         featureTime(2) = featureTime(2) + myToc();
         
@@ -96,12 +97,12 @@ end
 %[visitTime,featureTime,pruneTime,growTime] / sum([visitTime,featureTime,pruneTime,growTime])
 
 function myTic()
-    %tic
+    tic
 end
 
 function t = myToc()
     t = 0;    
-    %t = toc;
+    t = toc;
 end
 
 function p = prunable(bestFeatures, currentFeatures, currentDepth, finalDepth, gamma, reward)

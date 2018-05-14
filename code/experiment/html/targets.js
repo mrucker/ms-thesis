@@ -1,7 +1,7 @@
 function Targets(mouse)
 {
     var targets = [];
-    var process = poissonProcess.create(200, function () { targets.push(new Target(mouse))} );
+    var process = poissonProcess.create(50, function () { targets.push(new Target(mouse))} );
 
     this.startAppearing = function() {
         process.start();
@@ -105,54 +105,95 @@ function TargetBase(x,y,d,r,g,b, mouse)
         return 'rgba('+ rgb() +','+ opacity() +')';
     }
     
-    function rgb() {        
+    function rgb() {
         
-        var r_param = new ma.dl.vector([-0.1921, -0.0462, -0.0107, -0.0009, 0.0790]);
-        var f_value = features();
+        var r_value = reward();
         
-        var reward = f_value.trn().mul(r_param).toNumber();
-        
-        //return self.isTouched() ? [200,0,0].join(',') : [-Math.min(reward*256*3,0),g,Math.max(reward*256,0)].join(',');
-        
-        return [-Math.min(reward*256*3,0),0,Math.max(reward*256*1/.079,0)].join(',');
+        var c_stop0 = [200,  0 ,  0 ];
+        var c_stop1 = [ 0 , 200,  0 ];
+        var c_stop2 = [ 0 ,  0 , 200];
 
-        //return [r,g,b].join(',');
+        var c_val0 = -1;
+        var c_val1 =  0;
+        var c_val2 =  1;
+
+        var c_wgt0 = Math.max(0,1-Math.abs(r_value - c_val0));
+        var c_wgt1 = Math.max(0,1-Math.abs(r_value - c_val1));
+        var c_wgt2 = Math.max(0,1-Math.abs(r_value - c_val2));
+
+        var color = [
+            c_wgt0*c_stop0[0]+c_wgt1*c_stop1[0]+c_wgt2*c_stop2[0], 
+            c_wgt0*c_stop0[1]+c_wgt1*c_stop1[1]+c_wgt2*c_stop2[1],
+            c_wgt0*c_stop0[2]+c_wgt1*c_stop1[2]+c_wgt2*c_stop2[2]
+        ];
+
+        return color.join(',');
+    }
+    
+    function reward() {
+        
+        //var r_param = [-0.0153,  0.0217,  0.0064, -0.0008, 0.0001]; //crazy back and forth
+        var r_param = [-0.1921, -0.0462, -0.0107, -0.0009, 0.0790]; //controlled and targeted
+        var f_value = features();        
+        var r_value = f_value[0]*r_param[0] + f_value[1]*r_param[1] + f_value[2]*r_param[2] + f_value[3]*r_param[3] + f_value[4]*r_param[4];
+
+        r_value = r_value * 1/r_param[4];        
+        r_value = Math.max(r_value,-1);
+        r_value = Math.min(r_value, 1);
+        
+        return r_value;
     }
 
     function features() {
-        
-        var maxD = 3526;
-        var F    = new ma.dl.matrix([[1,0,0,0,0],[1,-1,0,0,0],[1/2,-1,1/2,0,0],[1/4,-3/4,3/4,-1/4,0],[0,0,0,0,1]]);
-        
-        var mouseHist    = new ma.dl.matrix(mouse.getHistory());
-        var targetLoc    = new ma.dl.vector([x,y]);
-        var mouseHistDot = new ma.dl.vector(mouse.getHistoryDot());        
-        var targetLocDot = Math.pow(x,2) + Math.pow(y,2);
-        
-        var x1   = new ma.dl.scalar(targetLocDot);
-        var x2   = mouseHistDot;
-        var x1x2 = mouseHist.mul(targetLoc);
-        
-        var distances = x1.add(x2).sub(x1x2.mul(new ma.dl.scalar(2))).sqrt().mul(new ma.dl.scalar(1/maxD));
-        
-        return F.mul(distances.concat(new ma.dl.vector([self.isTouched()*1])));
-    }
-    
-    function opacity() {
-        var aliveTime = self.getAge();
 
+        var maxD = 3526;
+
+        var mouseHist    = mouse.getHistory();
+        var mouseHistDot = mouse.getHistoryDot();
+
+        var targetLoc    = [x,y];
+        var targetLocDot = Math.pow(x,2) + Math.pow(y,2);
+
+        var d3 = targetLocDot + mouseHistDot[3] - 2*(targetLoc[0]*mouseHist[3][0] + targetLoc[1]*mouseHist[3][1]);
+        var d2 = targetLocDot + mouseHistDot[2] - 2*(targetLoc[0]*mouseHist[2][0] + targetLoc[1]*mouseHist[2][1]);
+        var d1 = targetLocDot + mouseHistDot[1] - 2*(targetLoc[0]*mouseHist[1][0] + targetLoc[1]*mouseHist[1][1]);
+        var d0 = targetLocDot + mouseHistDot[0] - 2*(targetLoc[0]*mouseHist[0][0] + targetLoc[1]*mouseHist[0][1]);
+
+        d3 = d3/Math.pow(maxD,2);
+        d2 = d2/Math.pow(maxD,2);
+        d1 = d1/Math.pow(maxD,2);
+        d0 = d0/Math.pow(maxD,2);
+
+        d3 = Math.sqrt(d3);
+        d2 = Math.sqrt(d2);
+        d1 = Math.sqrt(d1);
+        d0 = Math.sqrt(d0);        
+        
+        var d = d3;
+        var v = d3-d2;
+        var a = d3/2-d2+d1/2;
+        var j = d3/4-3*d2/4+3*d1/4-d0/4;
+
+        return [d, v, a, j, self.isTouched()*1];
+    }
+
+    function opacity() {
+        var r_value   = reward();
+        var o_value   = 1;
+        var aliveTime = self.getAge();        
+        
         if( aliveTime <= fadeInTime){
-            return aliveTime/fadeInTime;
+            o_value = (aliveTime/fadeInTime) * r_value;
         }
 
         if( fadeInTime <= aliveTime && aliveTime <= fadeInTime+fadeOffTime){
-            return 1;
+            o_value = 1;
         }
 
         if( fadeInTime+fadeOffTime <= aliveTime && aliveTime <= fadeInTime+fadeOffTime+fadeOutTime){
-            return (fadeInTime+fadeOffTime+fadeOutTime - aliveTime) / fadeOutTime;
+            o_value = (fadeInTime+fadeOffTime+fadeOutTime - aliveTime) / fadeOutTime;
         }
 
-        return 0;
+        return Math.min(1,(r_value+1));
     }
 }
