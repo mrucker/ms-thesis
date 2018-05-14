@@ -257,7 +257,7 @@ ma.dl.vector = function(array) {
     }
 
     this.concat = function(object) {
-        return new ma.dl.vector(this.getTensor().concat(object));
+        return new ma.dl.vector(this.getTensor().concat(object.getTensor()));
     }
     
     this.print = function() {

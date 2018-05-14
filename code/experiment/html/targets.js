@@ -34,7 +34,7 @@ function Target(mouse)
     var x = null;
     var y = null;
     var r = 0;
-    var g = 100;
+    var g = 0;
     var b = 0;
 
     return new TargetBase(x,y,d,r,g,b, mouse);
@@ -107,14 +107,23 @@ function TargetBase(x,y,d,r,g,b, mouse)
     
     function rgb() {        
         
-        var f = features();
+        var r_param = new ma.dl.vector([-0.1921, -0.0462, -0.0107, -0.0009, 0.0790]);
+        var f_value = features();
         
-        return self.isTouched() ? [200,0,0].join(',') : [r,g,b].join(',');
+        var reward = f_value.trn().mul(r_param).toNumber();
+        
+        //return self.isTouched() ? [200,0,0].join(',') : [-Math.min(reward*256*3,0),g,Math.max(reward*256,0)].join(',');
+        
+        return [-Math.min(reward*256*3,0),0,Math.max(reward*256*1/.079,0)].join(',');
 
         //return [r,g,b].join(',');
     }
 
     function features() {
+        
+        var maxD = 3526;
+        var F    = new ma.dl.matrix([[1,0,0,0,0],[1,-1,0,0,0],[1/2,-1,1/2,0,0],[1/4,-3/4,3/4,-1/4,0],[0,0,0,0,1]]);
+        
         var mouseHist    = new ma.dl.matrix(mouse.getHistory());
         var targetLoc    = new ma.dl.vector([x,y]);
         var mouseHistDot = new ma.dl.vector(mouse.getHistoryDot());        
@@ -124,9 +133,9 @@ function TargetBase(x,y,d,r,g,b, mouse)
         var x2   = mouseHistDot;
         var x1x2 = mouseHist.mul(targetLoc);
         
-        var distances = x1.add(x2).sub(x1x2.mul(new ma.dl.scalar(2))).sqrt();
+        var distances = x1.add(x2).sub(x1x2.mul(new ma.dl.scalar(2))).sqrt().mul(new ma.dl.scalar(1/maxD));
         
-        return distances.concat(new ma.dl.vector([self.isTouched()*1]));
+        return F.mul(distances.concat(new ma.dl.vector([self.isTouched()*1])));
     }
     
     function opacity() {
