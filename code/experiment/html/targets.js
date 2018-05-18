@@ -132,8 +132,8 @@ function TargetBase(x,y,d,r,g,b, mouse)
     
     function reward() {
         
-        //var r_param = [-0.0153,  0.0217,  0.0064, -0.0008, 0.0001]; //crazy back and forth
-        var r_param = [-0.1921, -0.0462, -0.0107, -0.0009, 0.0790]; //controlled and targeted
+        var r_param = [-0.0153,  0.0217,  0.0064, -0.0008, 0.0001]; //crazy back and forth
+        //var r_param = [-0.1921, -0.0462, -0.0107, -0.0009, 0.0790]; //controlled and targeted
         var f_value = features();        
         var r_value = f_value[0]*r_param[0] + f_value[1]*r_param[1] + f_value[2]*r_param[2] + f_value[3]*r_param[3] + f_value[4]*r_param[4];
 
@@ -194,6 +194,8 @@ function TargetBase(x,y,d,r,g,b, mouse)
             o_value = (fadeInTime+fadeOffTime+fadeOutTime - aliveTime) / fadeOutTime;
         }
 
+        return o_value;
+        
         return Math.min(1,(r_value+1));
     }
 }
