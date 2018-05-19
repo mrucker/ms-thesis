@@ -102,7 +102,6 @@ function TargetBase(x,y,d,r,g,b, mouse)
     }
 
     function fillStyle() {
-        //return 'rgba(0,200,0,1)';
         return 'rgba('+ rgb() +','+ opacity() +')';
     }
     
@@ -162,7 +161,7 @@ function TargetBase(x,y,d,r,g,b, mouse)
         //var r_param = [-0.0153,  0.0217,  0.0064, -0.0008, 0.0001]; //crazy back and forth
         //var r_param = [-0.1921, -0.0462, -0.0107, -0.0009, 0.0790];   //controlled and targeted
         var r_param = [0      ,0       ,0       ,0       ,1      ];   //the default color scheme
-        var f_value = features();        
+        var f_value = features();
         var r_value = f_value[0]*r_param[0] + f_value[1]*r_param[1] + f_value[2]*r_param[2] + f_value[3]*r_param[3] + f_value[4]*r_param[4];
 
         r_value = r_value * 1/r_param[4];        
@@ -173,8 +172,6 @@ function TargetBase(x,y,d,r,g,b, mouse)
     }
 
     function features() {
-
-        return [0,0,0,0,self.isTouched()*1];
     
         var maxD = 3526;
 
