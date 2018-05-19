@@ -17,6 +17,7 @@ $(document).ready( function () {
     var participant = new Participant();
     var experiment  = new Experiment(participant, mouse, targets, canvas);
     
+    var dialog0 = $( "#dialog0" );
     var dialog1 = $( "#dialog1" );
     var dialog2 = $( "#dialog2" );
     var dialog3 = $( "#dialog3" );   
@@ -60,6 +61,16 @@ $(document).ready( function () {
     counter.stopAfter( 3000, startExperiment);
     timer  .stopAfter(15000, stopEverything);
     
+    dialog0.dialog({ 
+        autoOpen   : false , 
+        modal      : true  ,
+        draggable  : false ,
+        dialogClass: "no-x",
+        buttons    : [
+            { text: "Next", click: function() { dialog0.dialog( "close" ); dialog1.dialog("open");} }
+        ]
+    });
+    
     dialog1.dialog({ 
         autoOpen   : false , 
         modal      : true  ,
@@ -99,9 +110,10 @@ $(document).ready( function () {
         ],
     });
     
-    dialog1.dialog("open");
+    dialog0.dialog("open");
     
     $(window).resize(function() {
+        $("#dialog0").dialog("option", "position", {my: "center", at: "center", of: window});
         $("#dialog1").dialog("option", "position", {my: "center", at: "center", of: window});
         $("#dialog2").dialog("option", "position", {my: "center", at: "center", of: window});
         $("#dialog3").dialog("option", "position", {my: "center", at: "center", of: window});
