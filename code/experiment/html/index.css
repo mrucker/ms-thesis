@@ -25,4 +25,4 @@ body, html { height:100%; }
 }
 
 /*Place box around canvas to find it easily when debugging*/
-#c         { border: 1px solid black; }
+/*#c         { border: 1px solid black; }*/

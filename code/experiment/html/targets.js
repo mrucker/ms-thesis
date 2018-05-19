@@ -1,7 +1,7 @@
 function Targets(mouse)
 {
     var targets = [];
-    var process = poissonProcess.create(50, function () { targets.push(new Target(mouse))} );
+    var process = poissonProcess.create(200, function () { targets.push(new Target(mouse))} );
 
     this.startAppearing = function() {
         process.start();
@@ -102,7 +102,34 @@ function TargetBase(x,y,d,r,g,b, mouse)
     }
 
     function fillStyle() {
+        //return 'rgba(0,200,0,1)';
         return 'rgba('+ rgb() +','+ opacity() +')';
+    }
+    
+    function opacity() {
+        var r_value   = reward();
+        var o_value   = 0;
+        var aliveTime = self.getAge();
+        
+        if (aliveTime <= fadeInTime){
+            o_value = aliveTime/fadeInTime;
+        }
+
+        if (fadeInTime <= aliveTime && aliveTime <= fadeInTime+fadeOffTime){
+            o_value = 1;
+        }
+
+        if (fadeInTime+fadeOffTime <= aliveTime && aliveTime <= fadeInTime+fadeOffTime+fadeOutTime){
+            o_value = (fadeInTime+fadeOffTime+fadeOutTime-aliveTime) / fadeOutTime;
+        }
+        
+        if (aliveTime >= fadeInTime+fadeOffTime+fadeOutTime) {
+            o_value = 0;
+        }
+
+        return o_value;
+        
+        //return Math.min(1,(r_value+1));
     }
     
     function rgb() {
@@ -132,20 +159,23 @@ function TargetBase(x,y,d,r,g,b, mouse)
     
     function reward() {
         
-        var r_param = [-0.0153,  0.0217,  0.0064, -0.0008, 0.0001]; //crazy back and forth
-        //var r_param = [-0.1921, -0.0462, -0.0107, -0.0009, 0.0790]; //controlled and targeted
+        //var r_param = [-0.0153,  0.0217,  0.0064, -0.0008, 0.0001]; //crazy back and forth
+        //var r_param = [-0.1921, -0.0462, -0.0107, -0.0009, 0.0790];   //controlled and targeted
+        var r_param = [0      ,0       ,0       ,0       ,1      ];   //the default color scheme
         var f_value = features();        
         var r_value = f_value[0]*r_param[0] + f_value[1]*r_param[1] + f_value[2]*r_param[2] + f_value[3]*r_param[3] + f_value[4]*r_param[4];
 
         r_value = r_value * 1/r_param[4];        
         r_value = Math.max(r_value,-1);
         r_value = Math.min(r_value, 1);
-        
+
         return r_value;
     }
 
     function features() {
 
+        return [0,0,0,0,self.isTouched()*1];
+    
         var maxD = 3526;
 
         var mouseHist    = mouse.getHistory();
@@ -175,27 +205,5 @@ function TargetBase(x,y,d,r,g,b, mouse)
         var j = d3/4-3*d2/4+3*d1/4-d0/4;
 
         return [d, v, a, j, self.isTouched()*1];
-    }
-
-    function opacity() {
-        var r_value   = reward();
-        var o_value   = 1;
-        var aliveTime = self.getAge();        
-        
-        if( aliveTime <= fadeInTime){
-            o_value = (aliveTime/fadeInTime) * r_value;
-        }
-
-        if( fadeInTime <= aliveTime && aliveTime <= fadeInTime+fadeOffTime){
-            o_value = 1;
-        }
-
-        if( fadeInTime+fadeOffTime <= aliveTime && aliveTime <= fadeInTime+fadeOffTime+fadeOutTime){
-            o_value = (fadeInTime+fadeOffTime+fadeOutTime - aliveTime) / fadeOutTime;
-        }
-
-        return o_value;
-        
-        return Math.min(1,(r_value+1));
-    }
+    }    
 }

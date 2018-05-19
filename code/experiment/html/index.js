@@ -95,7 +95,7 @@ $(document).ready( function () {
                 
                 startAnimation(); 
             } },
-            { text: "Updates", click: function() {  } }
+            //{ text: "Updates", click: function() {  } }
         ],
     });
     
