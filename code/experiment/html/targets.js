@@ -42,13 +42,18 @@ function Target(mouse)
 
 function TargetBase(x,y,d,r,g,b, mouse)
 {
-    var fadeInTime    = 0;
-    var fadeOffTime   = 500;
-    var fadeOutTime   = 500;
-    var createTime    = Date.now();
-    var touchedBefore = false;
-    var self          = this;
-    
+    var originalWidth   = 0;
+    var originalHeight  = 0;
+    var effectiveX      = 0;
+    var effectiveY      = 0;
+    var effectiveRadius = d/2;
+    var effectiveArea   = Math.PI*Math.pow(d/2,2);
+    var fadeInTime      = 0;
+    var fadeOffTime     = 5000;
+    var fadeOutTime     = 500;
+    var createTime      = Date.now();
+    var touchedBefore   = false;
+    var self            = this;
 
     this.getX        = function() { return x; };
     this.getY        = function() { return y; };
@@ -68,35 +73,44 @@ function TargetBase(x,y,d,r,g,b, mouse)
     }
     
     this.isTouched  = function() {
-        var targetX = x;
-        var targetY = y;
+        var targetX = effectiveX;
+        var targetY = effectiveY;
         var mouseX = mouse.getX();
         var mouseY = mouse.getY();
 
-        return Math.abs(mouseX-targetX) <= d/2 && Math.abs(mouseY - targetY) <= d/2 && dist(x,y,mouse.getX(),mouse.getY()) <= d/2;
+        return dist(targetX,targetY,mouseX,mouseY) <= effectiveRadius;
+        return Math.abs(mouseX-targetX) <= effectiveRadius && Math.abs(mouseY - targetY) <= effectiveRadius && dist(x,y,mouse.getX(),mouse.getY()) <= effectiveRadius;
     };
 
-    this.draw = function(canvas){
+    this.draw = function(canvas){    
 
-        var circleArea   = (canvas.getWidth()*canvas.getHeight()) * (Math.PI*Math.pow(d/2,2)/(1500*3000));
-        var circleRadius = Math.sqrt((circleArea/Math.PI))
-    
-        x = x || (canvas.getWidth()  - circleRadius*2) * Math.random() + circleRadius; //[d/2, height-d/2]
-        y = y || (canvas.getHeight() - circleRadius*2) * Math.random() + circleRadius; //[d/2, width -d/2]
+        var areaScale   =  (canvas.getHeight()*canvas.getWidth())/(1500*3000);
 
+        effectiveArea   = areaScale * Math.PI*Math.pow(d/2,2);
+        effectiveRadius = Math.sqrt(effectiveArea/Math.PI);
+
+        originalWidth   = originalWidth || canvas.getWidth();
+        originalHeight  = originalHeight || canvas.getHeight()        
+        
+        x = x || (canvas.getWidth()  - effectiveRadius*2) * Math.random() + effectiveRadius; //[d/2, height-d/2]
+        y = y || (canvas.getHeight() - effectiveRadius*2) * Math.random() + effectiveRadius; //[d/2, width -d/2]
+        
+        effectiveX = (x/originalWidth) * canvas.getWidth();
+        effectiveY = (y/originalHeight) * canvas.getHeight();
+        
         var context   = canvas.getContext2d();
 
         context.save();
 
         context.fillStyle = fillStyle();
         context.beginPath();
-        context.moveTo(x,y);
-        context.arc(x, y, circleRadius, 0, 2 * Math.PI);
+        context.moveTo(effectiveX,effectiveY);
+        context.arc(effectiveX, effectiveY, effectiveRadius, 0, 2 * Math.PI);
         context.fill();
 
         context.restore();
     }
-
+        
     function dist(x1,y1,x2,y2) {
         return Math.sqrt(Math.pow(x1-x2,2)+Math.pow(y1-y2,2));
     }
@@ -160,9 +174,9 @@ function TargetBase(x,y,d,r,g,b, mouse)
         
         //var r_param = [-0.0153,  0.0217,  0.0064, -0.0008, 0.0001]; //crazy back and forth
         //var r_param = [-0.1921, -0.0462, -0.0107, -0.0009, 0.0790];   //controlled and targeted
-        var r_param = [0      ,0       ,0       ,0       ,1      ];   //the default color scheme
-        var f_value = features();
-        var r_value = f_value[0]*r_param[0] + f_value[1]*r_param[1] + f_value[2]*r_param[2] + f_value[3]*r_param[3] + f_value[4]*r_param[4];
+        var r_param   = [0      ,0       ,0       ,0       ,1      ];   //the default color scheme
+        var f_value   = features();
+        var r_value   = f_value[0]*r_param[0] + f_value[1]*r_param[1] + f_value[2]*r_param[2] + f_value[3]*r_param[3] + f_value[4]*r_param[4];
 
         r_value = r_value * 1/r_param[4];        
         r_value = Math.max(r_value,-1);

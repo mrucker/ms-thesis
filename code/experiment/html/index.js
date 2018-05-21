@@ -59,7 +59,7 @@ $(document).ready( function () {
     };
     
     counter.stopAfter( 3000, startExperiment);
-    timer  .stopAfter(15000, stopEverything);
+    //timer  .stopAfter(15000, stopEverything);
     
     dialog0.dialog({ 
         autoOpen   : false , 

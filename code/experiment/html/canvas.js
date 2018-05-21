@@ -58,6 +58,15 @@ function Canvas(canvas)
         canvas.getContext2d().clearRect(0,0, this.getWidth(), this.getHeight());
     }
     
+    function animate() {
+        self.wipe(self);
+        self.draw(self);
+        
+        if(isAnimating) {
+            window.requestAnimationFrame(animate);
+        }
+    };
+    
     function onResize () {
         //the -10 is to make sure that scrollbars do not appear
         var pageWidth  = $(window).width()-10;
@@ -77,16 +86,7 @@ function Canvas(canvas)
         //context2d.transform(screenWidth*Math.sqrt(2),0,0,trueHeight*Math.sqrt(2),0,0);
         //context2d.transform(window.devicePixelRatio,0,0,window.devicePixelRatio,0,0);
     };
-        
-    function animate() {
-        self.wipe(self);
-        self.draw(self);
-        
-        if(isAnimating) {
-            window.requestAnimationFrame(animate);
-        }
-    };
-    
+
     function mouseMoveListener(e) {
 
         // the clientX and clientY values are the mouse (x,y) coordinates relative to the viewable browser window.
