@@ -1,5 +1,5 @@
 /*Overwrite the broswer's default styles*/
-*          { margin: 0; padding: 0; box-sizing: border-box; }
+*          { margin: 0; padding: 0;  }
 body, html { height:100%; }
 
 /*Center the canvas on the screen; https://stackoverflow.com/a/7782251/1066291*/
@@ -31,37 +31,17 @@ form {
     padding-top: 10px
 }
 
-input[type=text], select, textarea {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ccc;
+select {
+    width        : 100%;
+    padding      : 12px;
+    border       : 2px solid #ccc;
     border-radius: 4px;
-    resize: vertical;
+    resize       : vertical;
 }
 
 label {
     padding: 12px 12px 12px 0;
     display: inline-block;
-}
-
-input[type=submit] {
-    background-color: #4CAF50;
-    color: white;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    float: right;
-}
-
-input[type=submit]:hover {
-    background-color: #45a049;
-}
-
-.container {
-    border-radius: 5px;
-    background-color: #f2f2f2;
-    padding: 20px;
 }
 
 .col-25 {
