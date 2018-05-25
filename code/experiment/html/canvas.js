@@ -7,7 +7,7 @@ function Canvas(canvas)
     var context2d          = canvas.getContext('2d');
     var isAnimating        = false;
     var self               = this;
-    var mouseMoveListeners = [];
+    var deviceMoveListeners = [];
     
     onResize();
     
@@ -34,21 +34,23 @@ function Canvas(canvas)
         isAnimating = false;
     };
     
-    this.addMouseMoveListener = function(callback) {
+    this.addDeviceMoveListener = function(callback) {
         
-        if(mouseMoveListeners.length == 0) {
-            canvas.addEventListener("mousemove", mouseMoveListener);
+        if(deviceMoveListeners.length == 0) {
+            canvas.addEventListener("mousemove", onMouseMove, false);
+            canvas.addEventListener("touchmove", onTouchMove, false);
         }
         
-        mouseMoveListeners = mouseMoveListeners.concat([callback]).toDistinct();
+        deviceMoveListeners = deviceMoveListeners.concat([callback]).toDistinct();
     }
     
-    this.removeMouseMoveListener = function(callback) {
+    this.removeDeviceMoveListener = function(callback) {
         
-        mouseMoveListeners = mouseMoveListeners.filter(function(listener) { return listener != callback; });
+        deviceMoveListeners = deviceMoveListeners.filter(function(listener) { return listener != callback; });
         
-        if(mouseMoveListeners.length == 0) {
-            canvas.removeEventListener("mousemove", mouseMoveListener)
+        if(deviceMoveListeners.length == 0) {
+            canvas.removeEventListener("mousemove", onMouseMove)
+            canvas.removeEventListener("touchmove", onTouchMove);
         }
     }
 
@@ -87,7 +89,15 @@ function Canvas(canvas)
         //context2d.transform(window.devicePixelRatio,0,0,window.devicePixelRatio,0,0);
     };
 
-    function mouseMoveListener(e) {
+    function onMouseMove(e) {
+        onInputMove(e.clientX, e.clientY);
+    }
+    
+    function onTouchMove(e) {
+        onInputMove(e.touches[0].clientX, e.touches[0].clientY);
+    }
+    
+    function onInputMove(clientX,clientY) {
 
         // the clientX and clientY values are the mouse (x,y) coordinates relative to the viewable browser window.
         // This means things like, if the user is scrolled down on a page, the top left of the visible page is still coordinate (0,0).
@@ -97,9 +107,11 @@ function Canvas(canvas)
         var scrollDifferenceTop  = canvas.getBoundingClientRect().top;        
         var resolutionDifference = window.devicePixelRatio;
         
-        var relativeX = (e.clientX - scrollDifferenceLeft) * resolutionDifference;
-        var relativeY = (e.clientY - scrollDifferenceTop ) * resolutionDifference;
+        var relativeX = (clientX - scrollDifferenceLeft) * resolutionDifference;
+        var relativeY = (clientY - scrollDifferenceTop ) * resolutionDifference;
         
-        mouseMoveListeners.forEach(function (listener) { listener(relativeX, relativeY); });
+        deviceMoveListeners.forEach(function (listener) { listener(relativeX, relativeY); });
+        
     }
+    
 }

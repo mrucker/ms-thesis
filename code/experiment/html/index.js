@@ -5,7 +5,7 @@ $(document).ready( function () {
         return;//if canvas unsupported code here
     }
     
-    //Too unreliable. Works very inconsistently from browser to browser.
+    //Unload events are very inconsistent from browser to browser
     //window.addEventListener('unload', function() { return "abcd"; });
     //window.addEventListener('beforeunload', function() { return "Dude, are you sure you want to refresh? Think of the kittens!"; });
     
@@ -16,106 +16,84 @@ $(document).ready( function () {
 
     var participant = new Participant();
     var experiment  = new Experiment(participant, mouse, targets, canvas);
-    
-    var dialog0 = $( "#dialog0" );
-    var dialog1 = $( "#dialog1" );
-    var dialog2 = $( "#dialog2" );
-    var dialog3 = $( "#dialog3" );   
-    
+        
     canvas.draw = function(canvas) {
         experiment.makeObservation();
         
+        mouse     .draw(canvas);
         targets   .draw(canvas);
         counter   .draw(canvas);
         timer     .draw(canvas);
         experiment.draw(canvas);
     };
-    
-    //canvas .startAnimating();
-    //targets.startAppearing();
-    //mouse  .startTracking();
-    
-    var startAnimation = function() {
+
+    var startAnimation = function(dialogHandle) {
+        timer  .stopAfter(15000, function () { stopEverything(); dialogHandle.dialog("open"); });
         canvas .startAnimating();
         counter.startCounting();
         targets.startAppearing();
-        mouse.startTracking();
+        mouse  .startTracking();
     };
-    
+
+    var stopAnimation = function() {
+        mouse  .stopTracking();
+        targets.stopAppearing();
+        counter.stopCounting();
+        canvas .stopAnimating();
+    };
+
     var startExperiment = function () {
         timer.startTiming();
         experiment.beginExperiment();
     }
-    
-    var stopEverything = function() {        
-        timer.stopTiming();        
-        mouse.stopTracking();
-        canvas.stopAnimating();
-        counter.stopCounting();
-        targets.stopAppearing();
+
+    var stopExperiment = function() {
+        timer     .stopTiming();
         experiment.endExperiment();
         experiment.saveObservation(canvas.getWidth(), canvas.getHeight());
-        dialog3.dialog("open");
+    };
+
+    var stopEverything = function() {
+        stopAnimation();
+        stopExperiment();
+    };
+
+    var resetEverything = function() {
+        experiment.reset();
+        timer     .reset();
+        counter   .reset();
     };
     
     counter.stopAfter( 3000, startExperiment);
-    //timer  .stopAfter(15000, stopEverything);
+
+    dialogSetup($("#dialog0"), "Next"  , function() { $("#dialog1").dialog("open");       });
+    dialogSetup($("#dialog1"), "Next"  , function() { $("#dialog2").dialog("open");       });
+    dialogSetup($("#dialog2"), "Next"  , function() { $("#dialog3").dialog("open");       });
+    dialogSetup($("#dialog3"), "Agree" , function() { $("#dialog4").dialog("open");       });
+    dialogSetup($("#dialog4"), "Next"  , function() { $("#dialog5").dialog("open");       });
+    dialogSetup($("#dialog5"), "Begin" , function() { resetEverything(); startAnimation($("#dialog6"));});
+    dialogSetup($("#dialog6"), "Begin" , function() { resetEverything(); startAnimation($("#dialog7"));});
+    dialogSetup($("#dialog7"), "Repeat", function() { resetEverything(); startAnimation($("#dialog6"));});
     
-    dialog0.dialog({ 
-        autoOpen   : false , 
-        modal      : true  ,
-        draggable  : false ,
-        dialogClass: "no-x",
-        buttons    : [
-            { text: "Next", click: function() { dialog0.dialog( "close" ); dialog1.dialog("open");} }
-        ]
-    });
-    
-    dialog1.dialog({ 
-        autoOpen   : false , 
-        modal      : true  ,
-        draggable  : false ,
-        dialogClass: "no-x",
-        buttons    : [
-            { text: "Next", click: function() { dialog1.dialog( "close" ); dialog2.dialog("open");} }
-        ]
-    });
-    
-    dialog2.dialog({ 
-        autoOpen   : false , 
-        modal      : true  ,
-        draggable  : false ,
-        dialogClass: "no-x",
-        buttons    : [
-            { text: "Begin", click: function() { dialog2.dialog("close"); startAnimation(); } }
-        ]
-    });
-    
-    dialog3.dialog({
-        autoOpen   : false ,
-        modal      : true  ,
-        draggable  : false ,
-        dialogClass: "no-x",
-        buttons    : [
-            { text: "Repeat" , click: function() { 
-                dialog3.dialog("close"); 
-                
-                experiment.reset();
-                timer     .reset();
-                counter   .reset();
-                
-                startAnimation(); 
-            } },
-            //{ text: "Updates", click: function() {  } }
-        ],
-    });
-    
-    dialog0.dialog("open");
+    $("#dialog0").dialog("open");
     
     $(window).resize(function() {
-        $("#dialog0").dialog("option", "position", {my: "center", at: "center", of: window});
-        $("#dialog1").dialog("option", "position", {my: "center", at: "center", of: window});
-        $("#dialog2").dialog("option", "position", {my: "center", at: "center", of: window});
-        $("#dialog3").dialog("option", "position", {my: "center", at: "center", of: window});
+        $(".dialog").dialog("option", "position", {my: "center", at: "center", of: window});
     });
 });
+
+
+function dialogSetup(dialogHandle, buttonText, clickAction) {
+    dialogHandle.dialog({ 
+        
+        autoOpen   : false , 
+        modal      : true  ,
+        draggable  : false ,
+        dialogClass: "no-x",
+        buttons    : [
+            { text: buttonText, click: function() { dialogHandle.dialog("close"); clickAction(); } }
+        ],
+        width      : "90%",
+        create     : function( event, ui ) { $(this).parent().css("maxWidth", "400px"); }
+    });
+}

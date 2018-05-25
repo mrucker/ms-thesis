@@ -41,8 +41,8 @@ function Timer(isCountdown)
         context.save();
         context.fillStyle    = 'rgb(100,100,100)';
         context.font         = '48px Arial';
-        context.textAlign    = 'right';
         context.textBaseline = 'bottom';
+        context.textAlign    = 'right';
         context.fillText(timeAsText(),canvas.getWidth(),canvas.getHeight());
         context.restore();
     }

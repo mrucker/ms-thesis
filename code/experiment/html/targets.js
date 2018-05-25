@@ -49,7 +49,7 @@ function TargetBase(x,y,d,r,g,b, mouse)
     var effectiveRadius = d/2;
     var effectiveArea   = Math.PI*Math.pow(d/2,2);
     var fadeInTime      = 0;
-    var fadeOffTime     = 5000;
+    var fadeOffTime     = 500;
     var fadeOutTime     = 500;
     var createTime      = Date.now();
     var touchedBefore   = false;
@@ -105,7 +105,7 @@ function TargetBase(x,y,d,r,g,b, mouse)
         context.fillStyle = fillStyle();
         context.beginPath();
         context.moveTo(effectiveX,effectiveY);
-        context.arc(effectiveX, effectiveY, effectiveRadius, 0, 2 * Math.PI);
+        context.arc(Math.round(effectiveX,0), Math.round(effectiveY,0), effectiveRadius, 0, 2 * Math.PI);
         context.fill();
 
         context.restore();
