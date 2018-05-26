@@ -85,11 +85,13 @@ $(document).ready( function () {
 });
 
 function showModalContent(contentId) {
-    $("#modal").data("contentId", contentId)
-    
-        $("#modalTitle" ).html($("#" + contentId).data('title'))
+    $("#modal").data("contentId", contentId);
+
+        $("#modalTitle" ).html($("#" + contentId).data('title'));
         $("#modalBody"  ).html($("#" + contentId).html());
         $("#modalButton").html($("#" + contentId).data('btnTxt'));
-    
+
+    $("#modal").removeClass("fade").addClass($("#"+ contentId).data("fadeIn"));
     $('#modal').modal('show');
+    $("#modal").removeClass("fade").addClass($("#"+ contentId).data("fadeOut"));
 }

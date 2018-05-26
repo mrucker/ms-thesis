@@ -42,17 +42,17 @@ function Mouse(canvas)
         context.fillStyle = 'rgba(200,0,0,1)';
         context.beginPath();
         context.moveTo(position.x, position.y);
-        context.arc(position.x+4, position.y+4, 4, 0, 2 * Math.PI);
+        context.arc(position.x, position.y, 4, 0, 2 * Math.PI);
         context.fill();
         context.restore();
         
-        context.save();
-        context.fillStyle    = 'rgb(100,100,100)';
-        context.font         = '48px Arial';
-        context.textBaseline = 'bottom';
-        context.textAlign    = 'right';
-        context.fillText(position.x + "," + position.y,canvas.getWidth(),canvas.getHeight()/2);
-        context.restore();        
+        // context.save();
+        // context.fillStyle    = 'rgb(100,100,100)';
+        // context.font         = '48px Arial';
+        // context.textBaseline = 'bottom';
+        // context.textAlign    = 'right';
+        // context.fillText(position.x + "," + position.y,canvas.getWidth(),canvas.getHeight()/2);
+        // context.restore();
         
     };
     
