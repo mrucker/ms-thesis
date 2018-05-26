@@ -95,6 +95,7 @@ function Canvas(canvas)
     
     function onTouchMove(e) {
         onInputMove(e.touches[0].clientX, e.touches[0].clientY);
+        e.preventDefault();
     }
     
     function onInputMove(clientX,clientY) {
@@ -111,7 +112,6 @@ function Canvas(canvas)
         var relativeY = (clientY - scrollDifferenceTop ) * resolutionDifference;
         
         deviceMoveListeners.forEach(function (listener) { listener(relativeX, relativeY); });
-        
     }
     
 }
