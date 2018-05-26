@@ -5,41 +5,44 @@
         <meta charset="utf-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         
-        <!--JQuery 2.1.1-->
-        <script  src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js" > </script>
+        <!--JQuery 3.3.1-->
+        <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
                 
-        <!--JQueryUI 1.12.1-->
-        <link   href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css" type="text/css" rel="stylesheet">
-        <script  src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-        
-        <!-- My CSS files -->
-        <link   href="index.css" type="text/css" rel="stylesheet" />
+        <!--bootstrap (js and css)-->
+        <!-- popper.js is only required for some components, so it could be removed. See [https://getbootstrap.com/docs/4.1/getting-started/introduction/] for components that require it -->
+        <script src ="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+        <script src ="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"    integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+        <link   href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"  integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous" rel="stylesheet" >
         
         <!--Google Web Fonts -->
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open Sans">
         
         <!--Google TensorFlow.js-->
-        <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.10.0"> </script>
-        <!--<script src="https://cdn.jsdelivr.net/npm/deeplearn@latest"></script>-->
+        <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.10.0"> </script>        
+        
+        <!-- My CSS files -->
+        <link   href="assets/index.css"            type="text/css" rel="stylesheet" />
         
         <!-- My JS files -->
-        <script src ="id.js"          type="text/javascript"> </script>
-        <script src ="index.js"       type="text/javascript"> </script>
-        <script src ="timer.js"       type="text/javascript"> </script>
-        <script src ="mouse.js"       type="text/javascript"> </script>
-        <script src ="canvas.js"      type="text/javascript"> </script>
-        <script src ="targets.js"     type="text/javascript"> </script>
-        <script src ="counter.js"     type="text/javascript"> </script>
-        <script src ="experiment.js"  type="text/javascript"> </script>
-        <script src ="participant.js" type="text/javascript"> </script>        
+        <script src ="assets/index.js"             type="text/javascript"> </script>
         
+        <script src ="assets/core/id.js"           type="text/javascript"> </script>
+        <script src ="assets/core/mouse.js"        type="text/javascript"> </script>
+        <script src ="assets/core/experiment.js"   type="text/javascript"> </script>
+        <script src ="assets/core/participant.js"  type="text/javascript"> </script>        
+
+        <script src ="assets/canvas/timer.js"      type="text/javascript"> </script>
+        <script src ="assets/canvas/canvas.js"     type="text/javascript"> </script>
+        <script src ="assets/canvas/targets.js"    type="text/javascript"> </script>
+        <script src ="assets/canvas/counter.js"    type="text/javascript"> </script>
+        
+        <script src ="assets/utilities/date.js"    type="text/javascript"> </script>
         <script src ="assets/utilities/array.js"   type="text/javascript"> </script>
+        <script src ="assets/utilities/string.js"  type="text/javascript"> </script>
         <script src ="assets/utilities/promise.js" type="text/javascript"> </script>
         <script src ="assets/utilities/loading.js" type="text/javascript"> </script>
-        <script src ="assets/utilities/string.js"  type="text/javascript"> </script>
-        <script src ="assets/utilities/date.js"    type="text/javascript"> </script>
         
-        <script src ="assets/math/ma.js" type="text/javascript"> </script>
+        <script src ="assets/math/ma.js"           type="text/javascript"> </script>
         
         <script src ="libraries/poisson-process/poisson-process.min.js" type="text/javascript"> </script>
     </head>
@@ -51,80 +54,69 @@
             <!-- OPTION 2: put fallback content (text, image, Flash, etc.) if the browser doesn't support canvas -->
         </canvas>
         
-        <div id="dialog0" class="dialog" title="demo notification">
-            This is a demo. No data is collected.
+        <div class="modal" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalTitle" aria-hidden="true" data-backdrop="static">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle"></h5>
+                </div>
+                <div class="modal-body" id="modalBody">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="modalButton" data-dismiss="modal" ></button>
+                </div>
+            </div>
+          </div>
         </div>
-        <div id="dialog1" class="dialog" title="Welcome">
+        
+        <div id="dialog0" class="my-modal-content" data-btn-txt="Next"   data-title="Demo">
+          This is a demo. No data is collected.
+        </div>
+        <div id="dialog1" class="my-modal-content" data-btn-txt="Next"   data-title="Welcome">
             You are invited to participate in an experiment that explores machine learning techniques to improve human task performance. This is a research project being conducted by Mark Rucker, a graduate student at the University of Virginia. The experiment will take approximately 30 seconds to complete.
         </div>
-        <div id="dialog2" class="dialog" title="Directions">
+        <div id="dialog2" class="my-modal-content" data-btn-txt="Next"   data-title="Directions">
             During the experiment, green circles will randomly appear on your screen. Please try to touch as many as you can, with your mouse, during the duration of the experiment.            
         </div>
-        <div id="dialog3" class="dialog" title="Consent">
+        <div id="dialog3" class="my-modal-content" data-btn-txt="Agree"  data-title="Consent">
            The data collected by the experiment will be the position of the mouse cursor, position of the circles, age of the circles, size of the circles and the screen display size. No identifying information will be collected, but we will also ask about your age, gender, and device parameters. If you agree to this, please click "Agree" below.
         </div>
-        <div id="dialog4" class="dialog" title="Demographics">
+        <div id="dialog4" class="my-modal-content" data-btn-txt="Submit" data-title="Demographics">
             Thank you for participating. Please answer the questions below to the best of your ability:
             <form>
-                <div class="row">
-                    <div class="col-25">
-                        <label for="age">Age</label>
-                    </div>
-                    <div class="col-75">
-                        <select id="age"> <option value="0">Select age:</option> <option>18-24 years old</option> <option>25-34 years old</option> <option>35-44 years old</option> <option>45-54 years old</option> <option>55+ years old</option> </select> 
-                    </div>
+                <div class="form-group">
+                    <label for="age" class="col-form-label">Age</label>
+                    <select id="age" class="form-control"> <option value="0">Select age:</option> <option>18-24 years old</option> <option>25-34 years old</option> <option>35-44 years old</option> <option>45-54 years old</option> <option>55+ years old</option> </select>
                 </div>
-                    
-                <div class="row">
-                    <div class="col-25">
-                        <label for="gender">Gender </label>
-                    </div>
-                    <div class="col-75">
-                        <select id="gender" > <option value="0">Select gender:</option> <option>Male</option> <option>Female</option> <option>Other</option> </select>
-                    </div>
+                <div class="form-group">
+                    <label for="gender" class="col-form-label">Gender</label>
+                    <select id="gender" class="form-control"> <option value="0">Select gender:</option> <option>Male</option> <option>Female</option> <option>Other</option> </select>
                 </div>
-                <div class="row">
-                    <div class="col-25">
-                        <label for="machine">Machine</label>
-                    </div>
-                    <div class="col-75">
-                        <select id="machine"> <option value="0">Select machine:</option> <option>Desktop</option> <option>Laptop</option> <option>Tablet</option> <option>Smartphone</option> <option>Don't Know</option> <option>Other</option> </select>
-                    </div>
+                <div class="form-group">
+                    <label for="machine" class="col-form-label">Machine</label>
+                    <select id="machine" class="form-control"> <option value="0">Select machine:</option> <option>Desktop</option> <option>Laptop</option> <option>Tablet</option> <option>Smartphone</option> <option>Don't Know</option> <option>Other</option> </select>
                 </div>
-                
-                <div class="row">
-                    <div class="col-25">
-                        <label for="device" >Device </label> 
-                    </div>
-                    <div class="col-75">
-                        <select id="device" > <option value="0">Select device:</option> <option>Mouse</option> <option>Trackball</option> <option>Trackpoint</option> <option>Joystick</option> <option>Stylus</option> <option>Touchpad</option> <option>Touchscreen</option> <option>Don't Know</option> <option>Other</option>  </select> 
-                    </div>
+                <div class="form-group">
+                    <label for="device" class="col-form-label">Device</label> 
+                    <select id="device" class="form-control"> <option value="0">Select device:</option> <option>Mouse</option> <option>Trackball</option> <option>Trackpoint</option> <option>Joystick</option> <option>Stylus</option> <option>Touchpad</option> <option>Touchscreen</option> <option>Don't Know</option> <option>Other</option>  </select> 
                 </div>
-                <div class="row">
-                    <div class="col-25">                
-                        <label for="browser">Browser</label>
-                    </div>
-                    <div class="col-75">
-                        <select id="browser"> <option value="0">Select browser:</option> <option>Chrome</option> <option>Firefox</option> <option>Safari</option> <option>Internet Explorer</option> <option>Don't Know</option> <option>Other</option> </select> 
-                    </div>
+                <div class="form-group">
+                    <label for="browser" class="col-form-label">Browser</label>
+                    <select id="browser" class="form-control"> <option value="0">Select browser:</option> <option>Chrome</option> <option>Firefox</option> <option>Safari</option> <option>Internet Explorer</option> <option>Don't Know</option> <option>Other</option> </select> 
                 </div>
-                <div class="row">
-                    <div class="col-25">
-                        <label for="system" >System </label>
-                    </div>
-                    <div class="col-75">
-                        <select id="system" > <option value="0">Select system:</option> <option>Windows</option> <option>Android</option> <option>Apple</option> <option>Linux</option> <option>Don't Know</option> <option>Other</option> </select> 
-                    </div>
+                <div class="form-group">
+                    <label for="system" class="col-form-label">System</label>
+                    <select id="system" class="form-control"> <option value="0">Select system:</option> <option>Windows</option> <option>Android</option> <option>Apple</option> <option>Linux</option> <option>Don't Know</option> <option>Other</option> </select> 
                 </div>
             </form>
         </div>
-        <div id="dialog5" class="dialog" title="Task">
+        <div id="dialog5" class="my-modal-content" data-btn-txt="Begin"  data-title="Task">
             Thank you. That ends the questions. When you are ready to perform the first task please click "Begin" to proceed.
         </div>
-        <div id="dialog6" class="dialog" title="Break">
+        <div id="dialog6" class="my-modal-content" data-btn-txt="Begin"  data-title="Break">
             Thank you. That ends the first task. When you are ready to perform the second task please click "Begin" to proceed.
         </div>
-        <div id="dialog7" class="dialog" title="Finish">
+        <div id="dialog7" class="my-modal-content" data-btn-txt="Repeat" data-title="Finish">
             Thank you. That ends the experiment. If you would like to perform the tasks again, you may click on "Repeat".
         </div>
     </body>

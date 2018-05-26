@@ -9,8 +9,8 @@ $(document).ready( function () {
     //window.addEventListener('unload', function() { return "abcd"; });
     //window.addEventListener('beforeunload', function() { return "Dude, are you sure you want to refresh? Think of the kittens!"; });
     
-    var timer   = new Timer(true);
-    var counter = new Counter(3, true);
+    var timer   = new Timer(15000, true);
+    var counter = new Counter(3, 3000, true);
     var mouse   = new Mouse(canvas);
     var targets = new Targets(mouse);
 
@@ -27,8 +27,10 @@ $(document).ready( function () {
         experiment.draw(canvas);
     };
 
-    var startAnimation = function(dialogHandle) {
-        timer  .stopAfter(15000, function () { stopEverything(); dialogHandle.dialog("open"); });
+    var startAnimation = function(contentId) {
+        
+        timer.onStop(function () { stopEverything(); showModalContent(contentId); });
+        
         canvas .startAnimating();
         counter.startCounting();
         targets.startAppearing();
@@ -64,36 +66,30 @@ $(document).ready( function () {
         counter   .reset();
     };
     
-    counter.stopAfter( 3000, startExperiment);
+    counter.onStop(startExperiment);
 
-    dialogSetup($("#dialog0"), "Next"  , function() { $("#dialog1").dialog("open");       });
-    dialogSetup($("#dialog1"), "Next"  , function() { $("#dialog2").dialog("open");       });
-    dialogSetup($("#dialog2"), "Next"  , function() { $("#dialog3").dialog("open");       });
-    dialogSetup($("#dialog3"), "Agree" , function() { $("#dialog4").dialog("open");       });
-    dialogSetup($("#dialog4"), "Next"  , function() { $("#dialog5").dialog("open");       });
-    dialogSetup($("#dialog5"), "Begin" , function() { resetEverything(); startAnimation($("#dialog6"));});
-    dialogSetup($("#dialog6"), "Begin" , function() { resetEverything(); startAnimation($("#dialog7"));});
-    dialogSetup($("#dialog7"), "Repeat", function() { resetEverything(); startAnimation($("#dialog6"));});
+    $("#modal").on('hidden.bs.modal', function (e) {
+        var contentId = $(this).data("contentId");
+        
+        if(contentId == "dialog0") { showModalContent("dialog1"); }
+        if(contentId == "dialog1") { showModalContent("dialog2"); }
+        if(contentId == "dialog2") { showModalContent("dialog3"); }
+        if(contentId == "dialog3") { showModalContent("dialog4"); }
+        if(contentId == "dialog4") { showModalContent("dialog5"); }
+        if(contentId == "dialog5") { resetEverything(); startAnimation("dialog6"); }
+        if(contentId == "dialog6") { resetEverything(); startAnimation("dialog7"); }
+        if(contentId == "dialog7") { resetEverything(); startAnimation("dialog6"); }
+    })
     
-    $("#dialog0").dialog("open");
-    
-    $(window).resize(function() {
-        $(".dialog").dialog("option", "position", {my: "center", at: "center", of: window});
-    });
+    showModalContent("dialog0");
 });
 
-
-function dialogSetup(dialogHandle, buttonText, clickAction) {
-    dialogHandle.dialog({ 
-        
-        autoOpen   : false , 
-        modal      : true  ,
-        draggable  : false ,
-        dialogClass: "no-x",
-        buttons    : [
-            { text: buttonText, click: function() { dialogHandle.dialog("close"); clickAction(); } }
-        ],
-        width      : "90%",
-        create     : function( event, ui ) { $(this).parent().css("maxWidth", "400px"); }
-    });
+function showModalContent(contentId) {
+    $("#modal").data("contentId", contentId)
+    
+        $("#modalTitle" ).html($("#" + contentId).data('title'))
+        $("#modalBody"  ).html($("#" + contentId).html());
+        $("#modalButton").html($("#" + contentId).data('btnTxt'));
+    
+    $('#modal').modal('show');
 }

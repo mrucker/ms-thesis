@@ -1,8 +1,7 @@
-function Timer(isCountdown)
+function Timer(stopAfter, isCountdown)
 {
     var startTime    = undefined;
     var stopTime     = undefined;
-    var stopAfter    = undefined;
     var stopCallback = undefined;
 
     this.startTiming = function() {
@@ -19,8 +18,7 @@ function Timer(isCountdown)
         stopTime  = undefined;
     }
 
-    this.stopAfter = function(milliseconds, callback){
-        stopAfter    = milliseconds;
+    this.onStop = function(callback) {
         stopCallback = callback;
     }
 

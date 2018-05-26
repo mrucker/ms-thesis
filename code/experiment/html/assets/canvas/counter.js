@@ -1,8 +1,8 @@
-function Counter(countFrom, isCountdown)
+function Counter(countFrom, countFor, isCountdown)
 {
     var startTime = undefined;
     var stopTime  = undefined;
-    var stopAfter = undefined;
+    var stopAfter = countFor;
     var timeout   = undefined;
 
     this.startCounting = function() {
@@ -22,8 +22,7 @@ function Counter(countFrom, isCountdown)
         stopTime  = undefined;
     }
 
-    this.stopAfter = function(milliseconds, callback){
-        stopAfter    = milliseconds;
+    this.onStop = function(callback) {
         stopCallback = callback;
     }
     
