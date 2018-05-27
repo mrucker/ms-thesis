@@ -1,0 +1,1 @@
+aws s3 sync code\experiment\html\dev s3://thesis.markrucker.net/ --delete
