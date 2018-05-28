@@ -34,3 +34,4 @@ Array.prototype.toDict = function(key, map) {
 Array.prototype.pull = function(value) {
     return this.filter(function(item) { return item != value; });
 }
+

@@ -1,5 +1,4 @@
-#Build
-
+write-host "building..." -foregroundcolor green
 Get-ChildItem code\experiment\html\dev\assets\*.js  -recurse    | get-content | uglifyjs > code\experiment\html\prod\assets.js
 Get-ChildItem code\experiment\html\dev\assets\*.css -recurse    | get-content            > code\experiment\html\prod\assets.css
 
