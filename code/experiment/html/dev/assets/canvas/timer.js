@@ -3,6 +3,8 @@ function Timer(stopAfter, isCountdown)
     var startTime    = undefined;
     var stopTime     = undefined;
     var stopCallback = undefined;
+    var prevDrawTime = "";
+    var everyOther   = true;
 
     this.startTiming = function() {
         startTime = Date.now();
@@ -23,6 +25,12 @@ function Timer(stopAfter, isCountdown)
     }
 
     this.draw = function(canvas){
+        
+        if(everyOther) {
+            everyOther = false;
+            return;
+        }
+        
         if( isAfter() ) {
             stopTime = startTime + stopAfter;
             myDraw(canvas);
@@ -35,15 +43,26 @@ function Timer(stopAfter, isCountdown)
 
     function myDraw(canvas){
         var context   = canvas.getContext2d();
-        
-        context.save();
-        context.fillStyle    = 'rgb(100,100,100)';
+
         context.font         = '48px Arial';
         context.textBaseline = 'bottom';
         context.textAlign    = 'right';
+        
+        context.fillStyle = 'rgb(100,100,100)';
         context.fillText(timeAsText(),canvas.getWidth(),canvas.getHeight());
-        context.restore();
     }
+    
+    function eraseText(canvas, text) {
+        var context = canvas.getContext2d();
+        var x       = Math.round(canvas.getWidth(),0);
+        var y       = Math.round(canvas.getHeight(),0);
+        
+        var w = Math.ceil(context.measureText(text).width);
+        var h = 48;
+            
+        context.clearRect(x-w,y-h, w, h);
+    }
+    
     
     function timeAsText() {
         

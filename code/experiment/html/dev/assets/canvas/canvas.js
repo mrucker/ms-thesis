@@ -1,13 +1,10 @@
 function Canvas(canvas)
 {
-    //for more information on the resize event and the devicePixelRatio for High-DPI screens see:
-    //details -- https://webglfundamentals.org/webgl/lessons/webgl-resizing-the-canvas.html
-    //example -- https://www.aregooglesbouncingballshtml5.com/
-
-    var context2d          = canvas.getContext('2d');
-    var isAnimating        = false;
-    var self               = this;
+    var context2d           = canvas.getContext('2d');
+    var isAnimating         = false;
+    var self                = this;
     var deviceMoveListeners = [];
+    var everyother          = false;
     
     onResize();
     
@@ -57,13 +54,23 @@ function Canvas(canvas)
     this.draw = function(canvas) {}
     
     this.wipe = function (canvas) {
+        //either of these methods cause noticable performance loss on low resource machines
+        
+        //canvas.getContext2d().fillStyle = 'rgba(255,255,255,1)';
+        //canvas.getContext2d().fillRect(0,0, this.getWidth(), this.getHeight());
+        
         canvas.getContext2d().clearRect(0,0, this.getWidth(), this.getHeight());
     }
     
     function animate() {
-        self.wipe(self);
-        self.draw(self);
         
+        everyother = !everyother;
+        
+        if(everyother) {  
+            self.wipe(self);
+            self.draw(self);
+        }
+
         if(isAnimating) {
             window.requestAnimationFrame(animate);
         }

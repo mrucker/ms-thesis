@@ -1,9 +1,10 @@
 function Counter(countFrom, countFor, isCountdown)
 {
-    var startTime = undefined;
-    var stopTime  = undefined;
-    var stopAfter = countFor;
-    var timeout   = undefined;
+    var startTime    = undefined;
+    var stopTime     = undefined;
+    var stopAfter    = countFor;
+    var timeout      = undefined;
+    var prevDrawText = "";
 
     this.startCounting = function() {
         startTime = Date.now();
@@ -35,6 +36,11 @@ function Counter(countFrom, countFor, isCountdown)
         if(isAfter() && (runTime() - stopAfter) < 500) {
             drawGo(canvas);
         }
+        
+        if(isAfter() && (runTime() - stopAfter) > 500 && prevDrawText == "GO!") {
+            eraseText(canvas, prevDrawText);
+            prevDrawText = "";
+        }
     };
 
     function drawGo(canvas) {
@@ -45,21 +51,31 @@ function Counter(countFrom, countFor, isCountdown)
         drawText(canvas, countAsText());
     }
 
+    function eraseText(canvas, text) {
+        var context   = canvas.getContext2d();
+        var centerX   = Math.round(canvas.getWidth()/2,0);
+        var centerY   = Math.round(canvas.getHeight()/2,0);
+        
+        context.font = '100px Arial';
+        
+        var w = context.measureText(text).width;
+        var h = 100;
+            
+        context.clearRect(centerX-Math.ceil(w/2),centerY-Math.ceil(h/2), w, h);
+    }
+    
     function drawText(canvas, text) {
         var context   = canvas.getContext2d();
+        var centerX   = Math.round(canvas.getWidth()/2,0);
+        var centerY   = Math.round(canvas.getHeight()/2,0);
         
-        context.save();        
-        
-        context.translate(canvas.getWidth()/2, canvas.getHeight()/2)        
-        context.fillStyle    = 'rgb(100,100,100)';
         context.font         = '100px Arial';
         context.textAlign    = 'center';
-        context.textBaseline = 'middle';
-        context.fillText(text,0,0);
-        
-        context.restore();
+        context.textBaseline = 'middle';        
+        context.fillStyle    = 'rgb(100,100,100)';
+        context.fillText(text, centerX, centerY);
     }
-
+   
     function countAsText() {
         
         var milSinceStart = isCountdown ? stopAfter - runTime() : runTime();

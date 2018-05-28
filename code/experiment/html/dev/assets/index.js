@@ -16,10 +16,8 @@ $(document).ready( function () {
 
     var participant = new Participant();
     var experiment  = new Experiment(participant, mouse, targets, canvas);
-        
+
     canvas.draw = function(canvas) {
-        experiment.makeObservation();
-        
         mouse     .draw(canvas);
         targets   .draw(canvas);
         counter   .draw(canvas);

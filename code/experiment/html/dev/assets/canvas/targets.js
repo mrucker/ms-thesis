@@ -73,13 +73,13 @@ function TargetBase(x,y,d,r,g,b, mouse)
     }
     
     this.isTouched  = function() {
+        
         var targetX = effectiveX;
         var targetY = effectiveY;
         var mouseX = mouse.getX();
         var mouseY = mouse.getY();
 
-        return dist(targetX,targetY,mouseX,mouseY) <= effectiveRadius;
-        return Math.abs(mouseX-targetX) <= effectiveRadius && Math.abs(mouseY - targetY) <= effectiveRadius && dist(x,y,mouse.getX(),mouse.getY()) <= effectiveRadius;
+        return dist(targetX,targetY,mouseX,mouseY) <= effectiveRadius;        
     };
 
     this.draw = function(canvas){    
@@ -87,7 +87,7 @@ function TargetBase(x,y,d,r,g,b, mouse)
         var areaScale   =  (canvas.getHeight()*canvas.getWidth())/(1500*3000);
 
         effectiveArea   = areaScale * Math.PI*Math.pow(d/2,2);
-        effectiveRadius = Math.sqrt(effectiveArea/Math.PI);
+        effectiveRadius = Math.round(Math.sqrt(effectiveArea/Math.PI),0);
 
         originalWidth   = originalWidth || canvas.getWidth();
         originalHeight  = originalHeight || canvas.getHeight()        
@@ -95,22 +95,26 @@ function TargetBase(x,y,d,r,g,b, mouse)
         x = x || (canvas.getWidth()  - effectiveRadius*2) * Math.random() + effectiveRadius; //[d/2, height-d/2]
         y = y || (canvas.getHeight() - effectiveRadius*2) * Math.random() + effectiveRadius; //[d/2, width -d/2]
         
-        effectiveX = (x/originalWidth) * canvas.getWidth();
-        effectiveY = (y/originalHeight) * canvas.getHeight();
-        
+        effectiveX = Math.round((x/originalWidth ) * canvas.getWidth() ,0);
+        effectiveY = Math.round((y/originalHeight) * canvas.getHeight(),0);
+
         var context   = canvas.getContext2d();
 
-        context.save();
+        //context.beginPath();
+        //context.moveTo(effectiveX,effectiveY);
+        //context.arc(effectiveX, effectiveY, effectiveRadius+1, 0, 2 * Math.PI);
 
-        context.fillStyle = fillStyle();
+        //context.fillStyle = "rgb(255,255,255)";
+        //context.fill();
+
         context.beginPath();
         context.moveTo(effectiveX,effectiveY);
-        context.arc(Math.round(effectiveX,0), Math.round(effectiveY,0), effectiveRadius, 0, 2 * Math.PI);
-        context.fill();
+        context.arc(effectiveX, effectiveY, effectiveRadius, 0, 2 * Math.PI);
 
-        context.restore();
+        context.fillStyle = fillStyle();
+        context.fill();
     }
-        
+
     function dist(x1,y1,x2,y2) {
         return Math.sqrt(Math.pow(x1-x2,2)+Math.pow(y1-y2,2));
     }
@@ -149,9 +153,9 @@ function TargetBase(x,y,d,r,g,b, mouse)
         
         var r_value = reward();
         
-        var c_stop0 = [200,  0 ,  0 ];
+        var c_stop0 = [200, 0  ,  0 ];
         var c_stop1 = [ 0 , 200,  0 ];
-        var c_stop2 = [ 0 ,  0 , 200];
+        var c_stop2 = [ 0 , 0  , 200];
 
         var c_val0 = -1;
         var c_val1 =  0;

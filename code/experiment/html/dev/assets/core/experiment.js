@@ -1,11 +1,13 @@
 function Experiment(participant, mouse, targets, canvas)
 {
     var id           = Id.generate();
+    var self         = this;
     var startTime    = undefined;
     var stopTime     = undefined;
     var observations = [];
     var touchedCnt   = 0;
     var touchedPrev  = [];
+    var isObserving  = false;
     
     this.isStarted      = function() { return startTime != undefined; };
     this.isStopped      = function() { return stopTime  != undefined; };
@@ -17,7 +19,7 @@ function Experiment(participant, mouse, targets, canvas)
     });
     
     this.draw = function(canvas) {
-        var context   = canvas.getContext2d();
+        /*var context   = canvas.getContext2d();
         
         context.save();
         context.fillStyle    = 'rgb(100,100,100)';
@@ -25,7 +27,7 @@ function Experiment(participant, mouse, targets, canvas)
         context.textAlign    = 'right';
         context.textBaseline = 'top';
         context.fillText(touchedCnt, canvas.getWidth(), 0);
-        context.restore();
+        context.restore();*/
     }
 
     this.reset = function() {
@@ -46,6 +48,9 @@ function Experiment(participant, mouse, targets, canvas)
                 data  :JSON.stringify({"startTime":startTime})
             });
         });
+        
+        isObserving = true;
+        window.requestAnimationFrame(observe);
     }
 
     this.endExperiment = function () {
@@ -59,6 +64,8 @@ function Experiment(participant, mouse, targets, canvas)
                 data  :JSON.stringify({"stopTime":stopTime})
             });
         });
+        
+        isObserving = false;
     }
 
     this.makeObservation = function() {
@@ -106,10 +113,21 @@ function Experiment(participant, mouse, targets, canvas)
         });
 
         touchedPrev.push(touchedCnt);
-
-        console.log(JSON.stringify(touchedPrev).replace('[','').replace(']','').split(',').join('\r\n'));
-        console.log(JSON.stringify(states));
-        console.log(JSON.stringify(actions));
-        console.log(canvas.getWidth() + "," + canvas.getHeight());
+    
+        console.log(states.length);
+        
+        //console.log(JSON.stringify(touchedPrev).replace('[','').replace(']','').split(',').join('\r\n'));
+        //console.log(JSON.stringify(states));
+        //console.log(JSON.stringify(actions));
+        //console.log(canvas.getWidth() + "," + canvas.getHeight());
     };
+    
+    function observe() {
+        
+        self.makeObservation();        
+        
+        if(isObserving) {
+            window.requestAnimationFrame(observe);
+        }
+    }
 }
