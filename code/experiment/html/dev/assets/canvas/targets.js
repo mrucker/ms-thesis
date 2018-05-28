@@ -42,12 +42,15 @@ function Target(mouse)
 
 function TargetBase(x,y,d,r,g,b, mouse)
 {
+    var originalX       = x;
+    var originalY       = y;
+    var originalR       = d/2;
     var originalWidth   = 0;
     var originalHeight  = 0;
     var effectiveX      = 0;
     var effectiveY      = 0;
-    var effectiveRadius = d/2;
-    var effectiveArea   = Math.PI*Math.pow(d/2,2);
+    var effectiveR      = 0;
+    var effectiveA      = 0;
     var fadeInTime      = 0;
     var fadeOffTime     = 500;
     var fadeOutTime     = 500;
@@ -59,7 +62,7 @@ function TargetBase(x,y,d,r,g,b, mouse)
     this.getY        = function() { return y; };
     this.getAge      = function() { return Date.now() - createTime; };
     this.getData     = function() { return [self.getX(), self.getY(), self.getAge()]; };
-    this.getLifeSpan = function() { return fadeInTime + fadeOffTime + fadeOutTime; }; 
+    this.getLifeSpan = function() { return fadeInTime + fadeOffTime + fadeOutTime; };
     this.isDead      = function() { return self.getAge() > self.getLifeSpan() };
 
     this.isNewTouch = function() {
@@ -68,10 +71,10 @@ function TargetBase(x,y,d,r,g,b, mouse)
             touchedBefore = true;
             return true;
         }
-        
+
         return false;
     }
-    
+
     this.isTouched  = function() {
         
         var targetX = effectiveX;
@@ -79,39 +82,28 @@ function TargetBase(x,y,d,r,g,b, mouse)
         var mouseX = mouse.getX();
         var mouseY = mouse.getY();
 
-        return dist(targetX,targetY,mouseX,mouseY) <= effectiveRadius;        
+        return dist(targetX,targetY,mouseX,mouseY) <= effectiveR;
     };
 
-    this.draw = function(canvas){    
+    this.draw = function(canvas){
 
-        var areaScale   =  (canvas.getHeight()*canvas.getWidth())/(1500*3000);
+        effectiveA = canvas.getHeight()/1500 * canvas.getWidth())/3000 * Math.PI * Math.pow(originalR,2);
+        effectiveR = Math.round(Math.sqrt(effectiveArea/Math.PI),0);
 
-        effectiveArea   = areaScale * Math.PI*Math.pow(d/2,2);
-        effectiveRadius = Math.round(Math.sqrt(effectiveArea/Math.PI),0);
-
-        originalWidth   = originalWidth || canvas.getWidth();
-        originalHeight  = originalHeight || canvas.getHeight()        
+        originalWidth   = originalWidth  || canvas.getWidth();
+        originalHeight  = originalHeight || canvas.getHeight();
+        originalX       = originalX      || (canvas.getWidth()  - effectiveR*2) * Math.random() + effectiveR;
+        originalY       = originalY      || (canvas.getHeight() - effectiveR*2) * Math.random() + effectiveR;
         
-        x = x || (canvas.getWidth()  - effectiveRadius*2) * Math.random() + effectiveRadius; //[d/2, height-d/2]
-        y = y || (canvas.getHeight() - effectiveRadius*2) * Math.random() + effectiveRadius; //[d/2, width -d/2]
-        
-        effectiveX = Math.round((x/originalWidth ) * canvas.getWidth() ,0);
-        effectiveY = Math.round((y/originalHeight) * canvas.getHeight(),0);
+        effectiveX = Math.round((originalX/originalWidth ) * canvas.getWidth() ,0);
+        effectiveY = Math.round((originalY/originalHeight) * canvas.getHeight(),0);
 
         var context   = canvas.getContext2d();
 
-        //context.beginPath();
-        //context.moveTo(effectiveX,effectiveY);
-        //context.arc(effectiveX, effectiveY, effectiveRadius+1, 0, 2 * Math.PI);
-
-        //context.fillStyle = "rgb(255,255,255)";
-        //context.fill();
-
+        context.fillStyle = fillStyle();
         context.beginPath();
         context.moveTo(effectiveX,effectiveY);
-        context.arc(effectiveX, effectiveY, effectiveRadius, 0, 2 * Math.PI);
-
-        context.fillStyle = fillStyle();
+        context.arc(effectiveX, effectiveY, effectiveR, 0, 2 * Math.PI);
         context.fill();
     }
 
@@ -182,7 +174,7 @@ function TargetBase(x,y,d,r,g,b, mouse)
         var f_value   = features();
         var r_value   = f_value[0]*r_param[0] + f_value[1]*r_param[1] + f_value[2]*r_param[2] + f_value[3]*r_param[3] + f_value[4]*r_param[4];
 
-        r_value = r_value * 1/r_param[4];        
+        r_value = r_value * 1/r_param[4];
         r_value = Math.max(r_value,-1);
         r_value = Math.min(r_value, 1);
 
