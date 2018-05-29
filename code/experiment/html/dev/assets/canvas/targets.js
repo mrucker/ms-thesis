@@ -87,8 +87,8 @@ function TargetBase(x,y,d,r,g,b, mouse)
 
     this.draw = function(canvas){
 
-        effectiveA = canvas.getHeight()/1500 * canvas.getWidth())/3000 * Math.PI * Math.pow(originalR,2);
-        effectiveR = Math.round(Math.sqrt(effectiveArea/Math.PI),0);
+        effectiveA = (canvas.getHeight()/1500) * (canvas.getWidth()/3000) * (Math.PI * originalR * originalR);
+        effectiveR = Math.round(Math.sqrt(effectiveA/Math.PI),0);
 
         originalWidth   = originalWidth  || canvas.getWidth();
         originalHeight  = originalHeight || canvas.getHeight();

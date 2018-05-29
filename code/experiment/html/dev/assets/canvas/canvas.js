@@ -1,11 +1,18 @@
 function Canvas(canvas)
 {
-    var context2d           = canvas.getContext('2d');
-    var isAnimating         = false;
-    var self                = this;
+    var self        = this;
+    var context2d   = canvas.getContext('2d');
+    var isAnimating = false;
+    var everyother  = false;
     var deviceMoveListeners = [];
-    var everyother          = false;
-    
+
+    var pageW       = $(window).width();
+    var pageH       = $(window).height();
+    var styleW      = pageW -10;
+    var styleH      = pageH -10;
+    var deviceW     = styleW * window.devicePixelRatio;
+    var deviceH     = styleH * window.devicePixelRatio;
+
     onResize();
     
     window.addEventListener('resize', onResize);
@@ -77,23 +84,24 @@ function Canvas(canvas)
     };
     
     function onResize () {
-        //the -10 is to make sure that scrollbars do not appear
-        var pageWidth  = $(window).width()-10;
-        var pageHeight = $(window).height()-10;
         
-        var deviceWidth  = pageWidth  * window.devicePixelRatio;
-        var deviceHeight = pageHeight * window.devicePixelRatio;
+        var ratioW = $(window).width()/pageW;
+        var ratioH = $(window).height()/pageH;
+
+        pageW   *= ratioW
+        pageH   *= ratioH
+        styleW  *= ratioW;
+        styleH  *= ratioH;        
+        deviceW *= ratioW;
+        deviceH *= ratioH;
             
         //this represents the resolution of the canvas
-        canvas.width  = deviceWidth;
-        canvas.height = deviceHeight;
+        canvas.width  = deviceW;
+        canvas.height = deviceH;
         
         //this represents the amount of space the canvas consumes on the page (aka the whole web page)
-        canvas.style.width  = pageWidth + 'px';
-        canvas.style.height = pageHeight + 'px';
-        
-        //context2d.transform(screenWidth*Math.sqrt(2),0,0,trueHeight*Math.sqrt(2),0,0);
-        //context2d.transform(window.devicePixelRatio,0,0,window.devicePixelRatio,0,0);
+        canvas.style.width  = styleW + 'px';
+        canvas.style.height = styleH + 'px';        
     };
 
     function onMouseMove(e) {
