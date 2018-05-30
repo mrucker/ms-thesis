@@ -1,6 +1,15 @@
 $(document).ready( function () {
     var canvas  = new Canvas(document.querySelector('#c'));
 
+    var oldPageW = $(window).width();
+    var oldPageH = $(window).height();
+    
+    canvas.resize(oldPageW - 10, oldPageH - 10);
+    
+    window.addEventListener('resize', function() {
+        canvas.scale($(window).width()/oldPageW, $(window).height()/oldPageH);
+    });
+    
     if (!canvas.getContext2d) {
         return;//if canvas unsupported code here
     }

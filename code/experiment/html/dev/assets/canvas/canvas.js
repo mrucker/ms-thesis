@@ -1,24 +1,12 @@
 function Canvas(canvas)
 {
-    var self        = this;
-    var context2d   = canvas.getContext('2d');
-    var isAnimating = false;
-    var everyother  = false;
-    var deviceMoveListeners = [];
-
-    var pageW       = $(window).width();
-    var pageH       = $(window).height();
-    var styleW      = pageW -10;
-    var styleH      = pageH -10;
-    var deviceW     = styleW * window.devicePixelRatio;
-    var deviceH     = styleH * window.devicePixelRatio;
-
-    onResize();
-    
-    window.addEventListener('resize', onResize);
+    var self          = this;
+    var isAnimating   = false;
+    var everyother    = false;
+    var moveListeners = [];
     
     this.getContext2d = function() {
-        return context2d;
+        return canvas.getContext('2d');
     };
     
     this.getWidth = function() {
@@ -40,19 +28,19 @@ function Canvas(canvas)
     
     this.addDeviceMoveListener = function(callback) {
         
-        if(deviceMoveListeners.length == 0) {
+        if(moveListeners.length == 0) {
             canvas.addEventListener("mousemove", onMouseMove, false);
             canvas.addEventListener("touchmove", onTouchMove, false);
         }
         
-        deviceMoveListeners = deviceMoveListeners.concat([callback]).toDistinct();
+        moveListeners = moveListeners.concat([callback]).toDistinct();
     }
     
     this.removeDeviceMoveListener = function(callback) {
         
-        deviceMoveListeners = deviceMoveListeners.filter(function(listener) { return listener != callback; });
+        moveListeners = moveListeners.filter(function(listener) { return listener != callback; });
         
-        if(deviceMoveListeners.length == 0) {
+        if(moveListeners.length == 0) {
             canvas.removeEventListener("mousemove", onMouseMove)
             canvas.removeEventListener("touchmove", onTouchMove);
         }
@@ -69,6 +57,25 @@ function Canvas(canvas)
         canvas.getContext2d().clearRect(0,0, this.getWidth(), this.getHeight());
     }
     
+    this.scale = function(scaleW, scaleH) {
+        canvas.width  *= scaleW;
+        canvas.height *= scaleH;
+        
+        canvas.style.width  *= scaleW;
+        canvas.style.height *= scaleH;
+    }
+    
+    this.resize = function(styleW, styleH) {
+        
+        //this represents the number of pixels inside the canvas
+        canvas.width  = styleW * window.devicePixelRatio;
+        canvas.height = styleH * window.devicePixelRatio;
+        
+        //this represents the amount of space the canvas consumes on the page
+        canvas.style.width  = styleW + 'px';
+        canvas.style.height = styleH + 'px';
+    }
+    
     function animate() {
         
         everyother = !everyother;
@@ -81,28 +88,7 @@ function Canvas(canvas)
         if(isAnimating) {
             window.requestAnimationFrame(animate);
         }
-    };
-    
-    function onResize () {
-        
-        var ratioW = $(window).width()/pageW;
-        var ratioH = $(window).height()/pageH;
-
-        pageW   *= ratioW
-        pageH   *= ratioH
-        styleW  *= ratioW;
-        styleH  *= ratioH;        
-        deviceW *= ratioW;
-        deviceH *= ratioH;
-            
-        //this represents the resolution of the canvas
-        canvas.width  = deviceW;
-        canvas.height = deviceH;
-        
-        //this represents the amount of space the canvas consumes on the page (aka the whole web page)
-        canvas.style.width  = styleW + 'px';
-        canvas.style.height = styleH + 'px';        
-    };
+    };    
 
     function onMouseMove(e) {
         onInputMove(e.clientX, e.clientY);
@@ -126,7 +112,7 @@ function Canvas(canvas)
         var relativeX = (clientX - scrollDifferenceLeft) * resolutionDifference;
         var relativeY = (clientY - scrollDifferenceTop ) * resolutionDifference;
         
-        deviceMoveListeners.forEach(function (listener) { listener(relativeX, relativeY); });
+        moveListeners.forEach(function (listener) { listener(relativeX, relativeY); });
     }
     
 }
