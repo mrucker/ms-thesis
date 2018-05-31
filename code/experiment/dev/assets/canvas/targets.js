@@ -84,94 +84,12 @@ function TargetBase(x,y,d,r,g,b, mouse)
 
         return dist(targetX,targetY,mouseX,mouseY) <= effectiveR;
     };
-
-    this.draw = function(canvas){
-
-        effectiveA = (canvas.getHeight()/1500) * (canvas.getWidth()/3000) * (Math.PI * originalR * originalR);
-        effectiveR = Math.round(Math.sqrt(effectiveA/Math.PI),0);
-
-        originalWidth   = originalWidth  || canvas.getWidth();
-        originalHeight  = originalHeight || canvas.getHeight();
-        originalX       = originalX      || (canvas.getWidth()  - effectiveR*2) * Math.random() + effectiveR;
-        originalY       = originalY      || (canvas.getHeight() - effectiveR*2) * Math.random() + effectiveR;
-        
-        effectiveX = Math.round((originalX/originalWidth ) * canvas.getWidth() ,0);
-        effectiveY = Math.round((originalY/originalHeight) * canvas.getHeight(),0);
-
-        var context   = canvas.getContext2d();
-
-        context.fillStyle = fillStyle();
-        context.beginPath();
-        context.moveTo(effectiveX,effectiveY);
-        context.arc(effectiveX, effectiveY, effectiveR, 0, 2 * Math.PI);
-        context.fill();
-    }
-
-    function dist(x1,y1,x2,y2) {
-        return Math.sqrt(Math.pow(x1-x2,2)+Math.pow(y1-y2,2));
-    }
-
-    function fillStyle() {
-        return 'rgba('+ rgb() +','+ opacity() +')';
-    }
     
-    function opacity() {
-        var r_value   = reward();
-        var o_value   = 0;
-        var aliveTime = self.getAge();
-        
-        if (aliveTime <= fadeInTime){
-            o_value = aliveTime/fadeInTime;
-        }
-
-        if (fadeInTime <= aliveTime && aliveTime <= fadeInTime+fadeOffTime){
-            o_value = 1;
-        }
-
-        if (fadeInTime+fadeOffTime <= aliveTime && aliveTime <= fadeInTime+fadeOffTime+fadeOutTime){
-            o_value = (fadeInTime+fadeOffTime+fadeOutTime-aliveTime) / fadeOutTime;
-        }
-        
-        if (aliveTime >= fadeInTime+fadeOffTime+fadeOutTime) {
-            o_value = 0;
-        }
-
-        return o_value;
-        
-        //return Math.min(1,(r_value+1));
-    }
-    
-    function rgb() {
-        
-        var r_value = reward();
-        
-        var c_stop0 = [200, 0  ,  0 ];
-        var c_stop1 = [ 0 , 200,  0 ];
-        var c_stop2 = [ 0 , 0  , 200];
-
-        var c_val0 = -1;
-        var c_val1 =  0;
-        var c_val2 =  1;
-
-        var c_wgt0 = Math.max(0,1-Math.abs(r_value - c_val0));
-        var c_wgt1 = Math.max(0,1-Math.abs(r_value - c_val1));
-        var c_wgt2 = Math.max(0,1-Math.abs(r_value - c_val2));
-
-        var color = [
-            c_wgt0*c_stop0[0]+c_wgt1*c_stop1[0]+c_wgt2*c_stop2[0], 
-            c_wgt0*c_stop0[1]+c_wgt1*c_stop1[1]+c_wgt2*c_stop2[1],
-            c_wgt0*c_stop0[2]+c_wgt1*c_stop1[2]+c_wgt2*c_stop2[2]
-        ];
-
-        return color.join(',');
-    }
-    
-    function reward() {
-        
+    this.getReward = function() {
         //var r_param = [-0.0153,  0.0217,  0.0064, -0.0008, 0.0001]; //crazy back and forth
-        //var r_param = [-0.1921, -0.0462, -0.0107, -0.0009, 0.0790];   //controlled and targeted
-        var r_param   = [0      ,0       ,0       ,0       ,1      ];   //the default color scheme
-        var f_value   = features();
+        //var r_param = [-0.1921, -0.0462, -0.0107, -0.0009, 0.0790]; //controlled and targeted
+        var r_param   = [0      ,0       ,0       ,0       ,1      ]; //the default color scheme
+        var f_value   = self.getFeatures();
         var r_value   = f_value[0]*r_param[0] + f_value[1]*r_param[1] + f_value[2]*r_param[2] + f_value[3]*r_param[3] + f_value[4]*r_param[4];
 
         r_value = r_value * 1/r_param[4];
@@ -179,10 +97,9 @@ function TargetBase(x,y,d,r,g,b, mouse)
         r_value = Math.min(r_value, 1);
 
         return r_value;
-    }
-
-    function features() {
+    };
     
+    this.getFeatures = function () {
         var maxD = 3526;
 
         var mouseHist    = mouse.getHistory();
@@ -204,7 +121,7 @@ function TargetBase(x,y,d,r,g,b, mouse)
         d3 = Math.sqrt(d3);
         d2 = Math.sqrt(d2);
         d1 = Math.sqrt(d1);
-        d0 = Math.sqrt(d0);        
+        d0 = Math.sqrt(d0);
         
         var d = d3;
         var v = d3-d2;
@@ -212,5 +129,88 @@ function TargetBase(x,y,d,r,g,b, mouse)
         var j = d3/4-3*d2/4+3*d1/4-d0/4;
 
         return [d, v, a, j, self.isTouched()*1];
+    };
+
+    this.draw = function(canvas){
+
+        effectiveA = (canvas.getHeight()/1500) * (canvas.getWidth()/3000) * (Math.PI * originalR * originalR);
+        effectiveR = Math.round(Math.sqrt(effectiveA/Math.PI),0);
+
+        originalWidth   = originalWidth  || canvas.getWidth();
+        originalHeight  = originalHeight || canvas.getHeight();
+        originalX       = originalX      || (canvas.getWidth()  - effectiveR*2) * Math.random() + effectiveR;
+        originalY       = originalY      || (canvas.getHeight() - effectiveR*2) * Math.random() + effectiveR;
+        
+        effectiveX = Math.round((originalX/originalWidth ) * canvas.getWidth() ,0);
+        effectiveY = Math.round((originalY/originalHeight) * canvas.getHeight(),0);
+
+        //var fill = fillStyle();
+        
+        var context   = canvas.getContext2d();
+
+        //context.fillStyle = fillStyle();
+        //context.beginPath();
+        //context.arc(200, 200, 100, 0, 2 * Math.PI);
+        context.fillRect(200, 200, 300, 300);
+        context.fill();
     }    
+    
+    function dist(x1,y1,x2,y2) {
+        return Math.sqrt(Math.pow(x1-x2,2)+Math.pow(y1-y2,2));
+    }
+
+    function fillStyle() {
+        
+        var r_value = self.getReward()
+        
+        return 'rgba('+ rgb(r_value) +','+ opacity(r_value) +')';
+    }
+    
+    function opacity(r_value) {
+        var o_value   = 0;
+        var aliveTime = self.getAge();
+
+        if (aliveTime <= fadeInTime){
+            o_value = aliveTime/fadeInTime;
+        }
+
+        if (fadeInTime <= aliveTime && aliveTime <= fadeInTime+fadeOffTime){
+            o_value = 1;
+        }
+
+        if (fadeInTime+fadeOffTime <= aliveTime && aliveTime <= fadeInTime+fadeOffTime+fadeOutTime){
+            o_value = (fadeInTime+fadeOffTime+fadeOutTime-aliveTime) / fadeOutTime;
+        }
+
+        if (aliveTime >= fadeInTime+fadeOffTime+fadeOutTime) {
+            o_value = 0;
+        }
+
+        return o_value;
+
+        //return Math.min(1,(r_value+1));
+    }
+
+    function rgb(r_value) {
+
+        var c_stop0 = [200, 0  ,  0 ];
+        var c_stop1 = [ 0 , 200,  0 ];
+        var c_stop2 = [ 0 , 0  , 200];
+
+        var c_val0 = -1;
+        var c_val1 =  0;
+        var c_val2 =  1;
+
+        var c_wgt0 = Math.max(0,1-Math.abs(r_value - c_val0));
+        var c_wgt1 = Math.max(0,1-Math.abs(r_value - c_val1));
+        var c_wgt2 = Math.max(0,1-Math.abs(r_value - c_val2));
+
+        var color = [
+            c_wgt0*c_stop0[0]+c_wgt1*c_stop1[0]+c_wgt2*c_stop2[0],
+            c_wgt0*c_stop0[1]+c_wgt1*c_stop1[1]+c_wgt2*c_stop2[1],
+            c_wgt0*c_stop0[2]+c_wgt1*c_stop1[2]+c_wgt2*c_stop2[2]
+        ];
+
+        return color.join(',');
+    }
 }

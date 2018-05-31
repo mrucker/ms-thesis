@@ -49,11 +49,8 @@ function Canvas(canvas)
     this.draw = function(canvas) {}
     
     this.wipe = function (canvas) {
-        //either of these methods cause noticable performance loss on low resource machines
-        
-        //canvas.getContext2d().fillStyle = 'rgba(255,255,255,1)';
-        //canvas.getContext2d().fillRect(0,0, this.getWidth(), this.getHeight());
-        
+        //on IE and Firefox clear rect is considerably faster than fillRect
+        //on modern chrome browsers this doesn't seem to be the case. Fill and clear are about equal.
         canvas.getContext2d().clearRect(0,0, this.getWidth(), this.getHeight());
     }
     

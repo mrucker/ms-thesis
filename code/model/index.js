@@ -26,8 +26,8 @@ function drawGrid(mouse, canvas, context) {
     var width   = canvas.getWidth();
     var height  = canvas.getHeight();
     
-    var colSize = 400; //width/125; //10;
-    var rowSize = 400; //height/100; //10;
+    var colSize = 100; //width/125; //10;
+    var rowSize = 100; //height/100; //10;
 
     var cols = width/colSize;
     var rows = height/rowSize;

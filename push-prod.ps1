@@ -1,11 +1,11 @@
 write-host "building..." -foregroundcolor green
-Get-ChildItem code\experiment\html\dev\assets\*.js  -recurse    | get-content | uglifyjs > code\experiment\html\prod\assets.js
-Get-ChildItem code\experiment\html\dev\assets\*.css -recurse    | get-content            > code\experiment\html\prod\assets.css
+Get-ChildItem code\experiment\dev\assets\*.js  -recurse    | get-content | uglifyjs > code\experiment\prod\assets.js
+Get-ChildItem code\experiment\dev\assets\*.css -recurse    | get-content            > code\experiment\prod\assets.css
 
-Get-ChildItem code\experiment\html\dev\libraries\*.js -recurse  | get-content | uglifyjs > code\experiment\html\prod\libraries.js
-Get-ChildItem code\experiment\html\dev\libraries\*.css -recurse | get-content            > code\experiment\html\prod\libraries.css
+Get-ChildItem code\experiment\dev\libraries\*.js -recurse  | get-content | uglifyjs > code\experiment\prod\libraries.js
+Get-ChildItem code\experiment\dev\libraries\*.css -recurse | get-content            > code\experiment\prod\libraries.css
 
-$src = "code\experiment\html\prod";
+$src = "code\experiment\prod";
 $dst = "s3://thesis.markrucker.net/";
 
 write-host "compressing..." -foregroundcolor green
