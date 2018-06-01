@@ -9,6 +9,13 @@ function Experiment(participant, mouse, targets, canvas)
     var touchedPrev  = [];
     var isObserving  = false;
     
+    var obs_count = 0;
+    var obs_start = 0;
+    var obs_time  = 0;
+    var obs_stop  = 0;
+    var obs_hz    = 60;
+    
+    
     this.isStarted      = function() { return startTime != undefined; };
     this.isStopped      = function() { return stopTime  != undefined; };
     
@@ -17,6 +24,10 @@ function Experiment(participant, mouse, targets, canvas)
         method:"POST",
         data  :id
     });
+    
+    this.getOPS = function() {
+        return Math.round((obs_count*1000)/((obs_stop || performance.now()) - obs_start), 0);
+    }
     
     this.draw = function(canvas) {
         /*var context   = canvas.getContext2d();
@@ -39,7 +50,9 @@ function Experiment(participant, mouse, targets, canvas)
     
     this.beginExperiment = function() {
 
-        startTime    = new Date().toUTCString();
+        startTime = new Date().toUTCString();
+        obs_start = performance.now();
+        obs_count = 0;
         
         post.done(function(data){
             $.ajax({
@@ -50,12 +63,13 @@ function Experiment(participant, mouse, targets, canvas)
         });
         
         isObserving = true;
-        window.requestAnimationFrame(observe);
+        setTimeout(observe, 1000/obs_hz);
     }
 
     this.endExperiment = function () {
 
         stopTime = new Date().toUTCString();
+        obs_stop = performance.now();
 
         post.done(function(data){
             $.ajax({
@@ -70,6 +84,8 @@ function Experiment(participant, mouse, targets, canvas)
 
     this.makeObservation = function() {
         if(this.isStarted() && !this.isStopped()) {
+
+            obs_count++;
             
             var observation = {"mouseData": mouse.getData(), "targetData": targets.getData() };            
                                     
@@ -124,10 +140,16 @@ function Experiment(participant, mouse, targets, canvas)
     
     function observe() {
         
-        self.makeObservation();        
+        self.makeObservation();
+
+        obs_time += 1000/obs_hz;
+        
+        if(obs_count % 100 == 0) {
+            console.log(self.getOPS());
+        }
         
         if(isObserving) {
-            window.requestAnimationFrame(observe);
+            setTimeout(observe, 1000/obs_hz - (performance.now() - obs_start - obs_time) );
         }
     }
 }

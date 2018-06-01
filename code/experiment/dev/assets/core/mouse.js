@@ -39,28 +39,28 @@ function Mouse(canvas)
 
     this.draw = function(canvas) {
         
-        var effectiveX = Math.round(position.x,0);
-        var effectiveY = Math.round(position.y,0);
+        // var effectiveX = Math.round(position.x,0);
+        // var effectiveY = Math.round(position.y,0);
         
-        var context = canvas.getContext2d();
+        // var context = canvas.getContext2d();
 
-        if(prevDrawX != effectiveX || prevDrawY != effectiveY) {
-            context.fillStyle = 'rgb(255,255,255)';
-            context.beginPath();
-            context.moveTo(prevDrawX, prevDrawY);
-            context.arc(prevDrawX, prevDrawY, 5, 0, 2 * Math.PI);
-            context.fill();
+        // if(prevDrawX != effectiveX || prevDrawY != effectiveY) {
+            // context.fillStyle = 'rgb(255,255,255)';
+            // context.beginPath();
+            // context.moveTo(prevDrawX, prevDrawY);
+            // context.arc(prevDrawX, prevDrawY, 5, 0, 2 * Math.PI);
+            // context.fill();
             
-            prevDrawX = effectiveX;
-            prevDrawY = effectiveY;
+            // prevDrawX = effectiveX;
+            // prevDrawY = effectiveY;
 
-        }
+        // }
         
-        context.fillStyle = 'rgb(200,0,0)';
-        context.beginPath();
-        context.moveTo(effectiveX, effectiveY);
-        context.arc(effectiveX, effectiveY, 4, 0, 2 * Math.PI);
-        context.fill();
+        // context.fillStyle = 'rgb(200,0,0)';
+        // context.beginPath();
+        // context.moveTo(effectiveX, effectiveY);
+        // context.arc(effectiveX, effectiveY, 4, 0, 2 * Math.PI);
+        // context.fill();
         
         // context.save();
         // context.fillStyle    = 'rgb(100,100,100)';

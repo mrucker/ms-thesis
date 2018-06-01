@@ -6,16 +6,34 @@ function getTargetSuites() {
     var onComplete = function(e) { $("#results").append("<li>" + String(e.target) + "</li>"); };
     
     var benchMarks = [
-        {
-            'name'      : 'target.draw()',
-            'fn'        : function() { target.draw(canvas); },
+        {//0
+            'name'      : 'target.drawCircle()',
+            'fn'        : function() { target.drawCircle(canvas); },
             'setup'     : function() { 
                 var canvas = new Canvas(document.querySelector('#c'));
                 var target = new Target(new Mouse(canvas)); 
             },
             'onComplete': onComplete
-        },//1
-        {
+        },
+        {//1
+            'name'      : 'target.drawSquare()',
+            'fn'        : function() { target.drawSquare(canvas); },
+            'setup'     : function() { 
+                var canvas = new Canvas(document.querySelector('#c'));
+                var target = new Target(new Mouse(canvas)); 
+            },
+            'onComplete': onComplete
+        },
+        {//2
+            'name'      : 'target.drawImage()',
+            'fn'        : function() { target.drawImage(canvas); },
+            'setup'     : function() { 
+                var canvas = new Canvas(document.querySelector('#c'));
+                var target = new Target(new Mouse(canvas)); 
+            },
+            'onComplete': onComplete
+        },
+        {//3
             'name'      : 'target.getReward()',
             'fn'        : function() { var reward = target.getReward(); },
             'setup'     : function() { 
@@ -23,8 +41,8 @@ function getTargetSuites() {
                 var target = new Target(new Mouse(canvas)); 
             },
             'onComplete': onComplete
-        },//2
-        {
+        },
+        {//4
             'name'      : 'target.getFeatures()',
             'fn'        : function() { var reward = target.getFeatures(); },
             'setup'     : function() { 
@@ -32,8 +50,8 @@ function getTargetSuites() {
                 var target = new Target(new Mouse(canvas)); 
             },
             'onComplete': onComplete
-        },//3
-        {
+        },
+        {//5
             'name'      : 'target.isTouched()',
             'fn'        : function() { var reward = target.isTouched(); },
             'setup'     : function() { 
@@ -43,9 +61,18 @@ function getTargetSuites() {
             'onComplete': onComplete
         }
     ];
-        
-    new Benchmark(benchMarks[0]).run({'async':false});
-    new Benchmark(benchMarks[1]).run({'async':false}); 
-    new Benchmark(benchMarks[2]).run({'async':false}); 
-    new Benchmark(benchMarks[3]).run({'async':false}); 
+    
+    var drawTarget = {
+        'short': 'drawTarget'
+      , 'long' : "Draws the target control using three different methods"
+      , 'suite': new Benchmark.Suite().add(benchMarks[2]).add(benchMarks[0]).add(benchMarks[1])
+    };
+    
+    var calculateTarget = {
+        'short': 'calculateTarget'
+      , 'long' : "Performs all intrinsic target calculations such as features, reward and touch"
+      , 'suite': new Benchmark.Suite().add(benchMarks[3]).add(benchMarks[4]).add(benchMarks[5])
+    };
+    
+    return [drawTarget, calculateTarget];
 }

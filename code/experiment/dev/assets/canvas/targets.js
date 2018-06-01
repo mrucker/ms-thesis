@@ -1,3 +1,60 @@
+var _alphaStepSize  = .1;
+var _colorStepSize  = .1;
+
+var _colorStepCount = (2/_colorStepSize)+1;
+var _alphaStepCount = (1/_alphaStepSize)+1;
+
+var _canvas = document.createElement("canvas");
+	_canvas.width  = 200*_colorStepCount;
+	_canvas.height = 200*_alphaStepCount;
+
+for(var r = -1; r <= 1; r+=_colorStepSize) {
+    
+    var xOffset = Math.round(200*(r+1)/_colorStepSize,0);
+    
+    for(var a = 1; a >= 0; a-=_alphaStepSize) {
+    
+        var yOffset = Math.round(200*(1-a)/_alphaStepSize,0);
+
+        var context = _canvas.getContext("2d");
+        
+        context.fillStyle = "rgba(" + rgb(r) + "," + a + ")";
+        context.beginPath();
+        context.arc(100 + xOffset, 100 + yOffset, 100, 0, 2 * Math.PI);    
+        context.fill();
+    }
+}
+
+//var _image = new Image();
+//    _image.src = _canvas.toDataURL("image/png");  
+//var image2 = _canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");  // here is the most important part because if you dont replace you will get a DOM 18 exception.
+//window.location.href=image2; // it will save locally
+
+function rgb(r_value) {
+
+        var c_stop0 = [200, 0  ,  0 ];
+        var c_stop1 = [ 0 , 200,  0 ];
+        var c_stop2 = [ 0 , 0  , 200];
+
+        var c_val0 = -1;
+        var c_val1 =  0;
+        var c_val2 =  1;
+
+        var c_wgt0 = Math.max(0,1-Math.abs(r_value - c_val0));
+        var c_wgt1 = Math.max(0,1-Math.abs(r_value - c_val1));
+        var c_wgt2 = Math.max(0,1-Math.abs(r_value - c_val2));
+
+        var color = [
+            c_wgt0*c_stop0[0]+c_wgt1*c_stop1[0]+c_wgt2*c_stop2[0],
+            c_wgt0*c_stop0[1]+c_wgt1*c_stop1[1]+c_wgt2*c_stop2[1],
+            c_wgt0*c_stop0[2]+c_wgt1*c_stop1[2]+c_wgt2*c_stop2[2]
+        ];
+
+        color = color.map(function(c) { return Math.round(c,0); });
+        
+        return color.join(',');
+}
+    
 function Targets(mouse)
 {
     var targets = [];
@@ -130,8 +187,12 @@ function TargetBase(x,y,d,r,g,b, mouse)
 
         return [d, v, a, j, self.isTouched()*1];
     };
+    
+    this.draw = function(canvas) {
+        self.drawImage(canvas);
+    }
 
-    this.draw = function(canvas){
+    this.drawCircle = function(canvas){
 
         effectiveA = (canvas.getHeight()/1500) * (canvas.getWidth()/3000) * (Math.PI * originalR * originalR);
         effectiveR = Math.round(Math.sqrt(effectiveA/Math.PI),0);
@@ -144,16 +205,55 @@ function TargetBase(x,y,d,r,g,b, mouse)
         effectiveX = Math.round((originalX/originalWidth ) * canvas.getWidth() ,0);
         effectiveY = Math.round((originalY/originalHeight) * canvas.getHeight(),0);
 
-        //var fill = fillStyle();
-        
         var context   = canvas.getContext2d();
 
-        //context.fillStyle = fillStyle();
-        //context.beginPath();
-        //context.arc(200, 200, 100, 0, 2 * Math.PI);
-        context.fillRect(200, 200, 300, 300);
-        context.fill();
-    }    
+        context.fillStyle = fillStyle();
+        context.beginPath();
+        context.arc(effectiveX, effectiveY, effectiveR, 0, 2 * Math.PI);
+        context.fill(); 
+    }
+    
+    this.drawSquare = function(canvas){
+
+        effectiveA = (canvas.getHeight()/1500) * (canvas.getWidth()/3000) * (Math.PI * originalR * originalR);
+        effectiveL = Math.round(Math.sqrt(effectiveA),0);
+        effectiveR = effectiveL/2;
+
+        originalWidth   = originalWidth  || canvas.getWidth();
+        originalHeight  = originalHeight || canvas.getHeight();
+        originalX       = originalX      || (canvas.getWidth()  - effectiveR*2) * Math.random() + effectiveR;
+        originalY       = originalY      || (canvas.getHeight() - effectiveR*2) * Math.random() + effectiveR;
+        
+        effectiveX = Math.round((originalX/originalWidth ) * canvas.getWidth() ,0);
+        effectiveY = Math.round((originalY/originalHeight) * canvas.getHeight(),0);
+        
+        var context = canvas.getContext2d();
+
+        context.fillStyle = fillStyle();
+        context.fillRect(effectiveX-effectiveL/2, effectiveY-effectiveL/2, effectiveL, effectiveL); 
+    }
+    
+    this.drawImage = function(canvas){
+        
+        effectiveA = (canvas.getHeight()/1500) * (canvas.getWidth()/3000) * (Math.PI * originalR * originalR);
+        effectiveR = 100;//Math.round(Math.sqrt(effectiveA/Math.PI),0);
+    
+        originalWidth   = originalWidth  || canvas.getWidth();
+        originalHeight  = originalHeight || canvas.getHeight();
+        originalX       = originalX      || (canvas.getWidth()  - effectiveR*2) * Math.random() + effectiveR;
+        originalY       = originalY      || (canvas.getHeight() - effectiveR*2) * Math.random() + effectiveR;
+        
+        effectiveX = Math.round((originalX/originalWidth ) * canvas.getWidth() ,0);
+        effectiveY = Math.round((originalY/originalHeight) * canvas.getHeight(),0);
+                
+        var context = canvas.getContext2d();
+        
+        var xOffset = 200*Math.round((self.getReward()+1)/_colorStepSize,0);
+        var yOffset = 200*Math.round((1-opacity())/_alphaStepSize, 0);
+        
+        context.drawImage(_canvas,xOffset,yOffset, 2*effectiveR, 2*effectiveR, effectiveX-effectiveR, effectiveY-effectiveR, 2*effectiveR, 2*effectiveR);
+        //context.drawImage(_image, effectiveX, effectiveY);
+    }
     
     function dist(x1,y1,x2,y2) {
         return Math.sqrt(Math.pow(x1-x2,2)+Math.pow(y1-y2,2));

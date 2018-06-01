@@ -27,6 +27,7 @@ $(document).ready( function () {
     var experiment  = new Experiment(participant, mouse, targets, canvas);
 
     canvas.draw = function(canvas) {
+        
         mouse     .draw(canvas);
         targets   .draw(canvas);
         counter   .draw(canvas);

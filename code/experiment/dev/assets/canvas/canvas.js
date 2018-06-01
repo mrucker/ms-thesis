@@ -4,6 +4,11 @@ function Canvas(canvas)
     var isAnimating   = false;
     var everyother    = false;
     var moveListeners = [];
+    var frames        = 0;
+    var startTime     = 0;
+    var stopTime      = 0;
+    
+    var temp = canvas.getContext('2d');
     
     this.getContext2d = function() {
         return canvas.getContext('2d');
@@ -18,11 +23,21 @@ function Canvas(canvas)
     };        
  
     this.startAnimating = function () {
-        isAnimating = true;           
+        isAnimating = true; 
+        
+        frames    = 0;
+        startTime = performance.now();
+        stopTime  = 0;
+        
         window.requestAnimationFrame(animate);
     };
     
+    this.getFPS = function() {
+        return Math.round((frames*1000)/((stopTime || performance.now()) - startTime), 0);
+    }
+    
     this.stopAnimating = function () {
+        stopTime    = performance.now();
         isAnimating = false;
     };
     
@@ -52,6 +67,7 @@ function Canvas(canvas)
         //on IE and Firefox clear rect is considerably faster than fillRect
         //on modern chrome browsers this doesn't seem to be the case. Fill and clear are about equal.
         canvas.getContext2d().clearRect(0,0, this.getWidth(), this.getHeight());
+        //canvas.getContext2d().clearRect(0,0, this.getWidth()/2, this.getHeight()/2);
     }
     
     this.scale = function(scaleW, scaleH) {
@@ -74,18 +90,31 @@ function Canvas(canvas)
     }
     
     function animate() {
-        
+        frames++;
         everyother = !everyother;
         
         if(everyother) {  
             self.wipe(self);
             self.draw(self);
         }
+        
+        //if(frames % 100 == 0) {
+
+            var context   = self.getContext2d();
+            
+            context.fillStyle    = 'rgb(100,100,100)';
+            context.font         = '48px Arial';
+            context.textAlign    = 'left';
+            context.textBaseline = 'top';
+            
+            //context.clearRect(0,0, 90, 48);            
+            context.fillText(self.getFPS(), 0, 0);
+        //}    
 
         if(isAnimating) {
             window.requestAnimationFrame(animate);
-        }
-    };    
+        }        
+    };
 
     function onMouseMove(e) {
         onInputMove(e.clientX, e.clientY);
