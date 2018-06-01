@@ -39,10 +39,13 @@ function Mouse(canvas)
 
     this.draw = function(canvas) {
         
-        // var effectiveX = Math.round(position.x,0);
-        // var effectiveY = Math.round(position.y,0);
+        var effectiveX = Math.round(position.x,0);
+        var effectiveY = Math.round(position.y,0);
+                
+        var context = canvas.getContext2d();
         
-        // var context = canvas.getContext2d();
+        context.fillStyle = "rgb(200,0,0)";
+        context.fillRect(effectiveX - 2, effectiveY - 2, 4, 4);
 
         // if(prevDrawX != effectiveX || prevDrawY != effectiveY) {
             // context.fillStyle = 'rgb(255,255,255)';
