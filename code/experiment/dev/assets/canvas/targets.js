@@ -236,7 +236,7 @@ function TargetBase(x,y,d,r,g,b, mouse)
     this.drawImage = function(canvas){
         
         effectiveA = (canvas.getHeight()/1500) * (canvas.getWidth()/3000) * (Math.PI * originalR * originalR);
-        effectiveR = 100;//Math.round(Math.sqrt(effectiveA/Math.PI),0);
+        effectiveR = Math.round(Math.sqrt(effectiveA/Math.PI),0);
     
         originalWidth   = originalWidth  || canvas.getWidth();
         originalHeight  = originalHeight || canvas.getHeight();
@@ -251,7 +251,7 @@ function TargetBase(x,y,d,r,g,b, mouse)
         var xOffset = 200*Math.round((self.getReward()+1)/_colorStepSize,0);
         var yOffset = 200*Math.round((1-opacity())/_alphaStepSize, 0);
         
-        context.drawImage(_canvas,xOffset,yOffset, 2*effectiveR, 2*effectiveR, effectiveX-effectiveR, effectiveY-effectiveR, 2*effectiveR, 2*effectiveR);
+        context.drawImage(_canvas,xOffset,yOffset, 200, 200, effectiveX-effectiveR, effectiveY-effectiveR, 2*effectiveR, 2*effectiveR);
         //context.drawImage(_image, effectiveX, effectiveY);
     }
     

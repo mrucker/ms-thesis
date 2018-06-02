@@ -1,13 +1,14 @@
 $(document).ready( function () {
     var canvas  = new Canvas(document.querySelector('#c'));
 
-    var oldPageW = $(window).width();
-    var oldPageH = $(window).height();
+    //var oldPageW = ;
+    //var oldPageH = ;
     
-    canvas.resize(oldPageW - 10, oldPageH - 10);
+    canvas.resize($(window).width() - 10, $(window).height() - 10);
     
     window.addEventListener('resize', function() {
-        canvas.scale($(window).width()/oldPageW, $(window).height()/oldPageH);
+        canvas.resize($(window).width() - 10, $(window).height() - 10);
+        //canvas.scale($(window).width()/oldPageW, $(window).height()/oldPageH);        
     });
     
     if (!canvas.getContext2d) {

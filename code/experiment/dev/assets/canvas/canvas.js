@@ -67,15 +67,15 @@ function Canvas(canvas)
         //on IE and Firefox clear rect is considerably faster than fillRect
         //on modern chrome browsers this doesn't seem to be the case. Fill and clear are about equal.
         canvas.getContext2d().clearRect(0,0, this.getWidth(), this.getHeight());
-        //canvas.getContext2d().clearRect(0,0, this.getWidth()/2, this.getHeight()/2);
+        //canvas.getContext2d().clearRect(0,0, this.getWidth()/4, this.getHeight()/4);
     }
     
     this.scale = function(scaleW, scaleH) {
         canvas.width  *= scaleW;
         canvas.height *= scaleH;
         
-        canvas.style.width  *= scaleW;
-        canvas.style.height *= scaleH;
+        //canvas.style.width  *= scaleW;
+        //canvas.style.height *= scaleH;
     }
     
     this.resize = function(styleW, styleH) {
@@ -93,24 +93,18 @@ function Canvas(canvas)
         frames++;
         everyother = !everyother;
         
-        if(everyother) {  
+        if(everyother) {
             self.wipe(self);
             self.draw(self);
-        }
-        
-        //if(frames % 100 == 0) {
-
-            var context   = self.getContext2d();
             
+            var context   = self.getContext2d();
             context.fillStyle    = 'rgb(100,100,100)';
             context.font         = '48px Arial';
             context.textAlign    = 'left';
             context.textBaseline = 'top';
-            
-            //context.clearRect(0,0, 90, 48);            
             context.fillText(self.getFPS(), 0, 0);
-        //}    
-
+        }
+        
         if(isAnimating) {
             window.requestAnimationFrame(animate);
         }        
