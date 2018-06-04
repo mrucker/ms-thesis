@@ -1,18 +1,14 @@
 $(document).ready( function () {
     var canvas  = new Canvas(document.querySelector('#c'));
 
-    //var oldPageW = ;
-    //var oldPageH = ;
-    
-    canvas.resize($(window).width() - 10, $(window).height() - 10);
-    
-    window.addEventListener('resize', function() {
-        canvas.resize($(window).width() - 10, $(window).height() - 10);
-        //canvas.scale($(window).width()/oldPageW, $(window).height()/oldPageH);        
-    });
-    
     if (!canvas.getContext2d) {
         return;//if canvas unsupported code here
+    } else {
+        canvas.resize($(window).width() - 10, $(window).height() - 10);
+    
+        window.addEventListener('resize', function() {
+            canvas.resize($(window).width() - 10, $(window).height() - 10);
+        });
     }
     
     //Unload events are very inconsistent from browser to browser
@@ -84,23 +80,30 @@ $(document).ready( function () {
         if(contentId == "dialog1") { showModalContent("dialog2"); }
         if(contentId == "dialog2") { showModalContent("dialog3"); }
         if(contentId == "dialog3") { showModalContent("dialog4"); }
-        if(contentId == "dialog4") { showModalContent("dialog5"); }
+        if(contentId == "dialog4") { 
+            participant.saveData(getDemographics());
+            showModalContent("dialog5"); 
+        }
         if(contentId == "dialog5") { resetEverything(); startAnimation("dialog6"); }
         if(contentId == "dialog6") { resetEverything(); startAnimation("dialog7"); }
         if(contentId == "dialog7") { resetEverything(); startAnimation("dialog6"); }
     })
     
     showModalContent("dialog0");
+        
+    function getDemographics() {
+        return "{" + $("#modal form").serializeArray().map(function(o) { return '"' + o.name +'":"' + o.value + '"' }).join(",") + "}";
+    }
+    
+    function showModalContent(contentId) {
+        $("#modal").data("contentId", contentId);
+
+            $("#modalTitle" ).html($("#" + contentId).data('title'));
+            $("#modalBody"  ).html($("#" + contentId).html());
+            $("#modalButton").html($("#" + contentId).data('btnTxt'));
+
+        $("#modal").removeClass("fade").addClass($("#"+ contentId).data("fadeIn"));
+        $('#modal').modal('show');
+        $("#modal").removeClass("fade").addClass($("#"+ contentId).data("fadeOut"));
+    }
 });
-
-function showModalContent(contentId) {
-    $("#modal").data("contentId", contentId);
-
-        $("#modalTitle" ).html($("#" + contentId).data('title'));
-        $("#modalBody"  ).html($("#" + contentId).html());
-        $("#modalButton").html($("#" + contentId).data('btnTxt'));
-
-    $("#modal").removeClass("fade").addClass($("#"+ contentId).data("fadeIn"));
-    $('#modal').modal('show');
-    $("#modal").removeClass("fade").addClass($("#"+ contentId).data("fadeOut"));
-}

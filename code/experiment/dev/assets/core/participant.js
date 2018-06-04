@@ -5,19 +5,50 @@ function Participant(canvas)
     
     var id = storageId || createdId;
     
-    if(!storageId) {
-        writeIdStore(id);
+    // if(!storageId) {
+        // writeIdStore(id);
 
-        $.ajax({
-            url   :"https://api.thesis.markrucker.net/v1/participants",
-            method:"POST",
-            data  :id
-        });
-    }
+        // $.ajax({
+            // url   :"https://api.thesis.markrucker.net/v1/participants",
+            // method:"POST",
+            // data  :id
+        // });
+    // }
+    
+    var post = $.ajax({
+        url   :"https://api.thesis.markrucker.net/v1/participants",
+        method:"POST",
+        data  :id
+    });
 
     this.getId = function() { return id };
     
+    this.saveData = function(data) {
+        post.done(function(){
+            $.ajax({
+                "url"   :"https://api.thesis.markrucker.net/v1/participants/" + id,
+                "method":"PATCH",
+                "data"  :JSON.stringify(data)
+            });
+        });
+    }
+    
+    //17 bytes in dynamodb
+    function generateId() {
+        //r1 = Final value represents a number between 0 and 4.295 billion (we remove characters and convert to hex to save space)
+        //r2 = Final value represents a number between 0 and 795.36 days worth of miliseconds (we remove characters and convert to hex to save space)
+        var r1 = Math.floor(Math.random()*Math.pow(10,16)).toString(16).substring(0,8); 
+        var r2 = Date.now().toString(16).substring(2);
+
+        return r1 + r2;
+    }
+    
     function readIdStore() {
+        
+        //for now I'm not keeping track of a participants id
+        //in order to know if somebody has done the task before I simply ask
+        return undefined;
+        
         if(!storageAvailable('localStorage')) {
             return undefined;
         }
@@ -33,23 +64,18 @@ function Participant(canvas)
     }
     
     function writeIdStore(id) {
+        
+        //for now I'm not keeping track of a participants id
+        //in order to know if somebody has done the task before I simply ask
+        return;
+        
         if(!storageAvailable('localStorage')) {
             return;
         }
 
         window.localStorage.setItem('participantIdStamp', new Date().toUTCString());
         window.localStorage.setItem('participantIdValue', id);
-    }
-    
-    //17 bytes in dynamodb
-    function generateId() {
-        //r1 = Final value represents a number between 0 and 4.295 billion (we remove characters and convert to hex to save space)
-        //r2 = Final value represents a number between 0 and 795.36 days worth of miliseconds (we remove characters and convert to hex to save space)
-        var r1 = Math.floor(Math.random()*Math.pow(10,16)).toString(16).substring(0,8); 
-        var r2 = Date.now().toString(16).substring(2);
-
-        return r1 + r2;
-    }
+    }   
     
     //from https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API
     function storageAvailable(type) {

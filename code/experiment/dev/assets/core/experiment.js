@@ -7,26 +7,18 @@ function Experiment(participant, mouse, targets, canvas)
     var observations = [];
     var touchedCnt   = 0;
     var touchedPrev  = [];
-    var isObserving  = false;
     
-    var obs_count = 0;
-    var obs_start = 0;
-    var obs_time  = 0;
-    var obs_stop  = 0;
-    var obs_hz    = 60;
-    
-    
-    this.isStarted      = function() { return startTime != undefined; };
-    this.isStopped      = function() { return stopTime  != undefined; };
+    var ops          = new Frequency();
+    var ops_desired  = 60;
     
     var post = $.ajax({
         url   :"https://api.thesis.markrucker.net/v1/participants/" + participant.getId() + "/experiments",
         method:"POST",
         data  :id
     });
-    
+        
     this.getOPS = function() {
-        return Math.round((obs_count*1000)/((obs_stop || performance.now()) - obs_start), 0);
+        return ops.getHz();
     }
     
     this.draw = function(canvas) {
@@ -50,51 +42,41 @@ function Experiment(participant, mouse, targets, canvas)
     
     this.beginExperiment = function() {
 
+        ops.start();
+    
         startTime = new Date().toUTCString();
-        obs_start = performance.now();
-        obs_count = 0;
+        stopTime  = undefined;
         
-        post.done(function(data){
-            $.ajax({
-                url   :"https://api.thesis.markrucker.net/v1/participants/" + participant.getId() + "/experiments/" + id,
-                method:"PATCH",
-                data  :JSON.stringify({"startTime":startTime})
-            });
-        });
+        self.saveData({"startTime":startTime});
         
-        isObserving = true;
-        setTimeout(observe, 1000/obs_hz);
+        //FPS
+        //OPS
+        //MPS
+        //Feature Weights
+        //Window Size
+        //Window Resolution
+                
+        setTimeout(observe, 1000/ops.correctedHz(1,60));
     }
 
     this.endExperiment = function () {
 
+        ops.stop();
         stopTime = new Date().toUTCString();
-        obs_stop = performance.now();
 
-        post.done(function(data){
-            $.ajax({
-                url   :"https://api.thesis.markrucker.net/v1/participants/" + participant.getId() + "/experiments/" + id,
-                method:"PATCH",
-                data  :JSON.stringify({"stopTime":stopTime})
-            });
-        });
-        
-        isObserving = false;
+        self.saveData({"stopTime":stopTime});
     }
 
-    this.makeObservation = function() {
-        if(this.isStarted() && !this.isStopped()) {
-
-            obs_count++;
-            
-            var observation = {"mouseData": mouse.getData(), "targetData": targets.getData() };            
-                                    
-            observations.push(observation);
-            
-            touchedCnt += targets.touchCount();            
-        }
-    };
-    
+    this.saveData = function(data) {
+        post.done(function(){
+            $.ajax({
+                "url"   :"https://api.thesis.markrucker.net/v1/participants/" + participant.getId() + "/experiments/" + id,
+                "method":"PATCH",
+                "data"  :JSON.stringify(data)
+            });
+        });
+    }
+        
     this.saveObservation = function(width, height) {
         var states = observations.slice(3).map(function(observation, i) {
 
@@ -140,16 +122,19 @@ function Experiment(participant, mouse, targets, canvas)
     
     function observe() {
         
-        self.makeObservation();
+        if(startTime && !stopTime) {
 
-        obs_time += 1000/obs_hz;
-        
-        if(obs_count % 100 == 0) {
-            console.log(self.getOPS());
-        }
-        
-        if(isObserving) {
-            setTimeout(observe, 1000/obs_hz - (performance.now() - obs_start - obs_time) );
-        }
+            ops.cycle();
+            
+            if(ops.cycleCount() % 100 == 0) {
+                console.log(ops.getHz());
+            }
+            
+            observations.push({"mouseData": mouse.getData(), "targetData": targets.getData() });
+            
+            touchedCnt += targets.touchCount();
+            
+            setTimeout(observe, 1000/ops.correctedHz(1,60));
+        }        
     }
 }

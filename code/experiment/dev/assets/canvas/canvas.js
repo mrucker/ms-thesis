@@ -1,12 +1,11 @@
 function Canvas(canvas)
 {
     var self          = this;
-    var isAnimating   = false;
     var everyother    = false;
     var moveListeners = [];
-    var frames        = 0;
-    var startTime     = 0;
-    var stopTime      = 0;
+    var startTime     = undefined;
+    var stopTime      = undefined;
+    var fps           = new Frequency();
     
     var temp = canvas.getContext('2d');
     
@@ -23,23 +22,23 @@ function Canvas(canvas)
     };        
  
     this.startAnimating = function () {
-        isAnimating = true; 
+        fps.start();        
         
-        frames    = 0;
         startTime = performance.now();
-        stopTime  = 0;
+        stopTime  = undefined;
         
         window.requestAnimationFrame(animate);
     };
     
-    this.getFPS = function() {
-        return Math.round((frames*1000)/((stopTime || performance.now()) - startTime), 0);
-    }
-    
     this.stopAnimating = function () {
-        stopTime    = performance.now();
-        isAnimating = false;
+        fps.stop();
+        
+        stopTime = performance.now();
     };
+    
+    this.getFPS = function() {
+        return Math.round(fps.getHz(),0);
+    }
     
     this.addDeviceMoveListener = function(callback) {
         
@@ -64,20 +63,9 @@ function Canvas(canvas)
     this.draw = function(canvas) {}
     
     this.wipe = function (canvas) {
-        //on IE and Firefox clear rect is considerably faster than fillRect
-        //on modern chrome browsers this doesn't seem to be the case. Fill and clear are about equal.
         canvas.getContext2d().clearRect(0,0, this.getWidth(), this.getHeight());
-        //canvas.getContext2d().clearRect(0,0, this.getWidth()/4, this.getHeight()/4);
     }
-    
-    this.scale = function(scaleW, scaleH) {
-        canvas.width  *= scaleW;
-        canvas.height *= scaleH;
         
-        //canvas.style.width  *= scaleW;
-        //canvas.style.height *= scaleH;
-    }
-    
     this.resize = function(styleW, styleH) {
         
         //this represents the number of pixels inside the canvas
@@ -90,10 +78,9 @@ function Canvas(canvas)
     }
     
     function animate() {
-        frames++;
-        everyother = !everyother;
-        
-        if(everyother) {
+        fps.cycle();
+
+        if(everyother = !everyother) {
             self.wipe(self);
             self.draw(self);
             
@@ -105,9 +92,9 @@ function Canvas(canvas)
             context.fillText(self.getFPS(), 0, 0);
         }
         
-        if(isAnimating) {
+        if(startTime && !stopTime) {
             window.requestAnimationFrame(animate);
-        }        
+        }
     };
 
     function onMouseMove(e) {
