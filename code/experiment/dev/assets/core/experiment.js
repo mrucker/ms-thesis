@@ -4,12 +4,12 @@ function Experiment(participant, mouse, targets, canvas)
     var self         = this;
     var startTime    = undefined;
     var stopTime     = undefined;
-    var observations = [];
-    var touchedCnt   = 0;
+    var observations = [];    
     var touchedPrev  = [];
+    var touchedCnt   = 0;
     
-    var ops          = new Frequency();
-    var ops_desired  = 60;
+    var ops     = new Frequency();
+    var ops_Hz  = 60;
     
     var post = $.ajax({
         url   :"https://api.thesis.markrucker.net/v1/participants/" + participant.getId() + "/experiments",
@@ -41,9 +41,6 @@ function Experiment(participant, mouse, targets, canvas)
     }
     
     this.beginExperiment = function() {
-
-        ops.start();
-    
         startTime = new Date().toUTCString();
         stopTime  = undefined;
         
@@ -55,8 +52,8 @@ function Experiment(participant, mouse, targets, canvas)
         //Feature Weights
         //Window Size
         //Window Resolution
-                
-        setTimeout(observe, 1000/ops.correctedHz(1,60));
+        ops.start();
+        setTimeout(observe, 1000/ops.correctedHz(1,ops_Hz));
     }
 
     this.endExperiment = function () {
@@ -134,7 +131,7 @@ function Experiment(participant, mouse, targets, canvas)
             
             touchedCnt += targets.touchCount();
             
-            setTimeout(observe, 1000/ops.correctedHz(1,60));
+            setTimeout(observe, 1000/ops.correctedHz(1,ops_Hz));
         }        
     }
 }

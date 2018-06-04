@@ -22,9 +22,9 @@ function Canvas(canvas)
     };        
  
     this.startAnimating = function () {
-        fps.start();        
+        fps.start(); 
         
-        startTime = performance.now();
+        startTime = new Date().toUTCString();
         stopTime  = undefined;
         
         window.requestAnimationFrame(animate);
