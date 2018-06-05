@@ -2,10 +2,10 @@ function Canvas(canvas)
 {
     var self          = this;
     var everyother    = false;
-    var moveListeners = [];
+    var moveListener  = undefined;
     var startTime     = undefined;
     var stopTime      = undefined;
-    var fps           = new Frequency();
+    var fps           = new Frequency("fps", true);
     
     var temp = canvas.getContext('2d');
     
@@ -41,49 +41,45 @@ function Canvas(canvas)
     }
     
     this.addDeviceMoveListener = function(callback) {
-        
-        if(moveListeners.length == 0) {
-            canvas.addEventListener("mousemove", onMouseMove, false);
-            canvas.addEventListener("touchmove", onTouchMove, false);
-        }
-        
-        moveListeners = moveListeners.concat([callback]).toDistinct();
+
+        canvas.addEventListener("mousemove", onMouseMove, false);
+        canvas.addEventListener("touchmove", onTouchMove, false);
+
+        moveListener = callback;
     }
-    
+
     this.removeDeviceMoveListener = function(callback) {
-        
-        moveListeners = moveListeners.filter(function(listener) { return listener != callback; });
-        
-        if(moveListeners.length == 0) {
-            canvas.removeEventListener("mousemove", onMouseMove)
-            canvas.removeEventListener("touchmove", onTouchMove);
-        }
+
+        moveListener = undefined;
+
+        canvas.removeEventListener("mousemove", onMouseMove);
+        canvas.removeEventListener("touchmove", onTouchMove);
     }
 
     this.draw = function(canvas) {}
-    
+
     this.wipe = function (canvas) {
         canvas.getContext2d().clearRect(0,0, this.getWidth(), this.getHeight());
     }
-        
+
     this.resize = function(styleW, styleH) {
-        
+
         //this represents the number of pixels inside the canvas
         canvas.width  = styleW * window.devicePixelRatio;
         canvas.height = styleH * window.devicePixelRatio;
-        
+
         //this represents the amount of space the canvas consumes on the page
         canvas.style.width  = styleW + 'px';
         canvas.style.height = styleH + 'px';
     }
-    
+
     function animate() {
         fps.cycle();
 
         if(everyother = !everyother) {
             self.wipe(self);
             self.draw(self);
-            
+
             var context   = self.getContext2d();
             context.fillStyle    = 'rgb(100,100,100)';
             context.font         = '48px Arial';
@@ -91,7 +87,7 @@ function Canvas(canvas)
             context.textBaseline = 'top';
             context.fillText(self.getFPS(), 0, 0);
         }
-        
+
         if(startTime && !stopTime) {
             window.requestAnimationFrame(animate);
         }
@@ -100,12 +96,12 @@ function Canvas(canvas)
     function onMouseMove(e) {
         onInputMove(e.clientX, e.clientY);
     }
-    
+
     function onTouchMove(e) {
         onInputMove(e.touches[0].clientX, e.touches[0].clientY);
         e.preventDefault();
     }
-    
+
     function onInputMove(clientX,clientY) {
 
         // the clientX and clientY values are the mouse (x,y) coordinates relative to the viewable browser window.
@@ -113,13 +109,13 @@ function Canvas(canvas)
         // Therefore, if there are scroll bars on our canvas, or the canvas has a different resolution we need to calculate our canvas x,y.
         
         var scrollDifferenceLeft = canvas.getBoundingClientRect().left;
-        var scrollDifferenceTop  = canvas.getBoundingClientRect().top;        
+        var scrollDifferenceTop  = canvas.getBoundingClientRect().top;
         var resolutionDifference = window.devicePixelRatio;
         
         var relativeX = (clientX - scrollDifferenceLeft) * resolutionDifference;
         var relativeY = (clientY - scrollDifferenceTop ) * resolutionDifference;
         
-        moveListeners.forEach(function (listener) { listener(relativeX, relativeY); });
+        moveListener(relativeX, relativeY);
     }
     
 }

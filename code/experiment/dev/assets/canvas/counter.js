@@ -2,20 +2,27 @@ function Counter(countFrom, countFor, isCountdown)
 {
     var startTime    = undefined;
     var stopTime     = undefined;
-    var stopAfter    = countFor;
-    var timeout      = undefined;
-    var prevDrawText = "";
+    
+    var elapseAfter    = countFor;
+    var elapseCallback = undefined;
+    var elapseTimeout  = undefined;
 
     this.startCounting = function() {
-        startTime = Date.now();
+        startTime = Date.now() - runTime();
         stopTime  = undefined;
-
-        timeout = setTimeout(stopCallback, stopAfter);
+        
+        if(elapsedBy() < 0) {
+            //we add 30 to make sure the last draw is made before stopping
+            elapseTimeout = setTimeout(elapseCallback, -elapsedBy()+10);
+        }
     }
 
     this.stopCounting = function() {
         stopTime = Date.now();
-        clearTimeout(timeout);
+
+        if(elapseTimeout) {
+            clearTimeout(elapseTimeout);
+        }
     }
 
     this.reset = function() {
@@ -23,23 +30,18 @@ function Counter(countFrom, countFor, isCountdown)
         stopTime  = undefined;
     }
 
-    this.onStop = function(callback) {
-        stopCallback = callback;
+    this.onElapsed = function(callback) {
+        elapseCallback = callback;
     }
     
     this.draw = function(canvas){
 
-        if( !isAfter() ) {
+        if(elapsedBy() < 0) {
             drawCount(canvas);
         }
-
-        if(isAfter() && (runTime() - stopAfter) < 500) {
-            drawGo(canvas);
-        }
         
-        if(isAfter() && (runTime() - stopAfter) > 500 && prevDrawText == "GO!") {
-            eraseText(canvas, prevDrawText);
-            prevDrawText = "";
+        if(0 < elapsedBy() && elapsedBy() < 500) {
+            drawGo(canvas);
         }
     };
 
@@ -49,19 +51,6 @@ function Counter(countFrom, countFor, isCountdown)
 
     function drawCount(canvas) {
         drawText(canvas, countAsText());
-    }
-
-    function eraseText(canvas, text) {
-        var context   = canvas.getContext2d();
-        var centerX   = Math.round(canvas.getWidth()/2,0);
-        var centerY   = Math.round(canvas.getHeight()/2,0);
-        
-        context.font = '100px Arial';
-        
-        var w = context.measureText(text).width;
-        var h = 100;
-            
-        context.clearRect(centerX-Math.ceil(w/2),centerY-Math.ceil(h/2), w, h);
     }
     
     function drawText(canvas, text) {
@@ -78,8 +67,8 @@ function Counter(countFrom, countFor, isCountdown)
    
     function countAsText() {
         
-        var milSinceStart = isCountdown ? stopAfter - runTime() : runTime();
-        var cntSinceStart = milSinceStart/(stopAfter/countFrom);
+        var milSinceStart = isCountdown ? elapseAfter - runTime() : runTime();
+        var cntSinceStart = milSinceStart/(elapseAfter/countFrom);
                 
         var cntModifier   = isCountdown ? Math.ceil  : Math.floor;        
         var cntPart       = cntModifier(cntSinceStart);        
@@ -88,15 +77,11 @@ function Counter(countFrom, countFor, isCountdown)
         return cntPartAsText;
     }
 
-    function isAfter() {
-        return runTime() > stopAfter;
+    function elapsedBy() {
+        return runTime() - elapseAfter;
     }
 
     function runTime() {
-        var now = Date.now();
-        
-        if(!startTime) return 0;
-        
         return (!startTime) ? 0 : (stopTime || Date.now()) - startTime;
     }
 

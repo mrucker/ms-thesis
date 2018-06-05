@@ -159,16 +159,16 @@ function TargetBase(x,y,d,r,g,b, mouse)
     this.getFeatures = function () {
         var maxD = 3526;
 
-        var mouseHist    = mouse.getHistory();
+        var mouseHistPos = mouse.getHistoryPos();
         var mouseHistDot = mouse.getHistoryDot();
 
         var targetLoc    = [x,y];
         var targetLocDot = Math.pow(x,2) + Math.pow(y,2);
 
-        var d3 = targetLocDot + mouseHistDot[3] - 2*(targetLoc[0]*mouseHist[3][0] + targetLoc[1]*mouseHist[3][1]);
-        var d2 = targetLocDot + mouseHistDot[2] - 2*(targetLoc[0]*mouseHist[2][0] + targetLoc[1]*mouseHist[2][1]);
-        var d1 = targetLocDot + mouseHistDot[1] - 2*(targetLoc[0]*mouseHist[1][0] + targetLoc[1]*mouseHist[1][1]);
-        var d0 = targetLocDot + mouseHistDot[0] - 2*(targetLoc[0]*mouseHist[0][0] + targetLoc[1]*mouseHist[0][1]);
+        var d3 = targetLocDot + mouseHistDot[0] - 2*(targetLoc[0]*mouseHistPos[0][0] + targetLoc[1]*mouseHistPos[0][1]);
+        var d2 = targetLocDot + mouseHistDot[1] - 2*(targetLoc[0]*mouseHistPos[1][0] + targetLoc[1]*mouseHistPos[1][1]);
+        var d1 = targetLocDot + mouseHistDot[2] - 2*(targetLoc[0]*mouseHistPos[2][0] + targetLoc[1]*mouseHistPos[2][1]);
+        var d0 = targetLocDot + mouseHistDot[3] - 2*(targetLoc[0]*mouseHistPos[3][0] + targetLoc[1]*mouseHistPos[3][1]);
 
         d3 = d3/Math.pow(maxD,2);
         d2 = d2/Math.pow(maxD,2);

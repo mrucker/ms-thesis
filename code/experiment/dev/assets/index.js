@@ -34,8 +34,9 @@ $(document).ready( function () {
 
     var startAnimation = function(contentId) {
         
-        timer.onStop(function () { stopEverything(); showModalContent(contentId); });
-        
+        counter.onElapsed(startObserving);
+        timer  .onElapsed(function () { stopEverything(); showModalContent(contentId); });
+
         canvas .startAnimating();
         counter.startCounting();
         targets.startAppearing();
@@ -49,20 +50,19 @@ $(document).ready( function () {
         canvas .stopAnimating();
     };
 
-    var startExperiment = function () {
-        timer.startTiming();
-        experiment.beginExperiment();
+    var startObserving = function () {
+        timer     .startTiming();
+        experiment.startObserving();
     }
 
-    var stopExperiment = function() {
+    var stopObserving = function() {
         timer     .stopTiming();
-        experiment.endExperiment();
-        experiment.saveObservation(canvas.getWidth(), canvas.getHeight());
+        experiment.stopObserving();
     };
 
     var stopEverything = function() {
         stopAnimation();
-        stopExperiment();
+        stopObserving();
     };
 
     var resetEverything = function() {
@@ -70,8 +70,6 @@ $(document).ready( function () {
         timer     .reset();
         counter   .reset();
     };
-    
-    counter.onStop(startExperiment);
 
     $("#modal").on('hidden.bs.modal', function (e) {
         var contentId = $(this).data("contentId");

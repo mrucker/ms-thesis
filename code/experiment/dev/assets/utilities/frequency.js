@@ -1,4 +1,4 @@
-function Frequency()
+function Frequency(name, shouldLog)
 {
     var self       = this;
     var startTime  = undefined;
@@ -27,7 +27,12 @@ function Frequency()
     this.cycle = function() {
         if(startTime && !stopTime) {
             cycleCount++;
+            
+            if(shouldLog && cycleCount % 100 == 0) {
+                console.log(name + ": " + self.getHz());
+            }
         }
+        
     }    
     
     this.correctedHz = function(newCycles, targetHz) {
