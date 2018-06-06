@@ -21,7 +21,7 @@ $(document).ready( function () {
     var targets = new Targets(mouse);
 
     var participant = new Participant();
-    var experiment  = new Experiment(participant, mouse, targets, canvas);
+    var experiment  = {};
 
     canvas.draw = function(canvas) {
         
@@ -34,7 +34,7 @@ $(document).ready( function () {
 
     var startAnimation = function(contentId) {
         
-        counter.onElapsed(startObserving);
+        counter.onElapsed(startExperiment);
         timer  .onElapsed(function () { stopEverything(); showModalContent(contentId); });
 
         canvas .startAnimating();
@@ -50,25 +50,26 @@ $(document).ready( function () {
         canvas .stopAnimating();
     };
 
-    var startObserving = function () {
+    var startExperiment = function() {
         timer     .startTiming();
-        experiment.startObserving();
+        experiment.startExperiment();
     }
 
-    var stopObserving = function() {
+    var stopExperiment = function() {
         timer     .stopTiming();
-        experiment.stopObserving();
+        experiment.stopExperiment();
     };
 
     var stopEverything = function() {
         stopAnimation();
-        stopObserving();
+        stopExperiment();
     };
 
     var resetEverything = function() {
-        experiment.reset();
-        timer     .reset();
-        counter   .reset();
+        
+        experiment = new Experiment(participant.getId(), mouse, targets);        
+        timer  .reset();
+        counter.reset();
     };
 
     $("#modal").on('hidden.bs.modal', function (e) {
@@ -90,7 +91,11 @@ $(document).ready( function () {
     showModalContent("dialog0");
         
     function getDemographics() {
-        return "{" + $("#modal form").serializeArray().map(function(o) { return '"' + o.name +'":"' + o.value + '"' }).join(",") + "}";
+        var obj = {};
+
+        $("#modal form").serializeArray().forEach(function(o) { obj[o.name] =  o.value; });
+
+        return obj;
     }
     
     function showModalContent(contentId) {

@@ -44,9 +44,9 @@ function Frequency(name, shouldLog)
         
         var targetCycles            = cycleCount + newCycles;
         var timeToReachTargetCycles = targetCycles/targetHz;
-        var currentTime             = self.runTime();
+        var currentTimeTimeRunning  = self.runTime();
         
-        return newCycles/(timeToReachTargetCycles - currentTime)
+        return newCycles/(timeToReachTargetCycles - currentTimeTimeRunning)
     }
 
     this.getHz = function() {
