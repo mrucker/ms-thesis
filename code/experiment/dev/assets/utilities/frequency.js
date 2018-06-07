@@ -10,7 +10,7 @@ function Frequency(name, shouldLog)
     }
     
     this.runTime = function() {
-        
+
         return !startTime ? 0 : ((stopTime || performance.now()) - startTime)/1000            
     }
     

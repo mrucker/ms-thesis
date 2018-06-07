@@ -7,12 +7,12 @@ function Observations(participantId, experimentId, mouse, targets)
     var errors  = [];
 
     var maxToSave    = 900;
-    var minToSave    = 30;
+    var minToSave    = 60;
     var obsInQueue   = [];
     var obsInMemory  = [];
     var saveRequests = [];
 
-    var ops     = new Frequency("ops", true);
+    var ops     = new Frequency("ops", false);
     var ops_Hz  = 60;
 
     this.getObservations = function() {
@@ -21,6 +21,14 @@ function Observations(participantId, experimentId, mouse, targets)
 
     this.getTouches = function() {
         return touches;
+    }
+    
+    this.getHz = function () {
+        return ops.getHz();
+    }
+    
+    this.getErrors =function () {
+        return errors;
     }
 
     this.startObserving = function() {
@@ -50,8 +58,8 @@ function Observations(participantId, experimentId, mouse, targets)
 
         save();
         
-        console.log(JSON.stringify(Observations.toStates(obsInMemory)));
-        console.log(JSON.stringify(Observations.toActions(obsInMemory)));
+        //console.log(JSON.stringify(Observations.toStates(obsInMemory)));
+        //console.log(JSON.stringify(Observations.toActions(obsInMemory)));
     }
 
     function observe() {
@@ -59,7 +67,8 @@ function Observations(participantId, experimentId, mouse, targets)
 
             ops.cycle();
 
-            var observation = {"mouseData": mouse.getData(), "targetData": targets.getData() };
+            //var observation = {"mouseData": mouse.getData(), "targetData": targets.getData() };
+            var observation = mouse.getData().concat(targets.getData().toFlat());
             
             obsInMemory.push(observation);
             obsInQueue .push(observation);
@@ -93,7 +102,7 @@ function Observations(participantId, experimentId, mouse, targets)
             }).fail(function() {
                 save(obsToSave, attempt+1);
             });
-            
+
             saveRequests.push(saveRequest);
         }
     }

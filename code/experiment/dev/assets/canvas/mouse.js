@@ -13,12 +13,12 @@ function Mouse(canvas)
         
         mps.start();
         
-        canvas.addDeviceMoveListener(onMouseMove);
+        canvas.addOnDeviceMove(onDeviceMove);
     };
 
     this.stopTracking = function () {
 
-        canvas.removeDeviceMoveListener(onMouseMove);
+        canvas.removeOnDeviceMove(onDeviceMove);
 
         mps.stop();
 
@@ -56,7 +56,7 @@ function Mouse(canvas)
         context.fillRect(effectiveX - 3, effectiveY - 3, 6, 6);
     };
     
-    function onMouseMove(x,y) {
+    function onDeviceMove(x,y) {
         mps.cycle();
                 
         position.x = x;

@@ -52,7 +52,7 @@ function Timer(timeFor, isCountdown)
         context.textAlign    = 'right';
         
         context.fillStyle = 'rgb(100,100,100)';
-        context.fillText(text,canvas.getWidth(),canvas.getHeight());
+        context.fillText(text,canvas.getResolution(0),canvas.getResolution(1));
     }
     
     function timeAsText() {

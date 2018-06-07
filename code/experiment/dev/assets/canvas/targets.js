@@ -115,8 +115,8 @@ function TargetBase(x,y,d,r,g,b, mouse)
     var touchedBefore   = false;
     var self            = this;
 
-    this.getX        = function() { return x; };
-    this.getY        = function() { return y; };
+    this.getX        = function() { return effectiveX; };
+    this.getY        = function() { return effectiveY; };
     this.getAge      = function() { return Date.now() - createTime; };
     this.getData     = function() { return [self.getX(), self.getY(), self.getAge()]; };
     this.getLifeSpan = function() { return fadeInTime + fadeOffTime + fadeOutTime; };
@@ -194,16 +194,16 @@ function TargetBase(x,y,d,r,g,b, mouse)
 
     this.drawCircle = function(canvas){
 
-        effectiveA = (canvas.getHeight()/1500) * (canvas.getWidth()/3000) * (Math.PI * originalR * originalR);
+        effectiveA = (canvas.getResolution(1)/1500) * (canvas.getResolution(0)/3000) * (Math.PI * originalR * originalR);
         effectiveR = Math.round(Math.sqrt(effectiveA/Math.PI),0);
 
-        originalWidth   = originalWidth  || canvas.getWidth();
-        originalHeight  = originalHeight || canvas.getHeight();
-        originalX       = originalX      || (canvas.getWidth()  - effectiveR*2) * Math.random() + effectiveR;
-        originalY       = originalY      || (canvas.getHeight() - effectiveR*2) * Math.random() + effectiveR;
+        originalWidth   = originalWidth  || canvas.getResolution(0);
+        originalHeight  = originalHeight || canvas.getResolution(1);
+        originalX       = originalX      || (canvas.getResolution(0) - effectiveR*2) * Math.random() + effectiveR;
+        originalY       = originalY      || (canvas.getResolution(1) - effectiveR*2) * Math.random() + effectiveR;
         
-        effectiveX = Math.round((originalX/originalWidth ) * canvas.getWidth() ,0);
-        effectiveY = Math.round((originalY/originalHeight) * canvas.getHeight(),0);
+        effectiveX = Math.round((originalX/originalWidth ) * canvas.getResolution(0) ,0);
+        effectiveY = Math.round((originalY/originalHeight) * canvas.getResolution(1),0);
 
         var context   = canvas.getContext2d();
 
@@ -215,17 +215,17 @@ function TargetBase(x,y,d,r,g,b, mouse)
     
     this.drawSquare = function(canvas){
 
-        effectiveA = (canvas.getHeight()/1500) * (canvas.getWidth()/3000) * (Math.PI * originalR * originalR);
+        effectiveA = (canvas.getResolution(1)/1500) * (canvas.getResolution(0)/3000) * (Math.PI * originalR * originalR);
         effectiveL = Math.round(Math.sqrt(effectiveA),0);
         effectiveR = effectiveL/2;
 
-        originalWidth   = originalWidth  || canvas.getWidth();
-        originalHeight  = originalHeight || canvas.getHeight();
-        originalX       = originalX      || (canvas.getWidth()  - effectiveR*2) * Math.random() + effectiveR;
-        originalY       = originalY      || (canvas.getHeight() - effectiveR*2) * Math.random() + effectiveR;
+        originalWidth   = originalWidth  || canvas.getResolution(0);
+        originalHeight  = originalHeight || canvas.getResolution(1);
+        originalX       = originalX      || (canvas.getResolution(0) - effectiveR*2) * Math.random() + effectiveR;
+        originalY       = originalY      || (canvas.getResolution(1) - effectiveR*2) * Math.random() + effectiveR;
         
-        effectiveX = Math.round((originalX/originalWidth ) * canvas.getWidth() ,0);
-        effectiveY = Math.round((originalY/originalHeight) * canvas.getHeight(),0);
+        effectiveX = Math.round((originalX/originalWidth ) * canvas.getResolution(0) ,0);
+        effectiveY = Math.round((originalY/originalHeight) * canvas.getResolution(1),0);
         
         var context = canvas.getContext2d();
 
@@ -235,16 +235,16 @@ function TargetBase(x,y,d,r,g,b, mouse)
     
     this.drawImage = function(canvas){
         
-        effectiveA = (canvas.getHeight()/1500) * (canvas.getWidth()/3000) * (Math.PI * originalR * originalR);
+        effectiveA = (canvas.getResolution(1)/1500) * (canvas.getResolution(0)/3000) * (Math.PI * originalR * originalR);
         effectiveR = Math.round(Math.sqrt(effectiveA/Math.PI),0);
     
-        originalWidth   = originalWidth  || canvas.getWidth();
-        originalHeight  = originalHeight || canvas.getHeight();
-        originalX       = originalX      || (canvas.getWidth()  - effectiveR*2) * Math.random() + effectiveR;
-        originalY       = originalY      || (canvas.getHeight() - effectiveR*2) * Math.random() + effectiveR;
+        originalWidth   = originalWidth  || canvas.getResolution(0);
+        originalHeight  = originalHeight || canvas.getResolution(1);
+        originalX       = originalX      || (canvas.getResolution(0) - effectiveR*2) * Math.random() + effectiveR;
+        originalY       = originalY      || (canvas.getResolution(1) - effectiveR*2) * Math.random() + effectiveR;
         
-        effectiveX = Math.round((originalX/originalWidth ) * canvas.getWidth() ,0);
-        effectiveY = Math.round((originalY/originalHeight) * canvas.getHeight(),0);
+        effectiveX = Math.round((originalX/originalWidth ) * canvas.getResolution(0) ,0);
+        effectiveY = Math.round((originalY/originalHeight) * canvas.getResolution(1),0);
                 
         var context = canvas.getContext2d();
         

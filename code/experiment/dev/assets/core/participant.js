@@ -10,7 +10,7 @@ function Participant(canvas)
             putRequest = $.ajax({
                 "url   ":"https://api.thesis.markrucker.net/v1/participants/" + id,
                 "method":"PUT",
-                "data"  : data
+                "data"  : JSON.stringify(data)
             });
         }
         else {

@@ -1,41 +1,41 @@
-function Experiment(participantId, mouse, targets)
+function Experiment(participantId, canvas, mouse, targets)
 {
-    var id           = Id.generate();
-    var self         = this;
-    var startTime    = undefined;
-    var stopTime     = undefined;
-    var observations = new Observations(participantId, id, mouse, targets);
-    var errors       = [];
-    var putRequest   = undefined;
+    var id     = Id.generate();
+    var self   = this;
+    var obs    = new Observations(participantId, id, mouse, targets);    
+    var put    = undefined;
+    var errors = [];
+    var fps    = new Frequency("fps", true);
     
     this.draw = function(canvas) {
+        fps.cycle();
     }
 
     this.startExperiment = function() {
+        fps.start();
+        obs.startObserving();        
 
-        observations.startObserving();        
-
-        //Measurements to add: Feature Weights, Window Size, Window Resolution
-        self.saveData({"startTime":new Date().toUTCString()});
+        //Measurements to add: Feature Weights
+        self.saveData({"startTime":new Date().toUTCString(), "dimensions": canvas.getDimensions(), "resolution": canvas.getResolution()});
     }
 
     this.stopExperiment = function () {
-        observations.stopObserving();        
-
-        //Measurements to add: FPS, OPS, errorMessages
-        self.saveData({"stopTime":new Date().toUTCString()});
+        fps.stop();
+        obs.stopObserving();        
+        
+        self.saveData({"stopTime":new Date().toUTCString(), "fps": fps.getHz(), "ops": obs.getHz(), "errors" : errors.concat(obs.getErrors()) });
     }
 
     this.saveData = function(data) {
-        if(!putRequest) {
-            putRequest = $.ajax({
+        if(!put) {
+            put = $.ajax({
                 "url   ":"https://api.thesis.markrucker.net/v1/participants/" + participantId + "/experiments/" + id,
                 "method":"PUT",
                 "data"  : JSON.stringify(data)
             });
         }
         else {
-            putRequest.done(function(){
+            put.done(function(){
                 $.ajax({
                     "url"   :"https://api.thesis.markrucker.net/v1/participants/" + participantId + "/experiments/" + id,
                     "method":"PATCH",

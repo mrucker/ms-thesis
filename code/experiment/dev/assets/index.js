@@ -67,7 +67,7 @@ $(document).ready( function () {
 
     var resetEverything = function() {
         
-        experiment = new Experiment(participant.getId(), mouse, targets);        
+        experiment = new Experiment(participant.getId(), canvas, mouse, targets);
         timer  .reset();
         counter.reset();
     };
@@ -108,5 +108,9 @@ $(document).ready( function () {
         $("#modal").removeClass("fade").addClass($("#"+ contentId).data("fadeIn"));
         $('#modal').modal('show');
         $("#modal").removeClass("fade").addClass($("#"+ contentId).data("fadeOut"));
+        
+        if(contentId == "dialog7") {
+            console.log(requestStats);
+        }
     }
 });

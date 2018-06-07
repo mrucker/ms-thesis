@@ -55,8 +55,8 @@ function Counter(countFrom, countFor, isCountdown)
     
     function drawText(canvas, text) {
         var context   = canvas.getContext2d();
-        var centerX   = Math.round(canvas.getWidth()/2,0);
-        var centerY   = Math.round(canvas.getHeight()/2,0);
+        var centerX   = Math.round(canvas.getResolution(0)/2,0);
+        var centerY   = Math.round(canvas.getResolution(1)/2,0);
         
         context.font         = '100px Arial';
         context.textAlign    = 'center';

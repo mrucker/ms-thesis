@@ -1,31 +1,44 @@
 function Canvas(canvas)
 {
-    var self          = this;
-    var everyother    = false;
-    var moveListener  = undefined;
-    var startTime     = undefined;
-    var stopTime      = undefined;
-    var fps           = new Frequency("fps", true);
-    
-    var temp = canvas.getContext('2d');
+    var self       = this;    
+    var everyother = false;
+    var onMove     = undefined;
+    var started    = undefined;
+    var stopped    = undefined;
+    var fps        = new Frequency("fps", false);
     
     this.getContext2d = function() {
         return canvas.getContext('2d');
     };
     
-    this.getWidth = function() {
-        return canvas.width;
-    };
+    this.getDimensions = function(dim) {
+        if(dim != 0 && dim != 1 && dim != undefined) {
+            throw "invalid dimension";
+        }
+
+        if(dim == undefined) {
+            return [canvas.style.width, canvas.style.height];
+        }
+        
+        return [canvas.style.width, canvas.style.height][dim]
+    }
     
-    this.getHeight = function() {
-        return canvas.height;
-    };        
- 
+    this.getResolution = function(dim) {
+        if(dim != 0 && dim != 1 && dim != undefined) {
+            throw "invalid dimension";
+        }
+
+        if(dim == undefined) {
+            return [canvas.width, canvas.height];
+        }
+        
+        return [canvas.width, canvas.height][dim]    }
+     
     this.startAnimating = function () {
         fps.start(); 
         
-        startTime = new Date().toUTCString();
-        stopTime  = undefined;
+        started = true;
+        stopped = false;
         
         window.requestAnimationFrame(animate);
     };
@@ -33,24 +46,24 @@ function Canvas(canvas)
     this.stopAnimating = function () {
         fps.stop();
         
-        stopTime = performance.now();
+        stopped = true;
     };
     
     this.getFPS = function() {
         return Math.round(fps.getHz(),0);
     }
     
-    this.addDeviceMoveListener = function(callback) {
+    this.addOnDeviceMove = function(callback) {
 
         canvas.addEventListener("mousemove", onMouseMove, false);
         canvas.addEventListener("touchmove", onTouchMove, false);
 
-        moveListener = callback;
+        onMove = callback;
     }
 
-    this.removeDeviceMoveListener = function(callback) {
+    this.removeOnDeviceMove = function(callback) {
 
-        moveListener = undefined;
+        onMove = undefined;
 
         canvas.removeEventListener("mousemove", onMouseMove);
         canvas.removeEventListener("touchmove", onTouchMove);
@@ -59,7 +72,7 @@ function Canvas(canvas)
     this.draw = function(canvas) {}
 
     this.wipe = function (canvas) {
-        canvas.getContext2d().clearRect(0,0, this.getWidth(), this.getHeight());
+        canvas.getContext2d().clearRect(0,0, self.getResolution(0), self.getResolution(1));
     }
 
     this.resize = function(styleW, styleH) {
@@ -88,21 +101,21 @@ function Canvas(canvas)
             context.fillText(self.getFPS(), 0, 0);
         }
 
-        if(startTime && !stopTime) {
+        if(started && !stopped) {
             window.requestAnimationFrame(animate);
         }
     };
 
     function onMouseMove(e) {
-        onInputMove(e.clientX, e.clientY);
+        onDeviceMove(e.clientX, e.clientY);
     }
 
     function onTouchMove(e) {
-        onInputMove(e.touches[0].clientX, e.touches[0].clientY);
+        onDeviceMove(e.touches[0].clientX, e.touches[0].clientY);
         e.preventDefault();
     }
 
-    function onInputMove(clientX,clientY) {
+    function onDeviceMove(clientX,clientY) {
 
         // the clientX and clientY values are the mouse (x,y) coordinates relative to the viewable browser window.
         // This means things like, if the user is scrolled down on a page, the top left of the visible page is still coordinate (0,0).
@@ -115,7 +128,8 @@ function Canvas(canvas)
         var relativeX = (clientX - scrollDifferenceLeft) * resolutionDifference;
         var relativeY = (clientY - scrollDifferenceTop ) * resolutionDifference;
         
-        moveListener(relativeX, relativeY);
+        
+        onMove(relativeX, relativeY);
     }
     
 }
