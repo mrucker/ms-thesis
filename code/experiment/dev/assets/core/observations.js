@@ -1,4 +1,4 @@
-function Observations(participantId, experimentId, mouse, targets, maximumObservations)
+function Observations(participantId, experimentId, mouse, targets, maxPerSession)
 {
     var self    = this;
     var started = false;
@@ -6,8 +6,9 @@ function Observations(participantId, experimentId, mouse, targets, maximumObserv
     var touches = 0;
     var errors  = [];
 
-    var maxToSave    = 900;
-    var minToSave    = 60;
+    var maxAttempts  = 1;
+    var maxPerSave   = 900;
+    var minPerSave   = 60;
     var obsInQueue   = [];
     var obsInMemory  = [];
     var saveRequests = [];
@@ -56,27 +57,28 @@ function Observations(participantId, experimentId, mouse, targets, maximumObserv
         stopped = true;
         ops.stop();
 
-        save();
+        save(obsInQueue);
+        obsInQueue = [];
         
         //console.log(JSON.stringify(Observations.toStates(obsInMemory)));
         //console.log(JSON.stringify(Observations.toActions(obsInMemory)));
     }
 
     function observe() {
-        if(started && !stopped && obsInMemory.length < maximumObservations) {
+        if(started && !stopped && obsInMemory.length < maxPerSession) {
 
             ops.cycle();
 
             //25% reduction in data transmission if I send observation as array of arrays rather than key/values
-            var observation = [obsInMemory.length+1, mouse.getData().concat(targets.getData().toFlat()];
+            var observation = [obsInMemory.length+1, mouse.getData().concat(targets.getData().toFlat())];
             //var observation = mouse.getData().concat(targets.getData().toFlat());
             
             obsInMemory.push(observation);
             obsInQueue .push(observation);
 
-            if(obsInQueue.length >= minToSave) {
-                save(obsInQueue.slice(0, maxToSave));
-                obsInQueue = obsInQueue.slice(maxToSave);
+            if(obsInQueue.length >= minPerSave) {
+                save(obsInQueue.slice(0, maxPerSave));
+                obsInQueue = obsInQueue.slice(maxPerSave);
             }
 
             touches += targets.touchCount();
@@ -90,14 +92,14 @@ function Observations(participantId, experimentId, mouse, targets, maximumObserv
         attempt = attempt || 1;
 
         if(!obsToSave) {
-            errors.push("Save command called without any data. Attempt " + attempt + ".");
+            errors.push("Save command called without any data on attempt " + attempt + ".");
         }
-        else if(attempt > 3) {
+        else if(attempt > maxAttempts) {
             errors.push("Gave up trying to save observations after three failed attempts. " + obsToSave.length + " observations lost." );
         }
         else {
             var saveRequest = $.ajax({
-                "url   ":"https://api.thesis.markrucker.net/v1/participants/" + participantId + "/experiments/" + experimentId + "/observations/",
+                "url"   :"https://api.thesis.markrucker.net/v1/participants/" + participantId + "/experiments/" + experimentId + "/observations/",
                 "method":"POST",
                 "data"  : JSON.stringify(obsToSave)
             }).fail(function() {

@@ -1,16 +1,16 @@
-var requestStats = {
-    totalCount:0,
-    totalSize :0
-};
+// var requestStats = {
+    // totalCount:0,
+    // totalSize :0
+// };
 
-const utf8CharacterSize = 1; //byte
+// const utf8CharacterSize = 1; //byte
 
-$.ajax = function(params) {
+// $.ajax = function(params) {
     
-    requestStats.totalCount++;
-    requestStats.totalSize += params.data.length * utf8CharacterSize;
+    // requestStats.totalCount++;
+    // requestStats.totalSize += params.data.length * utf8CharacterSize;
 
-    console.log(params);
+    // console.log(params);
     
-    return $.Deferred().resolve();
-}
+    // return $.Deferred().resolve();
+// }

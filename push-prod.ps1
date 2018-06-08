@@ -1,4 +1,4 @@
-write-host "building..." -foregroundcolor green
+write-host "minifying..." -foregroundcolor green
 Get-ChildItem code\experiment\dev\assets\*.js         -recurse                                | get-content | uglifyjs > code\experiment\prod\assets.js
 Get-ChildItem code\experiment\dev\assets\*.css        -recurse                                | get-content            > code\experiment\prod\assets.css
 Get-ChildItem code\experiment\dev\libraries\*.js      -recurse                                | get-content | uglifyjs > code\experiment\prod\libraries.js

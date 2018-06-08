@@ -5,7 +5,7 @@ function Experiment(participantId, canvas, mouse, targets)
     var errors = [];
     var post   = undefined;
     var obs    = new Observations(participantId, id, mouse, targets, 2000);
-    var fps    = new Frequency("fps", true);
+    var fps    = new Frequency("fps", false);
 
     this.draw = function(canvas) {
         fps.cycle();
@@ -23,13 +23,13 @@ function Experiment(participantId, canvas, mouse, targets)
         fps.stop();
         obs.stopObserving();
         
-        self.saveData({"stopTime":new Date().toUTCString(), "fps": fps.getHz(), "ops": obs.getHz(), "errors" : errors.concat(obs.getErrors()) });
+        self.saveData({"stopTime":new Date().toUTCString(), "fps": fps.getHz(), "ops": obs.getHz(), "errors" : errors.concat(obs.getErrors()).toDistinct() });
     }
 
     this.saveData = function(data) {        
         if(!post) {
             post = $.ajax({
-                "url   ":"https://api.thesis.markrucker.net/v1/participants/" + participantId + "/experiments/" + id,
+                "url"   :"https://api.thesis.markrucker.net/v1/participants/" + participantId + "/experiments/" + id,
                 "method":"POST",
                 "data"  : JSON.stringify(data)
             });
@@ -37,7 +37,7 @@ function Experiment(participantId, canvas, mouse, targets)
         else {
             post.done(function() {
                 $.ajax({
-                    "url   ":"https://api.thesis.markrucker.net/v1/participants/" + participantId + "/experiments/" + id,
+                    "url"   :"https://api.thesis.markrucker.net/v1/participants/" + participantId + "/experiments/" + id,
                     "method":"PATCH",
                     "data"  : JSON.stringify(data)
                 });

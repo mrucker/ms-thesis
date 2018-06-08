@@ -16,11 +16,14 @@ function Canvas(canvas)
             throw "invalid dimension";
         }
 
+        var w = Number(canvas.style.width.trim().toLowerCase().replace("px",""));
+        var h = Number(canvas.style.height.trim().toLowerCase().replace("px",""));
+        
         if(dim == undefined) {
-            return [canvas.style.width, canvas.style.height];
+            return [w,h];
         }
         
-        return [canvas.style.width, canvas.style.height][dim]
+        return [w, h][dim]
     }
     
     this.getResolution = function(dim) {

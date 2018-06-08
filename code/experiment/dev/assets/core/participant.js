@@ -7,7 +7,7 @@ function Participant(canvas)
     
     this.saveData = function(data) {
         $.ajax({
-            "url   ":"https://api.thesis.markrucker.net/v1/participants/" + id,
+            "url"   :"https://api.thesis.markrucker.net/v1/participants/" + id,
             "method":"POST",
             "data"  : JSON.stringify(data)
         });
