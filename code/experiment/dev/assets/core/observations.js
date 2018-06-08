@@ -1,4 +1,4 @@
-function Observations(participantId, experimentId, mouse, targets)
+function Observations(participantId, experimentId, mouse, targets, maximumObservations)
 {
     var self    = this;
     var started = false;
@@ -63,18 +63,19 @@ function Observations(participantId, experimentId, mouse, targets)
     }
 
     function observe() {
-        if(started && !stopped) {
+        if(started && !stopped && obsInMemory.length < maximumObservations) {
 
             ops.cycle();
 
-            //var observation = {"mouseData": mouse.getData(), "targetData": targets.getData() };
-            var observation = mouse.getData().concat(targets.getData().toFlat());
+            //25% reduction in data transmission if I send observation as array of arrays rather than key/values
+            var observation = [obsInMemory.length+1, mouse.getData().concat(targets.getData().toFlat()];
+            //var observation = mouse.getData().concat(targets.getData().toFlat());
             
             obsInMemory.push(observation);
             obsInQueue .push(observation);
 
             if(obsInQueue.length >= minToSave) {
-                save(obsInQueue.slice(0, maxToSave));                
+                save(obsInQueue.slice(0, maxToSave));
                 obsInQueue = obsInQueue.slice(maxToSave);
             }
 
@@ -130,7 +131,7 @@ Observations.toActions = function(observations) {
         var prevState_x = observations[3+i-1].mouseData[0];
         var prevState_y = observations[3+i-1].mouseData[1];
 
-        return i == 0 ? [0,0] : [ thisState_x - prevState_x, thisState_y - prevState_y ];            
+        return i == 0 ? [0,0] : [ thisState_x - prevState_x, thisState_y - prevState_y ];
     });
     
     return actions;

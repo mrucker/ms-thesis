@@ -16,7 +16,7 @@ My API's custom domain
 
 The general community's idea on REST API's 
     http://www.restapitutorial.com/lessons/httpmethods.html
-    https://en.wikipedia.org/wiki/Representational_state_transfer#Architectural_constraints
+    https://en.wikipedia.org/wiki/Representational_state_transfer#Applied_to_web_services
     https://stackoverflow.com/a/2022938/1066291
 
 HTTP Verbs
@@ -29,12 +29,55 @@ HTTP Verbs
     > Post   (create)
     > Put    (update)[idempodent]
 
-My REST API
-    /Participants
+api v1
+    /participants
         > POST  [create participant]
-    /Experiments
+    /experiments
         > POST  [create experiment]
-    /Experiments/{id}
+    /experiments/{id}
         > PUT   [update experiment]
-    /Observations
+    /observations
         > PATCH [create observation]
+        
+api v2
+    /participants
+        > POST  [create participant]
+    /participants/{participantId}/experiments
+        > POST  [create experiment]
+    /participants/{participantId}/experiments/{experimentId}
+        > PATCH   [update experiment]
+    /observations
+        > POST [create observation]
+        
+api v3
+    /participants
+        > POST  [create participant]  (no update means good data can't be corrupted. it doesn't prevent bad data from being written)
+    /experiments
+        > POST  [create experiment]   (no update means good data can't be corrupted. it doesn't prevent bad data from being written)
+    /observations
+        > POST  [create observations] (no update means good data can't be corrupted. it doesn't prevent bad data from being written)
+
+api v4
+    /participants
+        > POST  [create participant]  (no update means good data can't be corrupted. it doesn't prevent bad data from being written)
+    /participants/{participantId}/experiments
+        > POST  [create experiment]   (no update means good data can't be corrupted. it doesn't prevent bad data from being written)
+    /participants/{participantId}/experiments/{experimentId}/observations
+        > POST  [create observations] (no update means good data can't be corrupted. it doesn't prevent bad data from being written)
+        
+Advantages to v4 over v1,v2,v3
+    Better than v3    > More data efficient (by placing the relationship ids in the URL we prevent duplicate date transmission)
+    Better than v1/v2 > By only allowing POSTS (aka, create) it is impossible for malicious actors to scrub good data. They can only add bad data.
+    
+api v5
+    /participants
+        > POST  [create participant]  (no update means good data can't be corrupted. it doesn't prevent bad data from being written)
+    /participants/{participantId}/experiments
+        > POST  [create experiment]   (no update means good data can't be corrupted. it doesn't prevent bad data from being written)
+        > PATCH [only new fields  ]   (only new  means good data can't be corrupted. it doesn't prevent bad data from being written)
+    /participants/{participantId}/experiments/{experimentId}/observations
+        > POST  [create observations] (no update means good data can't be corrupted. it doesn't prevent bad data from being written)
+        
+Advantages to v5 over v4
+    > adding the PATCH verb makes the partial post easier since we know by the verb which dynamodb action to take
+
