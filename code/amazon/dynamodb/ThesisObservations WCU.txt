@@ -1,0 +1,46 @@
+If I round my numbers to whole numbers then each data point will take either 2 or 3 bytes. [1]
+
+This means an individual observation has max size 3 bytes for name (aka, sequenceNumber) + its number count * 3
+    i.e. "<sequenceNumber>" : [<list of numbers in observation>]
+
+For a given observation there are 9 numeric data points
+    
+    Mouse
+        1. x
+        2. y
+
+    Target
+        3. x
+        4. y        
+        7. age
+        8. reward
+        -- radius  (maybe store this in ThesisExperiments as well and assume screen size doesn't change?)
+        -- opacity (maybe store the rule to calculate this as a field in ThesisExperiments?)
+        -- color   (maybe store the rule to calculate this as a field in ThesisExperiments?)
+        -- features? (I think this takes up too much data bandwidth for something I can easily re-calculate -- assuming there are no bugs in my code)
+
+So an individual observation in DDB should have a maximum size of
+
+    2*3 + targetCount*4*3 = 66 or so bytes (assuming 5 targets)
+    
+So a full session then would have a theoretical size of
+    
+    30 * 900 = 27KB
+    
+Or if I only do one sequence number for every 30 observations then
+
+    (3 + 9*3*30) * 30 = 25KB <though my observation becomes a list of lists... much less human readable than a map. Does that matter?>
+    
+So, in theory, and with perfect efficiency, I could record a single experiment, all at once, with 25 WCU. 
+
+If I consider though that an experiment will take place over time I can do even better than 25 WCU. I only need 2 WCU. Consider:
+    If I observe at 60HZ and write 30 observations at a time then I will need 2 WCU for an individual person.
+
+If I send 60 at a time...
+
+I could write 30 at a time... which would give me 900 bytes
+
+
+
+[1] https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/CapacityUnitCalculations.html
+[2]

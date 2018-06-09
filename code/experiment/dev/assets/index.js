@@ -85,7 +85,7 @@ $(document).ready( function () {
         }
         if(contentId == "dialog5") { resetEverything(); startAnimation("dialog6"); }
         if(contentId == "dialog6") { resetEverything(); startAnimation("dialog7"); }
-        if(contentId == "dialog7") { resetEverything(); startAnimation("dialog6"); }
+        if(contentId == "dialog7") { $("#c").css("display","none"); $("#thanks").css("display","block"); }
     })
     
     showModalContent("dialog0");
@@ -109,7 +109,7 @@ $(document).ready( function () {
         $('#modal').modal('show');
         $("#modal").removeClass("fade").addClass($("#"+ contentId).data("fadeOut"));
         
-        if(contentId == "dialog7") {
+        if(contentId == "dialog7" && requestStats.totalCount != 0) {
             console.log(requestStats);
         }
     }

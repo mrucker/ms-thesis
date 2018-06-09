@@ -1,20 +1,21 @@
-function Observations(participantId, experimentId, mouse, targets, maxPerSession)
+function Observations(participantId, experimentId, mouse, targets)
 {
     var self    = this;
     var started = false;
     var stopped = false;
     var touches = 0;
     var errors  = [];
-
-    var maxAttempts  = 1;
-    var maxPerSave   = 900;
-    var minPerSave   = 60;
+    
+    var payloadSize  = 30;
     var obsInQueue   = [];
     var obsInMemory  = [];
     var saveRequests = [];
 
     var ops     = new Frequency("ops", false);
-    var ops_Hz  = 60;
+    var ops_Hz  = 30;
+    
+    var maxAttempts     = 2;
+    var maxObservations = 15*ops_Hz; //to protect myself from a bug writing a crazy amount of data.
 
     this.getObservations = function() {
         return obsInMemory;
@@ -65,20 +66,20 @@ function Observations(participantId, experimentId, mouse, targets, maxPerSession
     }
 
     function observe() {
-        if(started && !stopped && obsInMemory.length < maxPerSession) {
+        if(started && !stopped && obsInMemory.length < maxObservations) {
 
             ops.cycle();
 
             //25% reduction in data transmission if I send observation as array of arrays rather than key/values
-            var observation = [obsInMemory.length+1, mouse.getData().concat(targets.getData().toFlat())];
+            var observation = mouse.getData().concat(targets.getData().toFlat());
             //var observation = mouse.getData().concat(targets.getData().toFlat());
             
             obsInMemory.push(observation);
             obsInQueue .push(observation);
 
-            if(obsInQueue.length >= minPerSave) {
-                save(obsInQueue.slice(0, maxPerSave));
-                obsInQueue = obsInQueue.slice(maxPerSave);
+            if(obsInQueue.length >= payloadSize) {
+                save(obsInQueue.slice(0, payloadSize));
+                obsInQueue = obsInQueue.slice(payloadSize);
             }
 
             touches += targets.touchCount();
@@ -89,6 +90,10 @@ function Observations(participantId, experimentId, mouse, targets, maxPerSession
     
     function save(obsToSave, attempt) {
 
+        if(obsToSave.length == 0) {
+            return;
+        }
+    
         attempt = attempt || 1;
 
         if(!obsToSave) {
@@ -101,7 +106,7 @@ function Observations(participantId, experimentId, mouse, targets, maxPerSession
             var saveRequest = $.ajax({
                 "url"   :"https://api.thesis.markrucker.net/v1/participants/" + participantId + "/experiments/" + experimentId + "/observations/",
                 "method":"POST",
-                "data"  : JSON.stringify(obsToSave)
+                "data"  : JSON.stringify([saveRequests.length + 1, obsToSave])
             }).fail(function() {
                 save(obsToSave, attempt+1);
             });

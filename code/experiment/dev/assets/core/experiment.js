@@ -4,7 +4,7 @@ function Experiment(participantId, canvas, mouse, targets)
     var self   = this;
     var errors = [];
     var post   = undefined;
-    var obs    = new Observations(participantId, id, mouse, targets, 2000);
+    var obs    = new Observations(participantId, id, mouse, targets);
     var fps    = new Frequency("fps", false);
 
     this.draw = function(canvas) {
@@ -23,7 +23,7 @@ function Experiment(participantId, canvas, mouse, targets)
         fps.stop();
         obs.stopObserving();
         
-        self.saveData({"stopTime":new Date().toUTCString(), "fps": fps.getHz(), "ops": obs.getHz(), "errors" : errors.concat(obs.getErrors()).toDistinct() });
+        self.saveData({"stopTime":new Date().toUTCString(), "fps": fps.getHz(), "ops": obs.getHz(), "errors" : errors.concat(obs.getErrors()).toDistinct()});
     }
 
     this.saveData = function(data) {        

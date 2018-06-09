@@ -96,12 +96,12 @@ function Canvas(canvas)
             self.wipe(self);
             self.draw(self);
 
-            var context   = self.getContext2d();
-            context.fillStyle    = 'rgb(100,100,100)';
-            context.font         = '48px Arial';
-            context.textAlign    = 'left';
-            context.textBaseline = 'top';
-            context.fillText(self.getFPS(), 0, 0);
+            // var context = self.getContext2d();
+            // context.fillStyle    = 'rgb(100,100,100)';
+            // context.font         = '48px Arial';
+            // context.textAlign    = 'left';
+            // context.textBaseline = 'top';
+            // context.fillText(self.getFPS(), 0, 0);
         }
 
         if(started && !stopped) {

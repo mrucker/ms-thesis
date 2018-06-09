@@ -114,14 +114,24 @@ function TargetBase(x,y,d,r,g,b, mouse)
     var createTime      = Date.now();
     var touchedBefore   = false;
     var self            = this;
-
+    
+    this.getR        = function() { return effectiveR; };
     this.getX        = function() { return effectiveX; };
     this.getY        = function() { return effectiveY; };
-    this.getAge      = function() { return Date.now() - createTime; };
-    this.getData     = function() { return [self.getX(), self.getY(), self.getAge()]; };
+    this.getAge      = function() { return Date.now() - createTime; };    
     this.getLifeSpan = function() { return fadeInTime + fadeOffTime + fadeOutTime; };
     this.isDead      = function() { return self.getAge() > self.getLifeSpan() };
 
+    this.getData     = function() { 
+        return [
+            Math.round(self.getX()     ,0),
+            Math.round(self.getY()     ,0),
+            Math.round(self.getAge()   ,0),
+            Math.round(self.getReward(),2),
+            Math.round(self.getR()     ,2),
+        ]; 
+    };
+    
     this.isNewTouch = function() {
         
         if (self.isTouched() && !touchedBefore) {

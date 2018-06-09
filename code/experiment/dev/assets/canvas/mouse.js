@@ -42,7 +42,10 @@ function Mouse(canvas)
     }
 
     this.getData = function() {
-        return [self.getX(), self.getY()];
+        return [
+            Math.round(self.getX(), 0),
+            Math.round(self.getY(), 0)
+        ];
     }
 
     this.draw = function(canvas) {

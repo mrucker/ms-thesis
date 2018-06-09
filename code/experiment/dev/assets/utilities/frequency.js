@@ -53,6 +53,6 @@ function Frequency(name, shouldLog)
         
         if(self.runTime() == 0) throw "frequency measure was never started";
         
-        return cycleCount/self.runTime();
+        return Math.round(cycleCount/self.runTime());
     }    
 }

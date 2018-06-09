@@ -2,6 +2,14 @@
 *          { margin: 0; padding: 0;  }
 body, html { height:100%; }
 
+#thanks {
+    display:none;
+    position: absolute;
+    top: 50%;
+    left:50%;
+    transform: translate(-50%,-50%);
+}
+
 /*Center the canvas on the screen; https://stackoverflow.com/a/7782251/1066291*/
 #c {
     padding : 0;
