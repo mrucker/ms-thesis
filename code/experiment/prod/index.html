@@ -59,32 +59,44 @@
            The data collected by the experiment will be the position of the mouse cursor, position of the circles, age of the circles, size of the circles and the screen display size. No identifying information will be collected, but we will also ask about your age, gender, and device parameters. If you agree to this, please click "Agree" below.
         </div>
         <div id="dialog4" class="my-modal-content" data-btn-txt="Submit" data-fade-in=""     data-fade-out=""     data-title="Demographics">
-            Thank you for participating. Please answer the questions below to the best of your ability:
-            <form>
-                <div class="form-group">
-                    <label for="age" class="col-form-label">Age</label>
-                    <select id="age" name="age" class="form-control"> <option value="0">Select age:</option> <option>18-24 years old</option> <option>25-34 years old</option> <option>35-44 years old</option> <option>45-54 years old</option> <option>55+ years old</option> </select>
+            <p>Thank you for participating. </p>            
+            <p>Please answer the questions below to the best of your ability:</p>
+            <form novalidate>
+                <div class="form-group row">
+                    <label for="age" class="col-sm-2 col-form-label">Age</label>
+                    <div class="col-sm-9">
+                        <select id="age" class="form-control" name="age" required> <option value="">Select age:</option> <option>18-24 years old</option> <option>25-34 years old</option> <option>35-44 years old</option> <option>45-54 years old</option> <option>55+ years old</option> </select>
+                        <div class="invalid-feedback"> Please select an age. </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="gender" class="col-form-label">Gender</label>
-                    <select id="gender" name="gender" class="form-control"> <option value="0">Select gender:</option> <option>Male</option> <option>Female</option> <option>Other</option> </select>
+                <div class="form-group row">
+                    <label for="gender" class="col-sm-2 col-form-label">Gender</label>
+                    <div class="col-sm-9">
+                        <select id="gender" class="form-control" name="gender" required> <option value="">Select gender:</option> <option>Male</option> <option>Female</option> <option>Other</option> </select>
+                        <div class="invalid-feedback"> Please indicate a gender. </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="machine" class="col-form-label">Machine</label>
-                    <select id="machine" name="machine" class="form-control"> <option value="0">Select machine:</option> <option>Desktop</option> <option>Laptop</option> <option>Tablet</option> <option>Smartphone</option> <option>Don't Know</option> <option>Other</option> </select>
+                <div class="form-group row">
+                    <label for="machine" class="col-sm-2 col-form-label">Machine</label>
+                    <div class="col-sm-9">
+                        <select id="machine" class="form-control" name="machine" required> <option value="">Select machine:</option> <option>Desktop</option> <option>Laptop</option> <option>Tablet</option> <option>Smartphone</option> <option>Don't Know</option> <option>Other</option> </select>
+                        <div class="invalid-feedback"> Please select a machine. </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="device" class="col-form-label">Device</label> 
-                    <select id="device" name="device" class="form-control"> <option value="0">Select device:</option> <option>Mouse</option> <option>Trackball</option> <option>Trackpoint</option> <option>Joystick</option> <option>Stylus</option> <option>Touchpad</option> <option>Touchscreen</option> <option>Don't Know</option> <option>Other</option>  </select> 
+                <div class="form-group row">
+                    <label for="device" class="col-sm-2 col-form-label">Device</label> 
+                    <div class="col-sm-9">
+                        <select id="device" class="form-control" name="device" required> <option value="">Select device:</option> <option>Mouse</option> <option>Touchpad</option> <option>Touchscreen</option> <option>Stylus</option> <option>Trackball</option> <option>Trackpoint</option> <option>Joystick</option> <option>Don't Know</option> <option>Other</option>  </select> 
+                        <div class="invalid-feedback"> Please select a device. </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="browser" class="col-form-label">Browser</label>
-                    <select id="browser" name="browser" class="form-control"> <option value="0">Select browser:</option> <option>Chrome</option> <option>Firefox</option> <option>Safari</option> <option>Internet Explorer</option> <option>Don't Know</option> <option>Other</option> </select> 
-                </div>
-                <div class="form-group">
-                    <label for="system" class="col-form-label">System</label>
-                    <select id="system" name="system" class="form-control"> <option value="0">Select system:</option> <option>Windows</option> <option>Android</option> <option>Apple</option> <option>Linux</option> <option>Don't Know</option> <option>Other</option> </select> 
-                </div>
+                <div class="form-group row">
+                    <label for="device" class="col-sm-2 col-form-label">Newcomer</label> 
+                    <div class="col-sm-9">
+                        <select id="newcomer" class="form-control" name="newcomer" required> <option value="">Select if new:</option> <option>Yes, this is my first time</option> <option>No, I've done this before </option> </select> 
+                        <div class="invalid-feedback"> Please indicate if new </div>
+                    </div>
+                <div>
             </form>
         </div>
         <div id="dialog5" class="my-modal-content" data-btn-txt="Begin"  data-fade-in=""     data-fade-out="fade" data-title="Task">

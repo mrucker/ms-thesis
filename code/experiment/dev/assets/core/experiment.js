@@ -26,7 +26,7 @@ function Experiment(participantId, canvas, mouse, targets)
         self.saveData({"stopTime":new Date().toUTCString(), "fps": fps.getHz(), "ops": obs.getHz(), "errors" : errors.concat(obs.getErrors()).toDistinct()});
     }
 
-    this.saveData = function(data) {        
+    function saveData(data) {        
         if(!post) {
             post = $.ajax({
                 "url"   :"https://api.thesis.markrucker.net/v1/participants/" + participantId + "/experiments/" + id,

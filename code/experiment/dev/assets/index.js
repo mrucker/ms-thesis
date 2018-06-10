@@ -24,7 +24,6 @@ $(document).ready( function () {
     var experiment  = {};
 
     canvas.draw = function(canvas) {
-        
         mouse     .draw(canvas);
         targets   .draw(canvas);
         counter   .draw(canvas);
@@ -33,10 +32,8 @@ $(document).ready( function () {
     };
 
     var startAnimation = function(contentId) {
-        
         counter.onElapsed(startExperiment);
         timer  .onElapsed(function () { stopEverything(); showModalContent(contentId); });
-
         canvas .startAnimating();
         counter.startCounting();
         targets.startAppearing();
@@ -66,12 +63,20 @@ $(document).ready( function () {
     };
 
     var resetEverything = function() {
-        
         experiment = new Experiment(participant.getId(), canvas, mouse, targets);
         timer  .reset();
         counter.reset();
     };
 
+    $("#modal").on('hide.bs.modal', function (e) {
+        var contentId = $(this).data("contentId");
+        
+        if(contentId == "dialog4" && !participant.saveDemographics()) { 
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    })
+    
     $("#modal").on('hidden.bs.modal', function (e) {
         var contentId = $(this).data("contentId");
         
@@ -79,23 +84,16 @@ $(document).ready( function () {
         if(contentId == "dialog1") { showModalContent("dialog2"); }
         if(contentId == "dialog2") { showModalContent("dialog3"); }
         if(contentId == "dialog3") { showModalContent("dialog4"); }
-        if(contentId == "dialog4") { 
-            participant.saveData(getDemographics());
-            showModalContent("dialog5"); 
-        }
+        if(contentId == "dialog4") { showModalContent("dialog5"); }
         if(contentId == "dialog5") { resetEverything(); startAnimation("dialog6"); }
         if(contentId == "dialog6") { resetEverything(); startAnimation("dialog7"); }
         if(contentId == "dialog7") { $("#c").css("display","none"); $("#thanks").css("display","block"); }
-    })
+    });
     
     showModalContent("dialog0");
+    
+    function setModalEventHandlers() {
         
-    function getDemographics() {
-        var obj = {};
-
-        $("#modal form").serializeArray().forEach(function(o) { obj[o.name] =  o.value; });
-
-        return obj;
     }
     
     function showModalContent(contentId) {
