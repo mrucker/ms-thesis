@@ -90,7 +90,7 @@ $(document).ready( function () {
         if(contentId == "dialog7") { $("#c").css("display","none"); $("#thanks").css("display","block"); }
     });
     
-    showModalContent("dialog0");
+    showModalContent("dialog1");
     
     function setModalEventHandlers() {
         

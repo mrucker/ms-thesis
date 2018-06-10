@@ -15,7 +15,7 @@ function Experiment(participantId, canvas, mouse, targets)
         fps.start();
         obs.startObserving();
 
-        //Measurements to add: Feature Weights
+        //Measurements to add: Feature Weights, opacity rule/function, color rule/function
         self.saveData({"startTime":new Date().toUTCString(), "dimensions": canvas.getDimensions(), "resolution": canvas.getResolution()});
     }
 

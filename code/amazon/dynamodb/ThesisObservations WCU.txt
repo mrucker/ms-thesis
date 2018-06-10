@@ -12,9 +12,9 @@ For a given observation there are 9 numeric data points
     Target
         3. x
         4. y        
-        7. age
-        8. reward
-        -- radius  (maybe store this in ThesisExperiments as well and assume screen size doesn't change?)
+        5. age
+        6. reward
+        7. radius
         -- opacity (maybe store the rule to calculate this as a field in ThesisExperiments?)
         -- color   (maybe store the rule to calculate this as a field in ThesisExperiments?)
         -- features? (I think this takes up too much data bandwidth for something I can easily re-calculate -- assuming there are no bugs in my code)
@@ -25,7 +25,7 @@ So an individual observation in DDB should have a maximum size of
     
 So a full session then would have a theoretical size of
     
-    30 * 900 = 27KB
+    round(66 * 45) = 30KB
     
 Or if I only do one sequence number for every 30 observations then
 
