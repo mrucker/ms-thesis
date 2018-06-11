@@ -1,17 +1,32 @@
 function Participant(canvas)
 {
-    var id   = Id.generate();
+    var id     = Id.generate();
+    var memory = {};
     
-    this.getId = function() { 
+    this.getId = function() {
         return id; 
     };
     
     this.saveDemographics = function() {
         if(getDemographicsValidity()) {
-            saveData(getDemographicsData());
+            
+            //we save in memory now because by the time the
+            //recaptcha finishes the browser form will be erased
+            saveMemory(getDemographicsData());
+            grecaptcha.execute();
+            
             return true;
         }        
         return false;
+    }
+    
+    this.reCAPTCHA = function(token) {
+        
+        var demo = loadMemory();
+        
+        demo["token"] = token;
+        
+        saveData(demo);
     }
     
     function saveData(data) {
@@ -20,6 +35,14 @@ function Participant(canvas)
             "method":"POST",
             "data"  : JSON.stringify(data)
         });
+    }
+    
+    function saveMemory(data) {
+        memory = data;
+    }
+    
+    function loadMemory() {
+        return memory;
     }
     
     function getDemographicsForm() {

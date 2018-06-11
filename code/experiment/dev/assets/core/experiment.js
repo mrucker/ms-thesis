@@ -1,7 +1,6 @@
 function Experiment(participantId, canvas, mouse, targets)
 {
     var id     = Id.generate();
-    var self   = this;
     var errors = [];
     var post   = undefined;
     var obs    = new Observations(participantId, id, mouse, targets);
@@ -15,15 +14,15 @@ function Experiment(participantId, canvas, mouse, targets)
         fps.start();
         obs.startObserving();
 
-        //Measurements to add: Feature Weights, opacity rule/function, color rule/function
-        self.saveData({"startTime":new Date().toUTCString(), "dimensions": canvas.getDimensions(), "resolution": canvas.getResolution()});
+        //Measurements to add: feature weights, opacity rule/function, color rule/function
+        saveData({"startTime":new Date().toUTCString(), "dimensions": canvas.getDimensions(), "resolution": canvas.getResolution()});
     }
 
     this.stopExperiment = function () {
         fps.stop();
         obs.stopObserving();
         
-        self.saveData({"stopTime":new Date().toUTCString(), "fps": fps.getHz(), "ops": obs.getHz(), "errors" : errors.concat(obs.getErrors()).toDistinct()});
+        saveData({"stopTime":new Date().toUTCString(), "fps": fps.getHz(), "ops": obs.getHz(), "errors" : errors.concat(obs.getErrors()).toDistinct()});
     }
 
     function saveData(data) {        

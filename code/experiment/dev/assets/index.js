@@ -92,10 +92,6 @@ $(document).ready( function () {
     
     showModalContent("dialog1");
     
-    function setModalEventHandlers() {
-        
-    }
-    
     function showModalContent(contentId) {
         $("#modal").data("contentId", contentId);
 
@@ -106,6 +102,26 @@ $(document).ready( function () {
         $("#modal").removeClass("fade").addClass($("#"+ contentId).data("fadeIn"));
         $('#modal').modal('show');
         $("#modal").removeClass("fade").addClass($("#"+ contentId).data("fadeOut"));
+        
+        if(contentId == "dialog4") {
+            $("#modal .modal-footer").css("justify-content","space-between");
+            $("#modal .modal-footer").prepend('<div id="my-g-recaptcha"></div>');
+
+            var parameters = {
+                "sitekey" : "6LeMQ14UAAAAAPoZJhiLTNVdcqr1cV8YEbon81-l"
+               , "size"    : "invisible"
+               , "badge"   : "inline"
+               , "callback": participant.reCAPTCHA
+           };
+            
+            //first value may either be the id or DOM object
+            grecaptcha.render("my-g-recaptcha", parameters);
+        }
+        
+        if(contentId == "dialog5") {
+            $("#modal .modal-footer").css("justify-content","flex-end");
+            $("#my-g-recaptcha").css("display","none");
+        }
         
         if(contentId == "dialog7" && requestStats.totalCount != 0) {
             console.log(requestStats);
