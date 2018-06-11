@@ -1,0 +1,34 @@
+example one in PS [1]
+    aws dynamodb query --table-name "ThesisParticipants" --no-consistent-read --key-condition-expression "Id = :id" --expression-attribute-values '{\":id\":{\"S\":\"22bf81593efa83ce8\"}}'
+
+example two in PS [2]
+    Query
+        aws dynamodb query --table-name "ThesisParticipants" --no-consistent-read --key-condition-expression "Id = :id" --expression-attribute-values 'file://expression-attributes.json'
+    File
+        {
+            ":id" : { "S" : "22bf81593efa83ce8" }
+        }
+
+example three in Node [3]
+    //npm install aws-sdk -g
+    
+    var AWS = require('aws-sdk')
+    
+    var params = {
+      TableName                : 'ThesisParticipants',
+      KeyConditionExpression   : 'Id = :id',
+      ExpressionAttributeValues: {
+        ':id': '22bf81593efa83ce8',
+      }
+    };
+    
+    var documentClient = new AWS.DynamoDB.DocumentClient();
+
+    documentClient.query(params, function(err, data) {
+       if (err) console.log(err);
+       else     console.log(data);
+    });
+        
+[1] https://acloud.guru/forums/aws-dynamodb/discussion/-KzG6wJR9LDKNioVICJ9/Single%20quotes%20in%20AWS%20CLI%20options
+[2] https://docs.aws.amazon.com/cli/latest/reference/dynamodb/query.html
+[3] https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html#query-property
