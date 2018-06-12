@@ -1,0 +1,2 @@
+?noData&testOnly&reward=[-0.0153,0.0217,0.0064,-0.0008,0.0001]  //crazy back and forth
+?noData&testOnly&reward=[-0.1921,-0.0462,-0.0107,-0.0009,0.0790]//controlled and targeted
