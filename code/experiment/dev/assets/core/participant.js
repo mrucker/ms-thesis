@@ -15,7 +15,7 @@ function Participant(canvas)
     }
     
     this.reCAPTCHA = function(token) {
-        
+
         var demo = loadMemory();
         
         demo["token"] = token;

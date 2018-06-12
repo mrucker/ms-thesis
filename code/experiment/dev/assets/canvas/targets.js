@@ -1,10 +1,9 @@
 var _renderer  = new TargetRenderer(0, .5, .5, 1000);
 var _prerender = _renderer.prerender();
 
-function Targets(mouse)
-{
+function Targets(mouse, featureWeights) {
     var targets = [];
-    var process = poissonProcess.create(200, function () { targets.push(new Target(mouse))} );
+    var process = poissonProcess.create(200, function () { targets.push(new Target(mouse, featureWeights))} );
 
     this.startAppearing = function() {
         process.start();
@@ -31,8 +30,7 @@ function Targets(mouse)
     }
 }
 
-function Target(mouse)
-{
+function Target(mouse, featureWeights) {
     var d = 300;
     var x = null;
     var y = null;
@@ -40,12 +38,6 @@ function Target(mouse)
     var g = 0;
     var b = 0;
 
-    return new TargetBase(x,y,d,r,g,b, mouse);
-}
-
-function TargetBase(x,y,d,r,g,b, mouse)
-{
-    
     var originalX       = x;
     var originalY       = y;
     var originalR       = d/2;
@@ -96,11 +88,9 @@ function TargetBase(x,y,d,r,g,b, mouse)
     };
     
     this.getReward = function() {
-        //var r_param = [-0.0153,  0.0217,  0.0064, -0.0008, 0.0001]; //crazy back and forth
-        //var r_param = [-0.1921, -0.0462, -0.0107, -0.0009, 0.0790]; //controlled and targeted
-        var r_param   = [0      ,0       ,0       ,0       ,1      ]; //the default color scheme
-        var f_value   = self.getFeatures();
-        var r_value   = f_value[0]*r_param[0] + f_value[1]*r_param[1] + f_value[2]*r_param[2] + f_value[3]*r_param[3] + f_value[4]*r_param[4];
+        var r_param = featureWeights;
+        var f_value = self.getFeatures();
+        var r_value = f_value[0]*r_param[0] + f_value[1]*r_param[1] + f_value[2]*r_param[2] + f_value[3]*r_param[3] + f_value[4]*r_param[4];
 
         r_value = r_value * 1/r_param[4];
         r_value = Math.max(r_value,-1);
@@ -226,29 +216,29 @@ function TargetRenderer(fadeInTime, fadeOffTime, fadeOutTime, lifespan) {
     fadeOffTime *= lifespan;
     fadeOutTime *= lifespan;
 
-    this.opacity = function(aliveTime) {
+    this.opacity = function(age) {
         var o_value   = 0;
 
-        if (aliveTime <= fadeInTime){
-            o_value = aliveTime/fadeInTime;
+        if (age <= fadeInTime){
+            o_value = age/fadeInTime;
         }
 
-        if (fadeInTime <= aliveTime && aliveTime <= fadeInTime+fadeOffTime){
+        if (fadeInTime <= age && age <= fadeInTime+fadeOffTime){
             o_value = 1;
         }
 
-        if (fadeInTime+fadeOffTime <= aliveTime && aliveTime <= fadeInTime+fadeOffTime+fadeOutTime){
-            o_value = (fadeInTime+fadeOffTime+fadeOutTime-aliveTime) / fadeOutTime;
+        if (fadeInTime+fadeOffTime <= age && age <= fadeInTime+fadeOffTime+fadeOutTime){
+            o_value = (fadeInTime+fadeOffTime+fadeOutTime-age) / fadeOutTime;
         }
 
-        if (aliveTime >= fadeInTime+fadeOffTime+fadeOutTime) {
+        if (age >= fadeInTime+fadeOffTime+fadeOutTime) {
             o_value = 0;
         }
 
         return o_value;
     }
     
-    this.rgb = function(r_value) {
+    this.rgb = function(reward) {
 
         var c_stop0 = [200, 0  ,  0 ];
         var c_stop1 = [ 0 , 200,  0 ];
@@ -258,9 +248,9 @@ function TargetRenderer(fadeInTime, fadeOffTime, fadeOutTime, lifespan) {
         var c_val1 =  0;
         var c_val2 =  1;
 
-        var c_wgt0 = Math.max(0,1-Math.abs(r_value - c_val0));
-        var c_wgt1 = Math.max(0,1-Math.abs(r_value - c_val1));
-        var c_wgt2 = Math.max(0,1-Math.abs(r_value - c_val2));
+        var c_wgt0 = Math.max(0,1-Math.abs(reward - c_val0));
+        var c_wgt1 = Math.max(0,1-Math.abs(reward - c_val1));
+        var c_wgt2 = Math.max(0,1-Math.abs(reward - c_val2));
 
         var color = [
             c_wgt0*c_stop0[0]+c_wgt1*c_stop1[0]+c_wgt2*c_stop2[0],

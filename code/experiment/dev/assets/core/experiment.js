@@ -7,7 +7,7 @@ function Experiment(participantId)
 
     var canvas  = new Canvas(document.querySelector('#c'));
     var mouse   = new Mouse(canvas);
-    var targets = new Targets(mouse);
+    var targets = new Targets(mouse, getFeatureWeights());
     var counter = new Counter(3, 3000, true);
     var timer   = new Timer(15000, true);
     
@@ -35,11 +35,12 @@ function Experiment(participantId)
         fps.cycle();
     }
 
-    function getExperimentalReward() {
+    function getFeatureWeights() {
         //var r_param = [-0.0153,  0.0217,  0.0064, -0.0008, 0.0001]; //crazy back and forth
         //var r_param = [-0.1921, -0.0462, -0.0107, -0.0009, 0.0790]; //controlled and targeted
-        //var r_param   = [0      ,0       ,0       ,0       ,1      ]; //the default color scheme
-
+        var r_param = [0      ,0       ,0       ,0       ,1      ]; //the default color scheme
+        
+        return r_param;
     }
     
     function startExperiment() {
