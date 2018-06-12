@@ -8,16 +8,10 @@ function Participant(canvas)
     };
     
     this.saveDemographics = function() {
-        if(getDemographicsValidity()) {
-            
-            //we save in memory now because by the time the
-            //recaptcha finishes the browser form will be erased
-            saveMemory(getDemographicsData());
-            grecaptcha.execute();
-            
-            return true;
-        }        
-        return false;
+        //we save in memory now because by the time the
+        //recaptcha finishes the browser form will be erased
+        saveMemory(getDemographicsData());
+        grecaptcha.execute();
     }
     
     this.reCAPTCHA = function(token) {
@@ -48,15 +42,6 @@ function Participant(canvas)
     function getDemographicsForm() {
         return $('#modal form');
     }
-    
-    function getDemographicsValidity() {
-        var $form    = getDemographicsForm();
-        var validity = $form[0].checkValidity();
-        
-        $form.addClass('was-validated');
-        
-        return validity;
-    }    
      
     function getDemographicsData() {
         var obj = {};

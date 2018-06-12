@@ -52,10 +52,6 @@ function Canvas(canvas)
         stopped = true;
     };
     
-    this.getFPS = function() {
-        return Math.round(fps.getHz(),0);
-    }
-    
     this.addOnDeviceMove = function(callback) {
 
         canvas.addEventListener("mousemove", onMouseMove, false);
@@ -74,11 +70,11 @@ function Canvas(canvas)
 
     this.draw = function(canvas) {}
 
-    this.wipe = function (canvas) {
+    this.wipe = function(canvas) {
         canvas.getContext2d().clearRect(0,0, self.getResolution(0), self.getResolution(1));
     }
 
-    this.resize = function(styleW, styleH) {
+    this.resize = function (styleW, styleH) {
 
         //this represents the number of pixels inside the canvas
         canvas.width  = styleW * window.devicePixelRatio;
@@ -88,7 +84,7 @@ function Canvas(canvas)
         canvas.style.width  = styleW + 'px';
         canvas.style.height = styleH + 'px';
     }
-
+    
     function animate() {
         fps.cycle();
 
@@ -130,7 +126,6 @@ function Canvas(canvas)
         
         var relativeX = (clientX - scrollDifferenceLeft) * resolutionDifference;
         var relativeY = (clientY - scrollDifferenceTop ) * resolutionDifference;
-        
         
         onMove(relativeX, relativeY);
     }

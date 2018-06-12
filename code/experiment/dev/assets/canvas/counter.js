@@ -13,7 +13,7 @@ function Counter(countFrom, countFor, isCountdown)
         
         if(elapsedBy() < 0) {
             //we add 30 to make sure the last draw is made before stopping
-            elapseTimeout = setTimeout(elapseCallback, -elapsedBy()+10);
+            elapseTimeout = setTimeout(function() { if (elapseCallback) elapseCallback(); }, -elapsedBy()+10);
         }
     }
 
@@ -31,7 +31,7 @@ function Counter(countFrom, countFor, isCountdown)
     }
 
     this.onElapsed = function(callback) {
-        elapseCallback = callback;
+        elapseCallback = callback;        
     }
     
     this.draw = function(canvas){

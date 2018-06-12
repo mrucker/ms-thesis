@@ -1,130 +1,97 @@
 $(document).ready( function () {
-    var canvas  = new Canvas(document.querySelector('#c'));
 
-    if (!canvas.getContext2d) {
-        return;//if canvas unsupported code here
-    } else {
-        canvas.resize($(window).width() - 10, $(window).height() - 10);
-    
-        window.addEventListener('resize', function() {
-            canvas.resize($(window).width() - 10, $(window).height() - 10);
-        });
-    }
-    
-    //Unload events are very inconsistent from browser to browser
-    //window.addEventListener('unload', function() { return "abcd"; });
-    //window.addEventListener('beforeunload', function() { return "Dude, are you sure you want to refresh? Think of the kittens!"; });
-    
-    var timer   = new Timer(15000, true);
-    var counter = new Counter(3, 3000, true);
-    var mouse   = new Mouse(canvas);
-    var targets = new Targets(mouse);
+    initializeCanvas();
 
     var participant = new Participant();
-    var experiment  = {};
+    var experiment1 = new Experiment(participant.getId());
+    var experiment2 = new Experiment(participant.getId());
+    
+    $.Deferred().resolve()
+        .then(showModalContent("dialog1", true))
+        .then(showModalContent("dialog2", true))
+        .then(showModalContent("dialog3", true))
+        .then(showModalContent("dialog4", true))
+        .then(showModalContent("dialog5", false))
+        .then(experiment1.run)
+        .then(showModalContent("dialog6", false))
+        .then(experiment2.run)
+        .then(showModalContent("dialog7", false))
+        .then(showThanks);        
+    
+    function showModalContent(contentId, preventDefault) {
+        return function() {
+            var $content = $("#" + contentId);
+            var $modal   = $("#modal");
+                    
+            $("#modalTitle" ).html($content.data('title'));
+            $("#modalBody"  ).html($content.html());
+            $("#modalButton").html($content.data('btnTxt'));
 
-    canvas.draw = function(canvas) {
-        mouse     .draw(canvas);
-        targets   .draw(canvas);
-        counter   .draw(canvas);
-        timer     .draw(canvas);
-        experiment.draw(canvas);
-    };
+            $modal.modal('show');
 
-    var startAnimation = function(contentId) {
-        counter.onElapsed(startExperiment);
-        timer  .onElapsed(function () { stopEverything(); showModalContent(contentId); });
-        canvas .startAnimating();
-        counter.startCounting();
-        targets.startAppearing();
-        mouse  .startTracking();
-    };
+            var deferred = $.Deferred();
+            
+            if(contentId == "dialog4") {
+                $("#modal .modal-footer").css("justify-content","space-between");
+                $("#modal .modal-footer").prepend('<div id="my-g-recaptcha"></div>');
 
-    var stopAnimation = function() {
-        mouse  .stopTracking();
-        targets.stopAppearing();
-        counter.stopCounting();
-        canvas .stopAnimating();
-    };
+                var parameters = {
+                    "sitekey" : "6LeMQ14UAAAAAPoZJhiLTNVdcqr1cV8YEbon81-l"
+                   , "size"    : "invisible"
+                   , "badge"   : "inline"
+                   , "callback": participant.reCAPTCHA
+               };
+                            
+                grecaptcha.render("my-g-recaptcha", parameters);
+                
+                $modal.on('hide.bs.modal', function (e) {
+                    var $form = $('#modal form');
+                    
+                    if($form[0].checkValidity()) {
+                        participant.saveDemographics();         
+                        deferred.resolve();
+                    } 
+                    
+                    if(!$form[0].checkValidity() || preventDefault) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                    
+                    $form.addClass('was-validated');
+                });
+                
+                return deferred;
+            }
 
-    var startExperiment = function() {
-        timer     .startTiming();
-        experiment.startExperiment();
+            if(contentId == "dialog5") {
+                $("#modal .modal-footer").css("justify-content","flex-end");
+                $("#my-g-recaptcha").css("display","none");
+            }
+
+            $modal.off('hide.bs.modal').on('hide.bs.modal', function (e) { 
+                deferred.resolve(); 
+                
+                if(preventDefault) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            });
+            
+            return deferred;
+        };
+    }
+    
+    function showThanks() {
+        $("#c").css("display","none"); $("#thanks").css("display","block");
     }
 
-    var stopExperiment = function() {
-        timer     .stopTiming();
-        experiment.stopExperiment();
-    };
-
-    var stopEverything = function() {
-        stopAnimation();
-        stopExperiment();
-    };
-
-    var resetEverything = function() {
-        experiment = new Experiment(participant.getId(), canvas, mouse, targets);
-        timer  .reset();
-        counter.reset();
-    };
-
-    $("#modal").on('hide.bs.modal', function (e) {
-        var contentId = $(this).data("contentId");
+    function initializeCanvas() {
+        var canvas  = new Canvas(document.querySelector('#c'));
         
-        if(contentId == "dialog4" && !participant.saveDemographics()) { 
-            e.preventDefault();
-            e.stopPropagation();
-        }
-    })
-    
-    $("#modal").on('hidden.bs.modal', function (e) {
-        var contentId = $(this).data("contentId");
+        canvas.resize($(window).width() - 10, $(window).height() - 10);
         
-        if(contentId == "dialog0") { showModalContent("dialog1"); }
-        if(contentId == "dialog1") { showModalContent("dialog2"); }
-        if(contentId == "dialog2") { showModalContent("dialog3"); }
-        if(contentId == "dialog3") { showModalContent("dialog4"); }
-        if(contentId == "dialog4") { showModalContent("dialog5"); }
-        if(contentId == "dialog5") { resetEverything(); startAnimation("dialog6"); }
-        if(contentId == "dialog6") { resetEverything(); startAnimation("dialog7"); }
-        if(contentId == "dialog7") { $("#c").css("display","none"); $("#thanks").css("display","block"); }
-    });
-    
-    showModalContent("dialog1");
-    
-    function showModalContent(contentId) {
-        $("#modal").data("contentId", contentId);
-
-            $("#modalTitle" ).html($("#" + contentId).data('title'));
-            $("#modalBody"  ).html($("#" + contentId).html());
-            $("#modalButton").html($("#" + contentId).data('btnTxt'));
-
-        $("#modal").removeClass("fade").addClass($("#"+ contentId).data("fadeIn"));
-        $('#modal').modal('show');
-        $("#modal").removeClass("fade").addClass($("#"+ contentId).data("fadeOut"));
-        
-        if(contentId == "dialog4") {
-            $("#modal .modal-footer").css("justify-content","space-between");
-            $("#modal .modal-footer").prepend('<div id="my-g-recaptcha"></div>');
-
-            var parameters = {
-                "sitekey" : "6LeMQ14UAAAAAPoZJhiLTNVdcqr1cV8YEbon81-l"
-               , "size"    : "invisible"
-               , "badge"   : "inline"
-               , "callback": participant.reCAPTCHA
-           };
-            
-            //first value may either be the id or DOM object
-            grecaptcha.render("my-g-recaptcha", parameters);
-        }
-        
-        if(contentId == "dialog5") {
-            $("#modal .modal-footer").css("justify-content","flex-end");
-            $("#my-g-recaptcha").css("display","none");
-        }
-        
-        if(contentId == "dialog7" && requestStats.totalCount != 0) {
-            console.log(requestStats);
-        }
+        $(window).on('resize', function() {
+            canvas.resize($(window).width() - 10, $(window).height() - 10);
+        });
     }
 });
