@@ -20,6 +20,10 @@ $(document).ready( function () {
         var experiment1 = new Experiment(participant.getId());
         var experiment2 = new Experiment(participant.getId());
     
+        if(querystring.exists("showId")) {
+            alert(participant.getId());
+        }
+    
         $.Deferred().resolve()
             .then(showModalContent("dialog1", true))
             .then(showModalContent("dialog2", true))
