@@ -1,22 +1,37 @@
 $(document).ready( function () {
 
     initializeCanvas();
-
-    var participant = new Participant();
-    var experiment1 = new Experiment(participant.getId());
-    var experiment2 = new Experiment(participant.getId());
     
-    $.Deferred().resolve()
-        .then(showModalContent("dialog1", true))
-        .then(showModalContent("dialog2", true))
-        .then(showModalContent("dialog3", true))
-        .then(showModalContent("dialog4", true))
-        .then(showModalContent("dialog5", false))
-        .then(experiment1.run)
-        .then(showModalContent("dialog6", false))
-        .then(experiment2.run)
-        .then(showModalContent("dialog7", false))
-        .then(showThanks);        
+    if(querystring.exists("noData")) {
+        $.ajax = function(params) {
+            return $.Deferred().resolve();
+        }
+    }
+
+    if(querystring.exists("testOnly")) {
+        $.Deferred().resolve()
+            .then(showModalContent("dialog1", false))
+            .then(new Experiment("testOnly").run)
+            .then(showModalContent("dialog7", false))
+            .then(showThanks);
+    } else {
+    
+        var participant = new Participant();
+        var experiment1 = new Experiment(participant.getId());
+        var experiment2 = new Experiment(participant.getId());
+    
+        $.Deferred().resolve()
+            .then(showModalContent("dialog1", true))
+            .then(showModalContent("dialog2", true))
+            .then(showModalContent("dialog3", true))
+            .then(showModalContent("dialog4", true))
+            .then(showModalContent("dialog5", false))
+            .then(experiment1.run)
+            .then(showModalContent("dialog6", false))
+            .then(experiment2.run)
+            .then(showModalContent("dialog7", false))
+            .then(showThanks);
+    }
     
     function showModalContent(contentId, preventDefault) {
         return function() {

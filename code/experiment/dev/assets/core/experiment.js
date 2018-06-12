@@ -36,11 +36,17 @@ function Experiment(participantId)
     }
 
     function getFeatureWeights() {
-        //var r_param = [-0.0153,  0.0217,  0.0064, -0.0008, 0.0001]; //crazy back and forth
-        //var r_param = [-0.1921, -0.0462, -0.0107, -0.0009, 0.0790]; //controlled and targeted
-        var r_param = [0      ,0       ,0       ,0       ,1      ]; //the default color scheme
         
-        return r_param;
+        if(querystring.exists("reward")) {
+            return JSON.parse(querystring.value("reward"));
+        }
+        else {
+          //var weights = [-0.0153,  0.0217,  0.0064, -0.0008, 0.0001]; //crazy back and forth
+          //var weights = [-0.1921, -0.0462, -0.0107, -0.0009, 0.0790]; //controlled and targeted
+            var weights = [0      ,0       ,0       ,0       ,1      ]; //the default color scheme
+        
+            return weights;
+        }
     }
     
     function startExperiment() {

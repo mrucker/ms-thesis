@@ -105,8 +105,8 @@ function Target(mouse, featureWeights) {
         var mouseHistPos = mouse.getHistoryPos();
         var mouseHistDot = mouse.getHistoryDot();
 
-        var targetLoc    = [x,y];
-        var targetLocDot = Math.pow(x,2) + Math.pow(y,2);
+        var targetLoc    = [effectiveX,effectiveY];
+        var targetLocDot = Math.pow(effectiveX,2) + Math.pow(effectiveY,2);
 
         var d3 = targetLocDot + mouseHistDot[0] - 2*(targetLoc[0]*mouseHistPos[0][0] + targetLoc[1]*mouseHistPos[0][1]);
         var d2 = targetLocDot + mouseHistDot[1] - 2*(targetLoc[0]*mouseHistPos[1][0] + targetLoc[1]*mouseHistPos[1][1]);
