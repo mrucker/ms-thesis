@@ -28,7 +28,7 @@ $(document).ready( function () {
             .then(showModalContent("dialog1", true))
             .then(showModalContent("dialog2", true))
             .then(showModalContent("dialog3", true))
-            .then(showModalContent("dialog4", true))
+            .then(showDemographicForm)
             .then(showModalContent("dialog5", false))
             .then(experiment1.run)
             .then(showModalContent("dialog6", false))
@@ -39,65 +39,65 @@ $(document).ready( function () {
     
     function showModalContent(contentId, preventDefault) {
         return function() {
-            var $content = $("#" + contentId);
-            var $modal   = $("#modal");
-                    
-            $("#modalTitle" ).html($content.data('title'));
-            $("#modalBody"  ).html($content.html());
-            $("#modalButton").html($content.data('btnTxt'));
+                        
+            loadModalContent(contentId);
 
-            $modal.modal('show');
+            $("#modal").modal('show');
 
-            var deferred = $.Deferred();
-            
-            if(contentId == "dialog4") {
-                $("#modal .modal-footer").css("justify-content","space-between");
-                $("#modal .modal-footer").prepend('<div id="my-g-recaptcha"></div>');
+            var deferred = $.Deferred();            
 
-                var parameters = {
-                    "sitekey" : "6LeMQ14UAAAAAPoZJhiLTNVdcqr1cV8YEbon81-l"
-                   , "size"    : "invisible"
-                   , "badge"   : "inline"
-                   , "callback": participant.reCAPTCHA
-               };
-                            
-                grecaptcha.render("my-g-recaptcha", parameters);
-                
-                $modal.on('hide.bs.modal', function (e) {
-                    var $form = $('#modal form');
-                    
-                    if($form[0].checkValidity()) {
-                        participant.saveDemographics();         
-                        deferred.resolve();
-                    } 
-                    
-                    if(!$form[0].checkValidity() || preventDefault) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                    }
-                    
-                    $form.addClass('was-validated');
-                });
-                
-                return deferred;
-            }
-
-            if(contentId == "dialog5") {
-                $("#modal .modal-footer").css("justify-content","flex-end");
-                $("#my-g-recaptcha").css("display","none");
-            }
-
-            $modal.off('hide.bs.modal').on('hide.bs.modal', function (e) { 
-                deferred.resolve(); 
-                
-                if(preventDefault) {
-                    e.preventDefault();
-                    e.stopPropagation();
+            $("#modal").on('hide.bs.modal', function (e) {
+                if(preventDefault) { 
+                    e.preventDefault(); 
+                    e.stopPropagation(); 
                 }
+                
+                deferred.resolve();
+                
+                $("#modal").off('hide.bs.modal');
             });
             
             return deferred;
         };
+    }
+        
+    function showDemographicForm() {
+        var deferred = $.Deferred(); 
+        
+        loadModalContent("dialog4");
+        
+        $("#modal .modal-footer").css("justify-content","space-between");
+        $("#modal .modal-footer").prepend('<div id="my-g-recaptcha"></div>');   
+        
+        var parameters = {
+            "sitekey" : "6LeMQ14UAAAAAPoZJhiLTNVdcqr1cV8YEbon81-l"
+           , "size"    : "invisible"
+           , "badge"   : "inline"
+           , "callback": participant.reCAPTCHA
+        };
+
+        grecaptcha.render("my-g-recaptcha", parameters);
+
+        $("#modal").on('hide.bs.modal', function (e) {
+            var $form = $('#modal form');
+
+            if($form[0].checkValidity()) {
+                participant.saveDemographics();
+
+                deferred.resolve();
+                
+                $("#modal .modal-footer").css("justify-content","flex-end");
+                $("#my-g-recaptcha").css("display","none");
+                $("#modal").off('hide.bs.modal')
+            } 
+
+            e.preventDefault();
+            e.stopPropagation();            
+
+            $form.addClass('was-validated');
+        });
+
+        return deferred;
     }
     
     function showThanks() {
@@ -113,4 +113,14 @@ $(document).ready( function () {
             canvas.resize($(window).width() - 10, $(window).height() - 10);
         });
     }
+    
+    function loadModalContent(contentId) {
+            var $content = $("#" + contentId);
+
+            $("#modalTitle" ).html($content.data('title'));
+            $("#modalBody"  ).html($content.html());
+            $("#modalButton").html($content.data('btnTxt'));
+    }
+
+
 });
