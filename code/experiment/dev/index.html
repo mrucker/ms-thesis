@@ -77,69 +77,126 @@
             </div>
           </div>
         </div>
+        
+        <span id="my-modal-content">
+            <div id="dialog0" data-btn-txt="Next"   data-title="Demo">
+              This is a demo. No data is collected. (this will be removed)
+            </div>
+            <div id="welcome" data-btn-txt="Next"   data-title="Welcome">
+                You are invited to participate in an experiment exploring machine learning techniques for aiding human performance. This research is being conducted by Mark Rucker, a graduate student at the University of Virginia, and will take approximately one minute to complete from beginning to end.
+            </div>
+            <div id="consent" data-btn-txt="Participate"  data-title="Consent">
+                <!-- , we will ask you to play two, short, 15 second games. During the games we will gather data on your cursor movement as well as the game itself.  -->
+                <p>Below are details about the experiment. Your participation is entirely voluntary, and you may exit at any time by closing your browser window. If you would like to continue, please click "Participate".</p>
+               
+                <p>
+                    <strong>What You Will do:</strong>
+                    <ul>
+                        <li>Answer a five-question, multiple-choice survey
+                        <li>Play two, fifteen-second long dexterity games
+                    </ul>
+                </p>
+                <p>
+                    <strong>Data We Will Collect:</strong>
+                    <ul>
+                        <li>From the survey:</li>
+                            <ul>
+                                <li>age and gender (<em>no identifying information</em>)</li>
+                                <li>device parameters (e.g., mouse vs touchscreen) </li>
+                            </ul>
+                        <li>From the games:</li> 
+                            <ul>
+                                <li>cursor data (e.g. position) </li>
+                                <li>game data (e.g. score)</li>
+                            </ul>
+                    </ul>
+                </p>               
+               <!--<p>While no identifying information will be collected, we will ask about your age, gender, and device parameters.</p> -->
+               <!--<p>If you'd still like to continue, please click "Participate" below.</p>-->
+            </div>
+            <div id="demographics" data-btn-txt="Submit" data-title="Demographics">
+                <p>Thank you for choosing to participate. </p>
+                <p>To continue, please answer the following questions:</p>
+                <form novalidate>
+                    <div class="form-group row">
+                        <label for="age" class="col-sm-2 col-form-label">Age</label>
+                        <div class="col-sm-9">
+                            <select id="age" class="form-control" name="age" required> <option value="">Select age:</option> <option>18-24 years old</option> <option>25-34 years old</option> <option>35-44 years old</option> <option>45-54 years old</option> <option>55+ years old</option> </select>
+                            <div class="invalid-feedback"> Please select an age. </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="gender" class="col-sm-2 col-form-label">Gender</label>
+                        <div class="col-sm-9">
+                            <select id="gender" class="form-control" name="gender" required> <option value="">Select gender:</option> <option>Male</option> <option>Female</option> <option>Other</option> </select>
+                            <div class="invalid-feedback"> Please indicate a gender. </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="machine" class="col-sm-2 col-form-label">Machine</label>
+                        <div class="col-sm-9">
+                            <select id="machine" class="form-control" name="machine" required> <option value="">Select machine:</option> <option>Desktop</option> <option>Laptop</option> <option>Tablet</option> <option>Smartphone</option> <option>Don't Know</option> <option>Other</option> </select>
+                            <div class="invalid-feedback"> Please select a machine. </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="device" class="col-sm-2 col-form-label">Device</label>
+                        <div class="col-sm-9">
+                            <select id="device" class="form-control" name="device" required> <option value="">Select device:</option> <option>Mouse</option> <option>Touchpad</option> <option>Touchscreen</option> <option>Stylus</option> <option>Trackball</option> <option>Trackpoint</option> <option>Joystick</option> <option>Don't Know</option> <option>Other</option>  </select> 
+                            <div class="invalid-feedback"> Please select a device. </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="device" class="col-sm-2 col-form-label">Newcomer</label>
+                        <div class="col-sm-9">
+                            <select id="newcomer" class="form-control" name="newcomer" required> <option value="">Select if new:</option> <option>Yes, this is my first time</option> <option>No, I've done this before </option> </select> 
+                            <div class="invalid-feedback"> Please indicate if new </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div id="directions" data-btn-txt="Next"   data-title="Directions">
+                <p>Next, please take a second to read the directions for the games.</p>
+                
+                <p>
+                    <strong>The Goal</strong>:
+                    <ul>
+                        <li>To earn as many points as possible in the given time.</li>
+                    </ul>
+                </p>
+                <p>
+                    <strong>The Game</strong>
+                    <ul>
+                        <li>For 15 seconds targets will appear randomly on screen</li>
+                            <ul>
+                                <li>All targets will have the same size</li>
+                                <li>All targets will remain for one second</li>
+                            </ul>
+                        <li>Touching targets before they disappear will earn points.</li>
+                    </ul>                
+                </p>
+                <p>
+                    <strong>The Difference</strong>:
+                    <ul>
+                        <li>Each game may assign different point values to targets.</li>
+                    </ul>
+                </p>
+            </div>
 
-        <div id="dialog0" class="my-modal-content" data-btn-txt="Next"   data-title="Demo">
-          This is a demo. No data is collected. (this will be removed)
-        </div>
-        <div id="dialog1" class="my-modal-content" data-btn-txt="Next"   data-title="Welcome">
-            You are invited to participate in an experiment that explores machine learning techniques to improve human task performance. This is a research project being conducted by Mark Rucker, a graduate student at the University of Virginia. The experiment will take approximately 30 seconds to complete.
-        </div>
-        <div id="dialog2" class="my-modal-content" data-btn-txt="Next"   data-title="Directions">
-            During the experiment, green circles will randomly appear on your screen. Please try to touch as many as you can, with your mouse (or finger), during the duration of the experiment.
-        </div>
-        <div id="dialog3" class="my-modal-content" data-btn-txt="Agree"  data-title="Consent">
-           The data collected by the experiment will be the position of the mouse cursor, position of the circles, age of the circles, size of the circles and the screen display size. No identifying information will be collected, but we will also ask about your age, gender, and device parameters. If you agree to this, please click "Agree" below.
-        </div>
-        <div id="dialog4" class="my-modal-content" data-btn-txt="Submit" data-title="Demographics">
-            <p>Thank you for participating. </p>
-            <p>Please answer the questions below to the best of your ability:</p>
-            <form novalidate>
-                <div class="form-group row">
-                    <label for="age" class="col-sm-2 col-form-label">Age</label>
-                    <div class="col-sm-9">
-                        <select id="age" class="form-control" name="age" required> <option value="">Select age:</option> <option>18-24 years old</option> <option>25-34 years old</option> <option>35-44 years old</option> <option>45-54 years old</option> <option>55+ years old</option> </select>
-                        <div class="invalid-feedback"> Please select an age. </div>
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <label for="gender" class="col-sm-2 col-form-label">Gender</label>
-                    <div class="col-sm-9">
-                        <select id="gender" class="form-control" name="gender" required> <option value="">Select gender:</option> <option>Male</option> <option>Female</option> <option>Other</option> </select>
-                        <div class="invalid-feedback"> Please indicate a gender. </div>
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <label for="machine" class="col-sm-2 col-form-label">Machine</label>
-                    <div class="col-sm-9">
-                        <select id="machine" class="form-control" name="machine" required> <option value="">Select machine:</option> <option>Desktop</option> <option>Laptop</option> <option>Tablet</option> <option>Smartphone</option> <option>Don't Know</option> <option>Other</option> </select>
-                        <div class="invalid-feedback"> Please select a machine. </div>
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <label for="device" class="col-sm-2 col-form-label">Device</label>
-                    <div class="col-sm-9">
-                        <select id="device" class="form-control" name="device" required> <option value="">Select device:</option> <option>Mouse</option> <option>Touchpad</option> <option>Touchscreen</option> <option>Stylus</option> <option>Trackball</option> <option>Trackpoint</option> <option>Joystick</option> <option>Don't Know</option> <option>Other</option>  </select> 
-                        <div class="invalid-feedback"> Please select a device. </div>
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <label for="device" class="col-sm-2 col-form-label">Newcomer</label>
-                    <div class="col-sm-9">
-                        <select id="newcomer" class="form-control" name="newcomer" required> <option value="">Select if new:</option> <option>Yes, this is my first time</option> <option>No, I've done this before </option> </select> 
-                        <div class="invalid-feedback"> Please indicate if new </div>
-                    </div>
-                <div>
-            </form>
-        </div>
-        <div id="dialog5" class="my-modal-content" data-btn-txt="Begin" data-title="Task">
-            Thank you. That ends the questions. When you are ready to perform the first task please click "Begin" to proceed.
-        </div>
-        <div id="dialog6" class="my-modal-content" data-btn-txt="Begin" data-title="Break">
-            Thank you. That ends the first task. When you are ready to perform the second task please click "Begin" to proceed.
-        </div>
-        <div id="dialog7" class="my-modal-content" data-btn-txt="Finish" data-title="Finished">
-            <p>Thank you for participating. That ends the experiment.</p> 
-            <p>If you'd like to try again you may refresh the page. </p>
-        </div>
+            <div id="begin1" data-btn-txt="Start Countdown" data-title="Game 1">
+                <p>When ready to play Game 1 please click "Start Countdown"</p>
+            </div>
+            <div id="break" data-btn-txt="Next" data-title="Break">
+                <p>Thank you. That ends the first game. </p>
+                <p>When you are ready to proceed please click "Next"</p>
+            </div>
+            <div id="begin2" data-btn-txt="Start Countdown" data-title="Game 2">
+                <p>When ready to play Game 2 please click "Start Countdown"</p>
+            </div>
+            <div id="finished" data-btn-txt="Finish" data-title="Finished">
+                <p>Thank you for participating. This ends the experiment.</p> 
+                <p>(If you'd like to play again you are welcome to refresh the page.)</p>
+            </div>
+        </span>
     </body>
 </html>

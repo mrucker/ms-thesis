@@ -52,7 +52,7 @@ function Experiment(participantId)
         //not knowing how I may or may not want to modify opacity and color rules in the future I'm not going to guess and store
         //I do likely want to store feature weights still though. Perhaps I need to make a comprehensive list of features and use these.
         
-        //Measurements to add: feature weights, touch count
+        //Measurements to add: feature weights
         saveData({"startTime":new Date().toUTCString(), "dimensions": canvas.getDimensions(), "resolution": canvas.getResolution()});
     }
 
@@ -60,6 +60,7 @@ function Experiment(participantId)
         fps.stop();
         obs.stopObserving();
         
+        //Measurements to add: touch count, observation count
         saveData({"stopTime":new Date().toUTCString(), "fps": fps.getHz(), "ops": obs.getHz(), "errors" : errors.concat(obs.getErrors()).toDistinct()});
     }
     

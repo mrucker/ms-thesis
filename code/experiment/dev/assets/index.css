@@ -1,5 +1,4 @@
 /*Overwrite the broswer's default styles*/
-*          { margin: 0; padding: 0;  }
 body, html { height:100%; }
 
 #thanks {
@@ -23,7 +22,7 @@ body, html { height:100%; }
 }
 
 /*Set the style for dialog boxes*/
-.my-modal-content {
+#my-modal-content {
     display: none;
 }
 

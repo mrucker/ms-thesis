@@ -11,9 +11,9 @@ $(document).ready( function () {
     if(querystring.exists("testOnly")) {
         $.Deferred().resolve()
             .then(showModalContent("dialog1", false))
-            .then(new Experiment("testOnly").run)
+            .then(new Experiment("testOnly").run    )
             .then(showModalContent("dialog7", false))
-            .then(showThanks);
+            .then(showThanks                        );
     } else {
     
         var participant = new Participant();
@@ -25,16 +25,17 @@ $(document).ready( function () {
         }
     
         $.Deferred().resolve()
-            .then(showModalContent("dialog1", true))
-            .then(showModalContent("dialog2", true))
-            .then(showModalContent("dialog3", true))
-            .then(showDemographicForm)
-            .then(showModalContent("dialog5", false))
-            .then(experiment1.run)
-            .then(showModalContent("dialog6", false))
-            .then(experiment2.run)
-            .then(showModalContent("dialog7", false))
-            .then(showThanks);
+//            .then(showModalContent("welcome"   , true ))            
+//            .then(showModalContent("consent"   , true ))            
+//            .then(showDemographicForm                  )
+//            .then(showModalContent("directions", true ))
+            .then(showModalContent("begin1"    , false))
+            .then(experiment1.run                      )
+            .then(showModalContent("break"     , true))
+            .then(showModalContent("begin2"    , false))
+            .then(experiment2.run                      )
+            .then(showModalContent("finished"  , false))
+            .then(showThanks                           );
     }
     
     function showModalContent(contentId, preventDefault) {
@@ -64,7 +65,7 @@ $(document).ready( function () {
     function showDemographicForm() {
         var deferred = $.Deferred(); 
         
-        loadModalContent("dialog4");
+        loadModalContent("demographics");
         
         $("#modal .modal-footer").css("justify-content","space-between");
         $("#modal .modal-footer").prepend('<div id="my-g-recaptcha"></div>');   

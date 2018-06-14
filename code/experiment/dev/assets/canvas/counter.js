@@ -45,23 +45,23 @@ function Counter(countFrom, countFor, isCountdown)
         }
     };
 
-    function drawGo(canvas) {
-        drawText(canvas, "GO!");
-    }
-
     function drawCount(canvas) {
-        drawText(canvas, countAsText());
+        drawText(canvas, countAsText(), 1);
     }
     
-    function drawText(canvas, text) {
+    function drawGo(canvas) {
+        drawText(canvas, "GO!", (elapsedBy()-500)/(-500));
+    }
+    
+    function drawText(canvas, text, alpha) {
         var context   = canvas.getContext2d();
         var centerX   = Math.round(canvas.getResolution(0)/2,0);
         var centerY   = Math.round(canvas.getResolution(1)/2,0);
         
-        context.font         = '100px Arial';
+        context.font         = '800px Arial';
         context.textAlign    = 'center';
         context.textBaseline = 'middle';        
-        context.fillStyle    = 'rgb(100,100,100)';
+        context.fillStyle    = 'rgba(100,100,100,' + alpha + ')';
         context.fillText(text, centerX, centerY);
     }
    
