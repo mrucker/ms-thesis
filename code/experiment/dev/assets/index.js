@@ -1,7 +1,7 @@
 $(document).ready( function () {
 
     initializeCanvas();
-    
+
     if(querystring.exists("noData")) {
         $.ajax = function(params) {
             return $.Deferred().resolve();
@@ -15,61 +15,61 @@ $(document).ready( function () {
             .then(showModalContent("dialog7", false))
             .then(showThanks                        );
     } else {
-    
+
         var participant = new Participant();
         var experiment1 = new Experiment(participant.getId());
         var experiment2 = new Experiment(participant.getId());
-    
+
         if(querystring.exists("showId")) {
             alert(participant.getId());
         }
-    
+
         $.Deferred().resolve()
-//            .then(showModalContent("welcome"   , true ))            
-//            .then(showModalContent("consent"   , true ))            
-//            .then(showDemographicForm                  )
-//            .then(showModalContent("directions", true ))
+            .then(showModalContent("welcome"   , true ))
+            .then(showModalContent("consent"   , true ))
+            .then(showDemographicForm                  )
+            .then(showModalContent("directions", true ))
             .then(showModalContent("begin1"    , false))
             .then(experiment1.run                      )
-            .then(showModalContent("break"     , true))
+            .then(showModalContent("break"     , true ))
             .then(showModalContent("begin2"    , false))
             .then(experiment2.run                      )
             .then(showModalContent("finished"  , false))
             .then(showThanks                           );
     }
-    
+
     function showModalContent(contentId, preventDefault) {
         return function() {
-                        
+
             loadModalContent(contentId);
 
             $("#modal").modal('show');
 
-            var deferred = $.Deferred();            
+            var deferred = $.Deferred();
 
             $("#modal").on('hide.bs.modal', function (e) {
-                if(preventDefault) { 
-                    e.preventDefault(); 
-                    e.stopPropagation(); 
+                if(preventDefault) {
+                    e.preventDefault();
+                    e.stopPropagation();
                 }
-                
+
                 deferred.resolve();
-                
+
                 $("#modal").off('hide.bs.modal');
             });
-            
+
             return deferred;
         };
     }
-        
+
     function showDemographicForm() {
         var deferred = $.Deferred(); 
-        
+
         loadModalContent("demographics");
-        
+
         $("#modal .modal-footer").css("justify-content","space-between");
-        $("#modal .modal-footer").prepend('<div id="my-g-recaptcha"></div>');   
-        
+        $("#modal .modal-footer").prepend('<div id="my-g-recaptcha"></div>');
+
         var parameters = {
             "sitekey" : "6LeMQ14UAAAAAPoZJhiLTNVdcqr1cV8YEbon81-l"
            , "size"    : "invisible"
@@ -93,14 +93,14 @@ $(document).ready( function () {
             } 
 
             e.preventDefault();
-            e.stopPropagation();            
+            e.stopPropagation();
 
             $form.addClass('was-validated');
         });
 
         return deferred;
     }
-    
+
     function showThanks() {
         $("#c").css("display","none"); $("#thanks").css("display","block");
     }
