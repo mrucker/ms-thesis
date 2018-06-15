@@ -6,6 +6,8 @@ function Counter(countFrom, countFor, isCountdown)
     var elapseAfter    = countFor;
     var elapseCallback = undefined;
     var elapseTimeout  = undefined;
+    
+    var goTime         = 1000;
 
     this.startCounting = function() {
         startTime = Date.now() - runTime();
@@ -40,7 +42,7 @@ function Counter(countFrom, countFor, isCountdown)
             drawCount(canvas);
         }
         
-        if(0 < elapsedBy() && elapsedBy() < 500) {
+        if(0 < elapsedBy() && elapsedBy() < goTime) {
             drawGo(canvas);
         }
     };
@@ -50,7 +52,7 @@ function Counter(countFrom, countFor, isCountdown)
     }
     
     function drawGo(canvas) {
-        drawText(canvas, "GO!", (elapsedBy()-500)/(-500));
+        drawText(canvas, "GO!", 1-elapsedBy()/goTime);
     }
     
     function drawText(canvas, text, alpha) {

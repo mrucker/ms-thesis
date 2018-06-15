@@ -49,7 +49,9 @@ function Canvas(canvas)
     this.stopAnimating = function () {
         fps.stop();
         
-        stopped = true;
+        self.wipe(self);
+        
+        stopped = true;        
     };
     
     this.addOnDeviceMove = function(callback) {
@@ -86,21 +88,21 @@ function Canvas(canvas)
     }
     
     function animate() {
-        fps.cycle();
-
-        if(everyother = !everyother) {
-            self.wipe(self);
-            self.draw(self);
-
-            // var context = self.getContext2d();
-            // context.fillStyle    = 'rgb(100,100,100)';
-            // context.font         = '48px Arial';
-            // context.textAlign    = 'left';
-            // context.textBaseline = 'top';
-            // context.fillText(self.getFPS(), 0, 0);
-        }
-
         if(started && !stopped) {
+            fps.cycle();
+
+            if(everyother = !everyother) {
+                self.wipe(self);
+                self.draw(self);
+
+                // var context = self.getContext2d();
+                // context.fillStyle    = 'rgb(100,100,100)';
+                // context.font         = '48px Arial';
+                // context.textAlign    = 'left';
+                // context.textBaseline = 'top';
+                // context.fillText(self.getFPS(), 0, 0);
+            }
+
             window.requestAnimationFrame(animate);
         }
     };

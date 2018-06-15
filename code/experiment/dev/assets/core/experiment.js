@@ -8,7 +8,7 @@ function Experiment(participantId)
     var canvas  = new Canvas(document.querySelector('#c'));
     var mouse   = new Mouse(canvas);
     var targets = new Targets(mouse, getFeatureWeights());
-    var counter = new Counter(3, 4000, true);
+    var counter = new Counter(3, 3000, true);
     var timer   = new Timer(15000, true);
     
     canvas.draw = function() {
