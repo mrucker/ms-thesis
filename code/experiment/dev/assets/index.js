@@ -25,6 +25,7 @@ $(document).ready( function () {
         }
 
         $.Deferred().resolve()
+            .then(showModalContent("demo"      , true ))
             .then(showModalContent("welcome"   , true ))
             .then(showModalContent("consent"   , true ))
             .then(showDemographicForm                  )
