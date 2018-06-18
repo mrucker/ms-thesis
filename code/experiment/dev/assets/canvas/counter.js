@@ -60,7 +60,7 @@ function Counter(countFrom, countFor, isCountdown)
         var centerX   = Math.round(canvas.getResolution(0)/2,0);
         var centerY   = Math.round(canvas.getResolution(1)/2,0);
         
-        context.font         = '800px Arial';
+        context.font         = '700px Arial';
         context.textAlign    = 'center';
         context.textBaseline = 'middle';        
         context.fillStyle    = 'rgba(100,100,100,' + alpha + ')';
