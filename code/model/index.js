@@ -26,8 +26,8 @@ function drawGrid(mouse, canvas, context) {
     var width   = canvas.getWidth();
     var height  = canvas.getHeight();
     
-    var colSize = 100; //width/125; //10;
-    var rowSize = 100; //height/100; //10;
+    var colSize = width/50; //10;
+    var rowSize = height/30; //10;
 
     var cols = width/colSize;
     var rows = height/rowSize;
@@ -46,13 +46,13 @@ function drawGrid(mouse, canvas, context) {
                 context.lineTo((col+0)*colSize, (row+0)*rowSize);
                 context.stroke();
                 
-                var centerX = (col+.5)*colSize;
-                var centerY = (row+.5)*rowSize;
-                var radius  = (0  +.5)*colSize;
+                //var centerX = (col+.5)*colSize;
+                //var centerY = (row+.5)*rowSize;
+                //var radius  = (0  +.5)*colSize;
                 
-                context.moveTo(centerX, centerY);
-                context.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-                context.stroke();
+                //context.moveTo(centerX, centerY);
+                //context.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+                //context.stroke();
             }
         }
     }
@@ -65,6 +65,6 @@ function drawGrid(mouse, canvas, context) {
     context.font         = '48px Arial';
     context.textAlign    = 'right';
     context.textBaseline = 'bottom';
-    context.fillText(Math.floor(mouse.getX()/colSize) + "," + Math.floor(mouse.getY()/rowSize),canvas.getWidth(),canvas.getHeight());
+    context.fillText(Math.floor(1 + mouse.getX()/colSize) + "," + Math.floor(1 + mouse.getY()/rowSize),canvas.getWidth(),canvas.getHeight());
     context.restore();
 }

@@ -1,4 +1,4 @@
-function irl_result = algorithm5run(params, trajectories, verbosity)
+function irl_result = algorithm1run(params, trajectories, verbosity)
 
     fprintf(1,'Start of Algorithm5 \n');
 
