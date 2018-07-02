@@ -34,6 +34,9 @@ function drawGrid(mouse, canvas, context) {
 
     if(oldWidth != width || oldHeight != height) {
 
+        console.log("Row: " + rowSize) 
+        console.log("Col: " + colSize)
+    
         oldWidth = width;
         oldHeight = height;
     

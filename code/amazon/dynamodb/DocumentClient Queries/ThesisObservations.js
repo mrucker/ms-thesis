@@ -21,7 +21,8 @@ documentClient.query(params, function(err, data) {
         var sortedObservations    = data.Items.sort((i1,i2) => i1.SequenceNumber - i2.SequenceNumber).map(i => i.Observations);
         var flattenedObservations = [].concat.apply([], sortedObservations);
 
-        console.log(JSON.stringify(flattenedObservations));
+        //console.log(JSON.stringify(flattenedObservations));
+        console.log(JSON.stringify(toActions(flattenedObservations)));
    }
 });
 

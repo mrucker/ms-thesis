@@ -5,11 +5,9 @@ target_radius    = 10;
 
 width   = 3000;
 height  = 3000;
+
 num_x   = 10;
 num_y   = 10;
-
-sub2ind([width height], [2 3 4], [1 2 4])
-ind2sub([width height], 10)
 
 actions = createActionsMatrix();
 states  = createFeatureMatrix(width, height, num_x, num_y, target_locations, target_radius);
