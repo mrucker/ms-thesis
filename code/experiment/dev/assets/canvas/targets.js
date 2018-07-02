@@ -20,9 +20,17 @@ function Targets(mouse, featureWeights) {
     }
 
     this.getData = function() {
-        //this is a little janky, but because the targets are positioned relative to the canvas they don't have a position until 
-        //the next time the canvas is redrawn. Therefore it is possible for the target to exist and not have a position so we ignore it until it does.
-        return targets.filter(function(target) { return target.getX() != null && target.getY() != null;  }).map(function(target) { return target.getData().map(Math.round); });
+        
+        //this is a little janky, but because the targets are positioned relative to the canvas they don't have a position until the next 
+        //time the canvas is redrawn. Therefore it is possible for the target to exist and not have a position so we ignore it until it does.       
+        var ts = targets.filter(function(target) { return target.getX() != null && target.getY() != null;  });
+        var rs = ts.map(function(target) { return Math.round(target.getR()); });
+        var ds = ts.map(function(target) { return target.getData().map(Math.round); });
+        
+        var r = Math.min.apply(null,rs);
+        var d = ds.toFlat();
+        
+        return [r].concat(d);
     }
     
     this.touchCount = function() {
@@ -61,9 +69,7 @@ function Target(mouse, featureWeights) {
         return [
             Math.round(self.getX()     ,0),
             Math.round(self.getY()     ,0),
-            Math.round(self.getAge()   ,0),
-            Math.round(self.getReward(),2),
-            Math.round(self.getR()     ,2),
+            Math.round(self.getAge()   ,0),            
         ]; 
     };
     

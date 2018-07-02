@@ -71,8 +71,7 @@ function Observations(participantId, experimentId, mouse, targets)
             ops.cycle();
 
             //25% reduction in data transmission if I send observation as array of arrays rather than key/values
-            var observation = mouse.getData().concat(targets.getData().toFlat());
-            //var observation = mouse.getData().concat(targets.getData().toFlat());
+            var observation = mouse.getData().concat(targets.getData());
             
             obsInMemory.push(observation);
             obsInQueue .push(observation);

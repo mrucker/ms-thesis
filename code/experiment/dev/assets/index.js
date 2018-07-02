@@ -2,11 +2,11 @@ $(document).ready( function () {
 
     initializeCanvas();
 
-    //if(querystring.exists("noData")) {
+    if(querystring.exists("noData")) {
         $.ajax = function(params) {
             return $.Deferred().resolve();
         }
-    //}
+    }
 
     if(querystring.exists("testOnly")) {
         $.Deferred().resolve()

@@ -60,7 +60,7 @@ function Experiment(participantId)
         fps.stop();
         obs.stopObserving();
         
-        //Measurements to add: touch count, observation count
+        //Measurements to add: touch count, observation count,
         saveData({"stopTime":new Date().toUTCString(), "fps": fps.getHz(), "ops": obs.getHz(), "errors" : errors.concat(obs.getErrors()).toDistinct()});
     }
     
