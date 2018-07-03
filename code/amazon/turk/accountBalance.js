@@ -1,6 +1,7 @@
 
 $(document).ready( function () {
     //AWS is loaded in a script tag in the html page
+    //This access key is not active. Simply here for example purposes.
     var region                = 'us-east-1';
     var aws_access_key_id     = 'AKIAJIGZ2IZY4BGLMXLQ';
     var aws_secret_access_key = 'Kh1c0rIEz96dnFz8Dil/sLWVCuUN0WaO3TOdZC/V';
