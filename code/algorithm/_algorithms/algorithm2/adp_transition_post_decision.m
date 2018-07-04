@@ -1,5 +1,6 @@
-function x2 = adp_transition(x1, u, create)
+function x2 = adp_transition_post_decision(x1, u)
 
+    %assumes that 33 ms will pass in transition (aka, 30 observations per second)
     %assumed state = [x, y, dx, dy, ddx,ddy, dddx,dddy, r, \forall targets {x, y, age}]
     
     isRightDataTypes = isnumeric(x1) && isrow(x1);
@@ -12,10 +13,6 @@ function x2 = adp_transition(x1, u, create)
     
     x2 = update_cursor_state(x2,u);
     x2 = update_existing_targets(x2);
-    
-    if(create)
-        x2 = create_new_targets(x2);
-    end
 end
 
 function x2 = update_cursor_state(x1,u)

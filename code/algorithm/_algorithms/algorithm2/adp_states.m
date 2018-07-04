@@ -18,7 +18,7 @@ function s = adp_states(observations)
         r = o(3);
         t = o(4:end);
         
-        states{i+1} = [adp_transition(x,u,false), r, t];
+        states{i+1} = [adp_transition_post_decision(x,u), r, t];
     end
 
     s = states;
