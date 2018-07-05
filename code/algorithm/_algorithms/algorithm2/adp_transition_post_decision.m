@@ -1,10 +1,10 @@
 function x2 = adp_transition_post_decision(x1, u)
 
     %assumes that 33 ms will pass in transition (aka, 30 observations per second)
-    %assumed state = [x, y, dx, dy, ddx,ddy, dddx,dddy, r, \forall targets {x, y, age}]
+    %assumed state = [x, y, dx, dy, ddx, ddy, dddx, dddy, w, h, r, \forall targets {x, y, age}]
     
     isRightDataTypes = isnumeric(x1) && isrow(x1);
-    isRightDimension = numel(x1) == 8 || (numel(x1) > 8 && mod(numel(x1), 3) == 0);
+    isRightDimension = numel(x1) == 11 || (numel(x1) > 11 && mod(numel(x1)-8, 3) == 0);
     
     assert(isRightDataTypes, 'each state must be a numeric row vector');
     assert(isRightDimension, 'each state must have 8 cursor features + [1 radius feature + 3x target features]');
@@ -39,19 +39,24 @@ end
 
 function x2 = update_existing_targets(x1)
 
-    if(numel(x1) < 9)
+    non_target_fields = 11;
+    
+    if(numel(x1) == non_target_fields)
         x2 = x1;
         return;
     end
+        
+    x2 = x1(:,1:11);
     
-    x2 = x1(1:8);
+    target_count = (numel(x2)-non_target_fields)/3;
+    target_ages  = x1(non_target_fields+(1:target_count)*3) + 33;
     
-    target_count = (numel(x2)-9)/3;    
-    target_ages  = x1(9+(1:target_count)*3) + 33;
-    
-    for i = 1:target_count        
+    for i = 1:target_count
         if(target_ages(i) < 1000)
-            x2 = horzcat(x2, x1( (10+(i-1)*3):(11+(i-1)*3) ), target_ages(i));
+            x = x1(non_target_fields+1+(i-1)*3);
+            y = x1(non_target_fields+2+(i-1)*3);
+            a = target_ages(i);
+            x2 = [x2, x, y, a];
         end
     end
     

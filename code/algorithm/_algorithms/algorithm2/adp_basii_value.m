@@ -11,7 +11,7 @@ function b = adp_basii_value(states)
         s = states{i};
 
         r = s(9);
-        t = s(10:end);        
+        t = s(10:end);
         t = reshape(t, [], numel(t)/3);
 
         x1 = s(1:2)';
@@ -19,7 +19,8 @@ function b = adp_basii_value(states)
 
         touch_count = sum(sqrt(dot(x2,x2,1)+dot(x1,x1,1)'-2*(x1'*x2)) <= r);
 
-        % distance from center,
+        % x distance from center,
+        % y distance from center,
         % distance from three nearest targets,
         % direction changes required for optimal 3 target path
         b(i,:) = [s(1:8), touch_count];

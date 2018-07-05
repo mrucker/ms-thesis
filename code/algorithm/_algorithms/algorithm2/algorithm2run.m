@@ -1,4 +1,4 @@
-function irl_result = algorithm1run(params, trajectories, verbosity)
+function irl_result = algorithm2run(params, trajectory, verbosity)
 
     fprintf(1,'Start of Algorithm5 \n');
 
@@ -14,58 +14,24 @@ function irl_result = algorithm1run(params, trajectories, verbosity)
     mdp_time = 0;
     mix_time = 0;
 
-    ft = @(a,c,d) features(a,c,d,params);
-    fe = @(a,b,c,d,e,f) mean(cell2mat(arrayfun(@(a_i) featureExpectation_bb(a(:,a_i), b, c, d, e, f, ft),1:size(a,2), 'UniformOutput', false)),2);
-
     sE = 0;
-    %pE = [];
-
     
-    
-    %[T,N] = size(trajectories);
-    
-    %start    = params.start;
-    %steps    = params.steps;
-    %episodes = params.episodes;
-    
-    start    = 1;
-    steps    = 2;
-    episodes = 100;
-
-    
+    [T,~] = size(trajectory);
+        
     tic;
-    for n= 0:(episodes-1)
-        %pE = reshape(trajectories{1+start,n}(3:8),[],3);
-        for t= 0:steps
-            st = ft(trajectories{start+t+n}(1:2), trajectories{start+t+n}(3:8), trajectories{start+t+n}(9:end));
-            sE = sE + (st * params.gamma^t)/episodes;
-            %pE = horzcat(trajectories{t+start,n}(1:2), pE);
-        end
+    for t= 1:T
+        sE = sE + (adp_basii_reward(trajectory{t}) * params.gamma^(t-1));
     end
     exp_time = exp_time + toc;
-
-    actions        = createActionsMatrix();
-    startLocations = [];
-    targetStepData = cell(episodes+steps,1);
-
-    for n = 0:(episodes-1)
-        startLocations(:,n+1) = trajectories{start+n}(1:8);
-    end
-
-    for t=1:episodes+steps
-        targetStepData{t} = trajectories{start+t-1,1}(9:end);
-        targetStepData{t} = reshape(targetStepData{t}, [], numel(targetStepData{t})/3);
-    end
 
     % Generate random policy.
     tic;
     rand_r = rand(1,size(sE,1))';
     rand_r = rand_r/sum(rand_r);
-    rand_s = fe(startLocations, targetStepData, steps, actions, rand_r, params.gamma);
+    rand_s = adp_feature_expectation(rand_r, trajectory{1}, params.gamma);
     mdp_time = mdp_time + toc;
 
     rs = {rand_r};
-    %ps = {rand_p};
     ss = {rand_s};
     sb = {rand_s};
     ts = {Inf};
@@ -80,7 +46,7 @@ function irl_result = algorithm1run(params, trajectories, verbosity)
 
         tic;
         rs{i}    = (sE-sb{i-1});
-        ss{i}    = fe(startLocations, targetStepData, steps, actions, rs{i}, params.gamma);
+        ss{i}    = adp_feature_expectation(rs{i}, trajectory{1}, params.gamma);
         mdp_time = mdp_time + toc;
 
         ts{i} = sqrt(sE'*sE + sb{i-1}'*sb{i-1} - 2*sE'*sb{i-1});

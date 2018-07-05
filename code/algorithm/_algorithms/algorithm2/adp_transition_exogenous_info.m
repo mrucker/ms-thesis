@@ -1,17 +1,23 @@
 function x2 = adp_transition_exogenous_info(x1)
 
+    %I should have x1 contain width, height and radius
+    
+    width  = x1(9);
+    height = x1(10);
+    radius = x1(11);
+
     %assumes that 33 ms will pass in transition (aka, 30 observations per second)    
-    %assumed state = [x, y, dx, dy, ddx,ddy, dddx,dddy, r, \forall targets {x, y, age}]
+    %assumed state = [x, y, dx, dy, ddx, ddy, dddx, dddy, w, h, r, \forall targets {x, y, age}]
     
     isRightDataTypes = isnumeric(x1) && isrow(x1);
-    isRightDimension = numel(x1) == 8 || (numel(x1) > 8 && mod(numel(x1), 3) == 0);
+    isRightDimension = numel(x1) == 11 || (numel(x1) > 11 && mod(numel(x1)-11, 3) == 0);
     
     assert(isRightDataTypes, 'each state must be a numeric row vector');
     assert(isRightDimension, 'each state must have 8 cursor features + [1 radius feature + 3x target features]');
 
     x2 = x1;
     
-    x2 = create_new_targets(x2,0,0,0);
+    x2 = create_new_targets(x2, width, height, radius);
 end
 
 

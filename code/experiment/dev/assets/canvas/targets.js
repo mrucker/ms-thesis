@@ -3,6 +3,8 @@ var _prerender = _renderer.prerender();
 
 function Targets(mouse, featureWeights) {
     var targets = [];
+    
+    //if you change this 200 value be sure to remember and change the matlab exogonous_info function as well
     var process = poissonProcess.create(200, function () { targets.push(new Target(mouse, featureWeights))} );
 
     this.startAppearing = function() {
