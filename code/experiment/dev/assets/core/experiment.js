@@ -19,7 +19,7 @@ function Experiment(participantId)
         self   .draw(canvas);
     };
     
-    var obs = new Observations(participantId, id, mouse, targets);
+    var obs = new Observations(participantId, id, mouse, targets, canvas);
     var fps = new Frequency("fps", false);
 
     this.run = function() {

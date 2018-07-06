@@ -7,6 +7,10 @@ function Canvas(canvas)
     var stopped    = undefined;
     var fps        = new Frequency("fps", false);
     
+    this.getData = function() {
+        return self.getResolution();
+    }
+    
     this.getContext2d = function() {
         return canvas.getContext('2d');
     };
@@ -22,7 +26,7 @@ function Canvas(canvas)
         if(dim == undefined) {
             return [w,h];
         }
-        
+
         return [w, h][dim]
     }
     
@@ -51,7 +55,7 @@ function Canvas(canvas)
         
         self.wipe(self);
         
-        stopped = true;        
+        stopped = true;
     };
     
     this.addOnDeviceMove = function(callback) {

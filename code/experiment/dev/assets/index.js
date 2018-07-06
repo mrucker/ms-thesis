@@ -28,7 +28,7 @@ $(document).ready( function () {
             .then(showModalContent("demo"      , true ))
             .then(showModalContent("welcome"   , true ))
             .then(showModalContent("consent"   , true ))
-            .then(showDemographicForm                  )
+            //.then(showDemographicForm                  )
             .then(showModalContent("directions", true ))
             .then(showModalContent("begin1"    , false))
             .then(experiment1.run                      )

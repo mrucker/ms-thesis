@@ -2,7 +2,10 @@ var _renderer  = new TargetRenderer(0, .5, .5, 1000);
 var _prerender = _renderer.prerender();
 
 function Targets(mouse, featureWeights) {
+    var radius  = 150;
     var targets = [];
+    var effectiveA = 0;
+    var effectiveR = 0;
     
     //if you change this 200 value be sure to remember and change the matlab exogonous_info function as well
     var process = poissonProcess.create(200, function () { targets.push(new Target(mouse, featureWeights))} );
@@ -16,32 +19,31 @@ function Targets(mouse, featureWeights) {
     }
 
     this.draw = function(canvas){
-        targets.forEach(function(target){ target.draw(canvas); });
-
+        
+        effectiveA = (canvas.getResolution(0)/3000) * (canvas.getResolution(1)/1500) * (Math.PI * radius * radius);
+        effectiveR = Math.round(Math.sqrt(effectiveA/Math.PI),0);
+        
+        targets.forEach(function(target){ target.setR(effectiveR); target.draw(canvas); });
+        
         targets = targets.filter(function(target) {return !target.isDead();} );
     }
 
-    this.getData = function() {
+    this.getData = function(width, height) {
         
         //this is a little janky, but because the targets are positioned relative to the canvas they don't have a position until the next 
         //time the canvas is redrawn. Therefore it is possible for the target to exist and not have a position so we ignore it until it does.       
-        var ts = targets.filter(function(target) { return target.getX() != null && target.getY() != null;  });
-        var rs = ts.map(function(target) { return Math.round(target.getR()); });
+        var ts = targets.filter(function(target) { return target.getX() != null && target.getY() != null; });
         var ds = ts.map(function(target) { return target.getData().map(Math.round); });
         
-        var r = Math.min.apply(null,rs);
-        var d = ds.toFlat();
-        
-        return [r].concat(d);
+        return [effectiveR].concat(ds.toFlat());
     }
-    
+
     this.touchCount = function() {
         return targets.filter(function(target) { return target.isNewTouch(); }).length;
     }
 }
 
 function Target(mouse, featureWeights) {
-    var d = 300;
     var x = null;
     var y = null;
     var r = 0;
@@ -50,28 +52,28 @@ function Target(mouse, featureWeights) {
 
     var originalX       = x;
     var originalY       = y;
-    var originalR       = d/2;
     var originalWidth   = 0;
     var originalHeight  = 0;
     var effectiveX      = 0;
     var effectiveY      = 0;
     var effectiveR      = 0;
-    var effectiveA      = 0;
     var createTime      = Date.now();
     var touchedBefore   = false;
     var self            = this;
     
+    this.setR   = function(r){ effectiveR = r;    }; 
     this.getR   = function() { return effectiveR; };
     this.getX   = function() { return effectiveX; };
     this.getY   = function() { return effectiveY; };
     this.getAge = function() { return Date.now() - createTime; };    
     this.isDead = function() { return _renderer.opacity(self.getAge()) <= .01 };
-
+    
     this.getData     = function() { 
         return [
             Math.round(self.getX()     ,0),
             Math.round(self.getY()     ,0),
-            Math.round(self.getAge()   ,0),            
+            Math.round(self.getAge()   ,0),
+            Math.round(self.isTouched(),0),
         ]; 
     };
     
@@ -139,21 +141,18 @@ function Target(mouse, featureWeights) {
         return [d, v, a, j, self.isTouched()*1];
     };
     
-    this.draw = function(canvas) {
-        self.drawImage(canvas);
+    this.draw = function(canvas, r) {
+        self.drawImage(canvas, r);
     }
 
     this.drawCircle = function(canvas){
-
-        effectiveA = (canvas.getResolution(1)/1500) * (canvas.getResolution(0)/3000) * (Math.PI * originalR * originalR);
-        effectiveR = Math.round(Math.sqrt(effectiveA/Math.PI),0);
 
         originalWidth   = originalWidth  || canvas.getResolution(0);
         originalHeight  = originalHeight || canvas.getResolution(1);
         originalX       = originalX      || (canvas.getResolution(0) - effectiveR*2) * Math.random() + effectiveR;
         originalY       = originalY      || (canvas.getResolution(1) - effectiveR*2) * Math.random() + effectiveR;
-        
-        effectiveX = Math.round((originalX/originalWidth ) * canvas.getResolution(0) ,0);
+
+        effectiveX = Math.round((originalX/originalWidth ) * canvas.getResolution(0),0);
         effectiveY = Math.round((originalY/originalHeight) * canvas.getResolution(1),0);
 
         var context   = canvas.getContext2d();
@@ -163,48 +162,41 @@ function Target(mouse, featureWeights) {
         context.arc(effectiveX, effectiveY, effectiveR, 0, 2 * Math.PI);
         context.fill(); 
     }
-    
-    this.drawSquare = function(canvas){
 
-        effectiveA = (canvas.getResolution(1)/1500) * (canvas.getResolution(0)/3000) * (Math.PI * originalR * originalR);
-        effectiveL = Math.round(Math.sqrt(effectiveA),0);
-        effectiveR = effectiveL/2;
+    this.drawSquare = function(canvas){
 
         originalWidth   = originalWidth  || canvas.getResolution(0);
         originalHeight  = originalHeight || canvas.getResolution(1);
         originalX       = originalX      || (canvas.getResolution(0) - effectiveR*2) * Math.random() + effectiveR;
         originalY       = originalY      || (canvas.getResolution(1) - effectiveR*2) * Math.random() + effectiveR;
-        
-        effectiveX = Math.round((originalX/originalWidth ) * canvas.getResolution(0) ,0);
+
+        effectiveX = Math.round((originalX/originalWidth ) * canvas.getResolution(0),0);
         effectiveY = Math.round((originalY/originalHeight) * canvas.getResolution(1),0);
-        
+
         var context = canvas.getContext2d();
 
         context.fillStyle = fillStyle();
         context.fillRect(effectiveX-effectiveL/2, effectiveY-effectiveL/2, effectiveL, effectiveL); 
     }
-    
+
     this.drawImage = function(canvas){
-        
-        effectiveA = (canvas.getResolution(1)/1500) * (canvas.getResolution(0)/3000) * (Math.PI * originalR * originalR);
-        effectiveR = Math.round(Math.sqrt(effectiveA/Math.PI),0);
-    
+
         originalWidth   = originalWidth  || canvas.getResolution(0);
         originalHeight  = originalHeight || canvas.getResolution(1);
         originalX       = originalX      || (canvas.getResolution(0) - effectiveR*2) * Math.random() + effectiveR;
         originalY       = originalY      || (canvas.getResolution(1) - effectiveR*2) * Math.random() + effectiveR;
-        
-        effectiveX = Math.round((originalX/originalWidth ) * canvas.getResolution(0) ,0);
+
+        effectiveX = Math.round((originalX/originalWidth ) * canvas.getResolution(0),0);
         effectiveY = Math.round((originalY/originalHeight) * canvas.getResolution(1),0);
-                
+
         var context = canvas.getContext2d();
-        
+
         var xOffset = _renderer.xOffset(self.getReward());
         var yOffset = _renderer.yOffset(self.getAge());
-        
+
         context.drawImage(_prerender,xOffset,yOffset, 200, 200, effectiveX-effectiveR, effectiveY-effectiveR, 2*effectiveR, 2*effectiveR);        
     }
-    
+
     function dist(x1,y1,x2,y2) {
         return Math.sqrt(Math.pow(x1-x2,2)+Math.pow(y1-y2,2));
     }

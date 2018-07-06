@@ -1,4 +1,4 @@
-function Observations(participantId, experimentId, mouse, targets)
+function Observations(participantId, experimentId, mouse, targets, canvas)
 {
     var self    = this;
     var started = false;
@@ -71,7 +71,7 @@ function Observations(participantId, experimentId, mouse, targets)
             ops.cycle();
 
             //25% reduction in data transmission if I send observation as array of arrays rather than key/values
-            var observation = mouse.getData().concat(targets.getData());
+            var observation = mouse.getData().concat(canvas.getData()).concat(targets.getData());
             
             obsInMemory.push(observation);
             obsInQueue .push(observation);
