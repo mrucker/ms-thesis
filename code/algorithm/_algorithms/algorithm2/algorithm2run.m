@@ -1,6 +1,6 @@
-function irl_result = algorithm2run(params, trajectory, verbosity)
+function irl_result = algorithm2run(params, trajectory_observations, verbosity)
 
-    fprintf(1,'Start of Algorithm5 \n');
+    fprintf(1,'Start of Algorithm2 \n');
 
     params = setDefaults(params);
 
@@ -13,14 +13,24 @@ function irl_result = algorithm2run(params, trajectory, verbosity)
     svm_time = 0;
     mdp_time = 0;
     mix_time = 0;
-
-    sE = 0;
-    
-    [T,~] = size(trajectory);
         
+    %do I want to drop the first 3 states?
+    trajectory_states = adp_basii_states(trajectory_observations);
+    
+    %trim off the first four states since they have pre-game noise
+    trajectory_states(1:4) = [];
+    
+    trajectory_reward = adp_basii_reward(trajectory_states);
+    
+    T = size(trajectory_reward,2);
+
+    T = 20;
+    
+    sE = 0;
+
     tic;
-    for t= 1:T
-        sE = sE + (adp_basii_reward(trajectory{t}) * params.gamma^(t-1));
+    for t = 1:T
+        sE = sE + params.gamma^(t-1) * trajectory_reward(:,t);
     end
     exp_time = exp_time + toc;
 
@@ -28,7 +38,7 @@ function irl_result = algorithm2run(params, trajectory, verbosity)
     tic;
     rand_r = rand(1,size(sE,1))';
     rand_r = rand_r/sum(rand_r);
-    rand_s = adp_feature_expectation(rand_r, trajectory{1}, params.gamma);
+    rand_s = adp_feature_expectation(rand_r, T, trajectory_states{1}, params.gamma);
     mdp_time = mdp_time + toc;
 
     rs = {rand_r};
@@ -46,7 +56,7 @@ function irl_result = algorithm2run(params, trajectory, verbosity)
 
         tic;
         rs{i}    = (sE-sb{i-1});
-        ss{i}    = adp_feature_expectation(rs{i}, trajectory{1}, params.gamma);
+        ss{i}    = adp_feature_expectation(rs{i}, T, trajectory_states{1}, params.gamma);
         mdp_time = mdp_time + toc;
 
         ts{i} = sqrt(sE'*sE + sb{i-1}'*sb{i-1} - 2*sE'*sb{i-1});

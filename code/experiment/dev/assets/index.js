@@ -2,13 +2,14 @@ $(document).ready( function () {
 
     initializeCanvas();
 
-    if(querystring.exists("noData")) {
+    //if(querystring.exists("noData")) {
+    if(!querystring.exists("data")) {
         $.ajax = function(params) {
             return $.Deferred().resolve();
         }
     }
 
-    if(querystring.exists("testOnly")) {
+    if(querystring.exists("test")) {
         $.Deferred().resolve()
             .then(showModalContent("dialog1", false))
             .then(new Experiment("testOnly").run    )
@@ -20,7 +21,7 @@ $(document).ready( function () {
         var experiment1 = new Experiment(participant.getId());
         var experiment2 = new Experiment(participant.getId());
 
-        if(querystring.exists("showId")) {
+        if(querystring.exists("id")) {
             alert(participant.getId());
         }
 
@@ -28,7 +29,7 @@ $(document).ready( function () {
             .then(showModalContent("demo"      , true ))
             .then(showModalContent("welcome"   , true ))
             .then(showModalContent("consent"   , true ))
-            //.then(showDemographicForm                  )
+            .then(showDemographicForm                  )
             .then(showModalContent("directions", true ))
             .then(showModalContent("begin1"    , false))
             .then(experiment1.run                      )

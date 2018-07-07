@@ -1,6 +1,6 @@
 function irl_result = algorithm1run(params, trajectories, verbosity)
 
-    fprintf(1,'Start of Algorithm5 \n');
+    fprintf(1,'Start of Algorithm1 \n');
 
     params = setDefaults(params);
 

@@ -7,7 +7,7 @@ var params = {
  ,KeyConditionExpression   : 'ExperimentId = :id'
  ,ConsistentRead           : false
  ,ExpressionAttributeValues: {
-    ':id': 'c3fa355b3efa8e580'
+    ':id': '22a63912470f88ed7'
   }
 };
 

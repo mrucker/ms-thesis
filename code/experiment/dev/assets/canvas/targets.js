@@ -73,7 +73,6 @@ function Target(mouse, featureWeights) {
             Math.round(self.getX()     ,0),
             Math.round(self.getY()     ,0),
             Math.round(self.getAge()   ,0),
-            Math.round(self.isTouched(),0),
         ]; 
     };
     
