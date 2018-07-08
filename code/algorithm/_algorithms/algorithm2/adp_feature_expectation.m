@@ -35,7 +35,7 @@ function fe = adp_feature_expectation(r_theta, T, s_0, gamma)
                 v_theta(:,:,n+1) = v_theta(:,:,n);
                 
                 %see page 351 for why ".1" (aka, B0 = I * ["a small constant"])
-                B                = repmat(eye(VF) * .1, [1 1 T]); 
+                B                = repmat(eye(VF) * .1, [1 1 T]);
             end
 
             
