@@ -1,6 +1,6 @@
 function [B, theta] = recursive_linear_regression(B, theta, x, y)
         
-    if(isempty(theta))
+    if(~any(theta))
         %see page 351 in ADP for why ".1" (aka, B0 = I * ["a small constant"])
         %this never seemed to give me good approximations no matter how many observations I fed in 
         %B = [eye(size(x,1)) * .01;
@@ -40,5 +40,5 @@ function [B, theta] = recursive_linear_regression(B, theta, x, y)
 end
 
 function i = isInvertible(X)
-    i = rrcond(X) > .000001;
+    i = rcond(X) > .000001;
 end
