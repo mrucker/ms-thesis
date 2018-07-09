@@ -1,13 +1,10 @@
-function v_thetas = adp_value_approximation(s_1, actions, reward, value_basii, transition_post, transition_pre, gamma, N, M, T)
+function v_thetas = adp_value_approximation_error(s_1, actions, reward, value_basii, transition_post, transition_pre, gamma, N, M, T, value_theta)
 
     %the bigger N, the more policies we iterate through when trying to find the best policy
     %the bigger M, the better our estimate of v_theta for the given basis functions
 
     B = cell(1,T);
     S = cell(1,T);
-
-    b_cnt = size(value_basii(s_1()),1);
-    theta = mat2cell(zeros([T*b_cnt N]), ones(1,T)*b_cnt, ones(1,N));
     
     for n = 1:N 
         
@@ -18,7 +15,7 @@ function v_thetas = adp_value_approximation(s_1, actions, reward, value_basii, t
             for t = 1:T
 
                 action_matrix = actions(S{t});
-                action_values = reward(S{t}) + gamma * theta{t,n}' * value_basii(transition_post(S{t}, action_matrix));
+                action_values = reward(S{t}) + gamma * value_theta{t}' * value_basii(transition_post(S{t}, action_matrix));
 
                 [~, a] = max(action_values);
 
@@ -51,5 +48,5 @@ function v_thetas = adp_value_approximation(s_1, actions, reward, value_basii, t
         end    
     end
     
-    v_thetas = theta(:,N+1);
+    v_thetas = theta{1,N+1};
 end

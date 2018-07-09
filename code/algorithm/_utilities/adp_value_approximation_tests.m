@@ -1,18 +1,16 @@
 addpath('../_utilities/');
 
-n = 6;
+n = 5;
 g = .9;
 N = 10;
 M = 50;
-T = 10;
-
-%basii_matrix  = exp(-sqrt(dot(state_matrix,state_matrix,1)+dot(state_matrix,state_matrix,1)'-2*(state_matrix'*state_matrix)));
+T = 50;
 
 state_matrix  = vertcat(reshape(repmat(1:n,n,1), [1,n^2]), reshape(repmat((1:n)',1,n), [1,n^2]));
-basii_matrix  = eye(n^2);
+basii_matrix  = exp(-sqrt(dot(state_matrix,state_matrix,1)+dot(state_matrix,state_matrix,1)'-2*(state_matrix'*state_matrix)));
 reward_matrix = rand([n n])*100;
 action_matrix = [1 0; 0 1; -1 0; 0 -1]';
-trans_matrix  = transition_matrix(state_matrix, action_matrix);
+
 
 rewards = @(s) reward_matrix(s(2), s(1));
 actions = @(s) action_matrix(:, all((s + action_matrix) < (n + 1) .* (s + action_matrix > 0)));
@@ -22,37 +20,18 @@ s_1 = @() round(rand([2,1]) * (n-1)) + 1;
 transition_post = @(s,a) s+a;
 transition_pre  = @(s,a) s+a;
 
-value_basii = @(s) basii_matrix(:, [n;1]' *(s +[-1;0]));
+value_basii = @(s) basii_matrix(:, [5;1]' *(s +[-1;0]));
 
 v_theta = adp_value_approximation(s_1, actions, rewards, value_basii, transition_post, transition_pre, g, N, M, T);
 
-approx_value = (v_theta{1}' * value_basii(state_matrix))';
-actual_value = value_iteration(trans_matrix, repmat(reshape(reward_matrix, n^2, 1), [1 4]), g);
+approx_value = v_theta' * value_basii(state_matrix);
+actual_value = mar_value_iteration(transition_matrix(state_matrix, action_matrix), repmat(reshape(reward_matrix, 25, 1), [1 4]), g);
 
-approx_policy = deterministic_policy(trans_matrix, approx_value);
-actual_policy = deterministic_policy(trans_matrix, approx_value);
+[approx_value', actual_value]
 
-sortrows([approx_value, actual_value, approx_policy, actual_policy])
-
-figure
-plot(approx_value', actual_value, 'o')
-xlabel('approx value') 
-ylabel('actual value')
-legend('states')
-title('Value Comparison')
-
-figure
-heatmap([approx_policy';actual_policy'], 1:n^2, {'approx', 'actual'}, 1, ...
-    'GridLines', ':', 'ColorLevels',4, 'ShowAllTicks', 1, 'ColorMap', 'cool', 'MaxColorValue', 4.5, 'MinColorValue', 0.5, 'FontSize', 10, ...
-    'Colorbar', {'Ticks',[1:4]});
-xlabel('states');
-ylabel('policies');
-legend('action');
-title('Policy Comparison');
-
-function T = transition_matrix(state_matrix, action_matrix)
+function trans_matrix = transition_matrix(state_matrix, action_matrix)
     n = sqrt(size(state_matrix, 2));
-    T = zeros(n^2, n^2, size(action_matrix,2));
+    trans_matrix  = zeros(n^2, n^2, size(action_matrix,2));
     
     
     for s_i = 1:size(state_matrix,2)
@@ -61,16 +40,16 @@ function T = transition_matrix(state_matrix, action_matrix)
             s = state_matrix (:, s_i);
             a = action_matrix(:, a_i);
 
-            ss = s+a;
+            trans_s = s+a;
 
-            if all(ss < (n + 1) .* (ss > 0))
-                T(s_i, sub2ind([n,n], ss(1), ss(2)), a_i) = 1;
+            if all(trans_s < (n + 1) .* (trans_s > 0))
+                trans_matrix(s_i, sub2ind([n,n], trans_s(1), trans_s(2)), a_i) = 1;
             end
         end
     end
 end
 
-function V = value_iteration(P, R, discount, epsilon, max_iter, V0)
+function [V, policy, iter, cpu_time] = mar_value_iteration(P, R, discount, epsilon, max_iter, V0)
 
     iter = 0;
 
@@ -88,7 +67,7 @@ function V = value_iteration(P, R, discount, epsilon, max_iter, V0)
     end
 
     if(nargin < 6)
-        V = zeros(S_N, 1);
+        V = zeros(S_N, 001);
     else
         V = V0;
     end
@@ -113,11 +92,11 @@ function V = value_iteration(P, R, discount, epsilon, max_iter, V0)
         iter = iter + 1;
 
         for a_i = 1:A_N
-            Q(:, a_i) = R(:,a_i) + discount*P(:,:,a_i)*V;
+            Q(:, a_i) = R(:,a_i) + P(:,:,a_i)*discount*V;
             V = max(V, Q(:,a_i)); %I think adding this line makes this closer to the Gauss-Seidel variation (Powell 64)
         end
 
-        V = max(Q, [], 2);
+        [V, policy] = max(Q, [], 2);
 
         d = abs(V-v);
         %max(d)          < epsilon [Checking for convergence. We should only converge on V*.]
@@ -126,14 +105,7 @@ function V = value_iteration(P, R, discount, epsilon, max_iter, V0)
         done = max(d) - min(d) < epsilon;
         done = done || iter == max_iter;
     end
+
+    cpu_time = 0;
 end
 
-function P = deterministic_policy(trans_matrix, value)
-     Q = zeros(size(trans_matrix,1), size(trans_matrix,3));
-     
-    for a_i = 1:size(trans_matrix,3)
-        Q(:,a_i) = trans_matrix(:,:,a_i) * value;
-    end
-    
-    [~, P] = max(Q, [], 2);
-end
