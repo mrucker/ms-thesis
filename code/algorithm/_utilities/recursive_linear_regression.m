@@ -1,6 +1,6 @@
 function [B, theta] = recursive_linear_regression(B, theta, x, y)
         
-    if(~any(theta))
+    if(~any(theta) || all(theta == 400))
         %see page 351 in ADP for why ".1" (aka, B0 = I * ["a small constant"])
         %this never seemed to give me good approximations no matter how many observations I fed in 
         %B = [eye(size(x,1)) * .01;
@@ -29,13 +29,14 @@ function [B, theta] = recursive_linear_regression(B, theta, x, y)
 
     x = x'; %all the equations below assumes x and y are column vectors;
     
+    l     = 1/2;
     e     = theta' * x - y;
-    g     = 1 + x'*B*x;
+    g     = l + x'*B*x;
     H     = 1/g * B;
     
     %update steps
     theta = theta - H * x * e;
-    B     = B - 1/g * (B * (x * x') * B);
+    B     = 1/l*(B - 1/g * (B * (x * x') * B));
 
 end
 

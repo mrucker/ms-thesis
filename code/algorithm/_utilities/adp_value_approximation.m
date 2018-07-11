@@ -7,7 +7,7 @@ function v_thetas = adp_value_approximation(s_1, actions, reward, value_basii, t
     S = cell(1,T);
 
     b_cnt = size(value_basii(s_1()),1);
-    theta = mat2cell(zeros([T*b_cnt N]), ones(1,T)*b_cnt, ones(1,N));
+    theta = mat2cell(ones([T*b_cnt N])*400, ones(1,T)*b_cnt, ones(1,N));
     
     for n = 1:N 
         
@@ -18,7 +18,7 @@ function v_thetas = adp_value_approximation(s_1, actions, reward, value_basii, t
             for t = 1:T
 
                 action_matrix = actions(S{t});
-                action_values = reward(S{t}) + gamma * theta{t,n}' * value_basii(transition_post(S{t}, action_matrix));
+                action_values = reward(S{t}) + gamma * theta{1,n}' * value_basii(transition_post(S{t}, action_matrix));
 
                 [~, a] = max(action_values);
 
@@ -44,12 +44,12 @@ function v_thetas = adp_value_approximation(s_1, actions, reward, value_basii, t
             X = value_basii(cell2mat(S))';
             Y = V;
             
-            for t = 1:T
+            for t = 1:1
                 [B{t}, theta{t,n+1}] = recursive_linear_regression(B{t}, theta{t,n+1}, X(t,:), Y(t));
             end
-            
+
         end    
     end
     
-    v_thetas = theta(:,N+1);
+    v_thetas = theta{1,N+1};
 end

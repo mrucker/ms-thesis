@@ -1,11 +1,9 @@
-addpath('../_utilities/');
-
 o_cnt = 1000;
 p_cnt = 4; %plotting only works for 1 & 2
 
 X = rand([o_cnt p_cnt]) * 10;
 T = rand([p_cnt 1]) * 10;
-Y = X * T + normrnd(5, 39, [o_cnt 1]);
+Y = X * T + 5 + 6*randn(o_cnt, 1);
 
 %batch regression method
 t_b = (X'*X)^(-1) * X' * Y;
