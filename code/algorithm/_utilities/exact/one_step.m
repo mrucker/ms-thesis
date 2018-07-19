@@ -1,55 +1,92 @@
-function P = one_step(states, state2index, actions, ticks, time_on_screen, expected_interarrival)
+function P = one_step(movements, targets, actions, state2index, ticks, time_on_screen, expected_interarrival)    
+
+    target_max_count  = size(targets  , 1);
+    target_perm_count = size(targets  , 2);
+    movement_count    = size(movements, 2);
+    state_count       = movement_count * target_perm_count;
+    
+    %we put this here because it is somewhat time consuming 
+    %to recompute it below in each loop of our transitions    
+    %all_target_layouts = dec2bin((1:target_perms)-1)' - '0';
+    
+    sub_add_sty_pmf = my_sub_add_sty_pmf(ticks, target_max_count, time_on_screen, expected_interarrival);
+    
+    target_pmf      = my_target_pmf(targets, sub_add_sty_pmf);
+    target_pmf      = round(target_pmf, 3);
+    
+    target_pmf_rows = reshape(repmat(1:target_perm_count, [target_perm_count 1]), [target_perm_count^2 1]);
+    target_pmf_cols = repmat((1:target_perm_count)', [target_perm_count 1]);
+    target_pmf_vals = reshape(target_pmf', [target_perm_count^2 1]);
+    
+    target_row_col_val = [target_pmf_rows, target_pmf_cols, target_pmf_vals];    
+    target_row_col_val = target_row_col_val( target_row_col_val(:,3) ~=0 ,:);
+            
     P = cell(1,size(actions,2));
-
+    
     for a_i = 1:size(actions,2)
-        P{a_i} = sparse(size(states,2), size(states,2));
-    end
+        
+        %state_count = move_count * target_perms...
+        %so state_count * target_perms == move_count*target_perms^2
+        
+        non_zero_transition_count = movement_count * size(target_row_col_val,1);
+        
+        p = zeros(non_zero_transition_count, 3);
+        
+        tic
+        for m_i = 1:movement_count
 
-    max_targs = size(states(:,1),1) - 11;
+            a = actions  (:,a_i);
+            m = movements(:,m_i);
 
-    add_sub_sty_pmf = my_add_sub_sty_pmf(ticks, max_targs, time_on_screen, expected_interarrival);
-
-    for a_i = 1:size(actions,2)
-        for s_i = 1:size(states,2)
-
-            a = actions(:,a_i);
-            s = states (:,s_i);
-
+            c = state2index([m;0;0;0;targets(:,1)]);
+            
             %first update state, this is deterministic so we can calculate simply
-            s(3:8) = s(1:6);
-            s(1:2) = a;
+            m(3:8) = m(1:6);
+            m(1:2) = a;
+            
+            p_start   = (m_i-1) * size(target_row_col_val,1) + 1;
+            p_stop    = p_start + size(target_row_col_val,1) - 1;
+            p_indexes = p_start:p_stop;
+            
+            my_transitions        = target_row_col_val;
+            my_transitions(:,1:2) = my_transitions(:,1:2) + c - 1;
+            
+            p(p_indexes,:) = my_transitions;
+        end
+        toc
+        P{a_i} = sparse(p(:,1),p(:,2),p(:,3), state_count, state_count);
+    end
+end
 
-            P{a_i}(s_i,:) = my_sub_add(P{a_i}(s_i,:), s, add_sub_sty_pmf, state2index);
+function v = my_nchoosek(n,k)
+    v = factorial(n)./(factorial(n-k) .* factorial(k));
+end
+
+function target_perms_pmf = my_target_pmf(target_perms, sub_add_sty_pmf)
+
+    target_perms_count = size(target_perms,2);
+    target_perms_pmf   = zeros(target_perms_count, target_perms_count);
+    
+    for t_i = 1:target_perms_count
+        
+        target_perm = target_perms(:,t_i);
+   
+        add_k = sum(target_perms-target_perm == +1);
+        sub_k = sum(target_perms-target_perm == -1);
+        sty_k = sum(target_perms+target_perm == +2);
+
+        
+        target_perms_prob_lambda = @(s_i) factorial(add_k(s_i)) * sub_add_sty_pmf(add_k(s_i), sub_k(s_i), sty_k(s_i));
+        target_perms_pmf(t_i,:)  = arrayfun(target_perms_prob_lambda, 1:target_perms_count);
+        
+        if all(target_perm == 1)
+            target_perms_prob_lambda = @(s_i) factorial(add_k(s_i) + 1) * sub_add_sty_pmf(add_k(s_i)+1, sub_k(s_i), sty_k(s_i));            
+            target_perms_pmf(t_i,:)  = target_perms_pmf(t_i,:) + arrayfun(target_perms_prob_lambda, 1:target_perms_count);
         end
     end
 end
 
-function P = my_sub_add(P, s, add_sub_sty_pmf, state2index)
-
-    x = s(12:end);
-    a = dec2bin((1:2^numel(x))-1)' - '0';
-
-    add_k = sum(a-x == +1);
-    sub_k = sum(a-x == -1);
-    sty_k = sum(a+x == +2);
-
-    states   = vertcat(repmat(s(1:11), [1 size(a,2)]), a);
-    states_i = state2index(states);
-
-    states_p = arrayfun(@(s_i) factorial(add_k(s_i)) * add_sub_sty_pmf(add_k(s_i), sub_k(s_i), sty_k(s_i)), 1:size(a,2));
-
-    if all(x == 1)
-        add_k = add_k + 1;
-        states_p = states_p + arrayfun(@(s_i) factorial(add_k(s_i)) * add_sub_sty_pmf(add_k(s_i), sub_k(s_i), sty_k(s_i)), 1:size(a,2));        
-    end
-    
-    states_i = states_i(states_p > 0);
-    states_p = states_p(states_p > 0); %I just hope this keeps them in order
-    
-    P(states_i) = P(states_i) + states_p;
-end
-
-function pmf = my_add_sub_sty_pmf(ticks, max_targs, time_on_screen, expected_interarrival)
+function sub_add_sty_pmf = my_sub_add_sty_pmf(ticks, max_targs, time_on_screen, expected_interarrival)
     
     %adds  \in [0, max_adds]
     %subs  \in [0, max_subs]
@@ -92,39 +129,5 @@ function pmf = my_add_sub_sty_pmf(ticks, max_targs, time_on_screen, expected_int
     sub_ticks_prob = sub_prob * (1-sty_prob^ticks)/(1-sty_prob);
     sty_ticks_prob = sty_prob^ticks;
 
-    pmf = @(add_k,sub_k,sty_k) add_k_prob(add_k+1) * put_k_prob(add_k + 1, max_targs - (sub_k + sty_k) + 1) * sub_ticks_prob^(sub_k) * sty_ticks_prob^(sty_k);
-end
-
-function v = my_nchoosek(n,k)
-    v = factorial(n)./(factorial(n-k) .* factorial(k));
-end
-
-function add_pmf = my_add_pmf(ticks, expected_interarrival)
-    add_cnt          = 0:ticks;
-    add_combinations = my_nchoosek(ticks, add_cnt);
-    add_probability  = (1/expected_interarrival).^add_cnt .* (1-(1/expected_interarrival)).^(ticks-add_cnt);
-    add_pmf          = add_combinations .* add_probability;
-    
-    %useful, so I'll keep them, but ultimately not needed
-    %add_cdf          = add_pmf * triu(ones(chances+1));
-    %adds = 1-find(rand < add_cdf,1);
-end
-
-%First, we'll calculate the probabilities that any existing
-%target disappear. To approximate this without age, we'll say a
-%target has a 1/1000 chance of disappearing at any given tick
-%and between each time step 33 ticks occur. So in each step a
-%target has r = (999/1000)^33 chance of remaining giving 1-r.
-function sub_pmf = my_sub_pmf(ticks, max_targs, time_on_screen)
-    keep_prob = (1 - 1/time_on_screen)^ticks;
-    take_prob = (1 - keep_prob);
-
-    sub_pmf = zeros(max_targs+1);
-    
-    for targs = 0:max_targs
-        sub                = 0:targs;
-        sub_combinations   = my_nchoosek(targs, sub);
-        sub_probability    = take_prob.^sub .* keep_prob.^(targs-sub);
-        sub_pmf(targs+1,:) = [sub_combinations .* sub_probability, zeros(1,max_targs-targs)];
-    end
+    sub_add_sty_pmf = @(add_k,sub_k,sty_k) add_k_prob(add_k+1) * put_k_prob(add_k + 1, max_targs - (sub_k + sty_k) + 1) * sub_ticks_prob^(sub_k) * sty_ticks_prob^(sty_k);
 end
