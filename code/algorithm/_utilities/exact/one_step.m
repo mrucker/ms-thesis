@@ -35,16 +35,21 @@ function P = one_step(movements, targets, actions, state2index, ticks, time_on_s
         tic
         for m_i = 1:movement_count
 
-            m = movements(:,m_i);
-
-            c = state2index([m;0;0;0;targets(:,1)]);
+            a = actions  (:,a_i);
+            
+            m_curr = movements(:,m_i);
+            m_next = [a; m_curr(1:end-2)];
+                        
+            i_curr = state2index([m_curr;0;0;0;targets(:,1)]);
+            i_next = state2index([m_next;0;0;0;targets(:,1)]);
 
             p_start   = (m_i-1) * size(target_row_col_val,1) + 1;
             p_stop    = p_start + size(target_row_col_val,1) - 1;
             p_indexes = p_start:p_stop;
 
-            my_transitions        = target_row_col_val;
-            my_transitions(:,1:2) = my_transitions(:,1:2) + c - 1;
+            my_transitions      = target_row_col_val;
+            my_transitions(:,1) = my_transitions(:,1) + i_curr - 1;
+            my_transitions(:,2) = my_transitions(:,2) + i_next - 1;
 
             p(p_indexes,:) = my_transitions;
         end
