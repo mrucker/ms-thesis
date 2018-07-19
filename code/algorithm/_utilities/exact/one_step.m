@@ -24,7 +24,7 @@ function P = one_step(movements, targets, actions, state2index, ticks, time_on_s
     P = cell(1,size(actions,2));
     
     for a_i = 1:size(actions,2)
-        
+
         %state_count = move_count * target_perms...
         %so state_count * target_perms == move_count*target_perms^2
         
@@ -35,22 +35,17 @@ function P = one_step(movements, targets, actions, state2index, ticks, time_on_s
         tic
         for m_i = 1:movement_count
 
-            a = actions  (:,a_i);
             m = movements(:,m_i);
 
             c = state2index([m;0;0;0;targets(:,1)]);
-            
-            %first update state, this is deterministic so we can calculate simply
-            m(3:8) = m(1:6);
-            m(1:2) = a;
-            
+
             p_start   = (m_i-1) * size(target_row_col_val,1) + 1;
             p_stop    = p_start + size(target_row_col_val,1) - 1;
             p_indexes = p_start:p_stop;
-            
+
             my_transitions        = target_row_col_val;
             my_transitions(:,1:2) = my_transitions(:,1:2) + c - 1;
-            
+
             p(p_indexes,:) = my_transitions;
         end
         toc
@@ -66,21 +61,20 @@ function target_perms_pmf = my_target_pmf(target_perms, sub_add_sty_pmf)
 
     target_perms_count = size(target_perms,2);
     target_perms_pmf   = zeros(target_perms_count, target_perms_count);
-    
+
     for t_i = 1:target_perms_count
-        
+
         target_perm = target_perms(:,t_i);
    
         add_k = sum(target_perms-target_perm == +1);
         sub_k = sum(target_perms-target_perm == -1);
         sty_k = sum(target_perms+target_perm == +2);
 
-        
         target_perms_prob_lambda = @(s_i) factorial(add_k(s_i)) * sub_add_sty_pmf(add_k(s_i), sub_k(s_i), sty_k(s_i));
         target_perms_pmf(t_i,:)  = arrayfun(target_perms_prob_lambda, 1:target_perms_count);
-        
+
         if all(target_perm == 1)
-            target_perms_prob_lambda = @(s_i) factorial(add_k(s_i) + 1) * sub_add_sty_pmf(add_k(s_i)+1, sub_k(s_i), sty_k(s_i));            
+            target_perms_prob_lambda = @(s_i) factorial(add_k(s_i) + 1) * sub_add_sty_pmf(add_k(s_i)+1, sub_k(s_i), sty_k(s_i));
             target_perms_pmf(t_i,:)  = target_perms_pmf(t_i,:) + arrayfun(target_perms_prob_lambda, 1:target_perms_count);
         end
     end
@@ -105,7 +99,7 @@ function sub_add_sty_pmf = my_sub_add_sty_pmf(ticks, max_targs, time_on_screen, 
     %This is the probability of k being added in n ticks at k specific locations.
 
     add_k_prob = my_nchoosek(add_n, add_k) .* add_prob.^add_k .* (1-add_prob).^(add_n-add_k);
-    add_k_prob = [add_k_prob, zeros(1,50)]; %we add a bunch of zeros in case somebody tries to add more than is possible   
+    add_k_prob = [add_k_prob, zeros(1,50)]; %we add a bunch of zeros in case somebody tries to add more than is possible
     
     %intentionally changed my put distribution so that it no longer
     %considers with replacement. This makes calculations much faster and
