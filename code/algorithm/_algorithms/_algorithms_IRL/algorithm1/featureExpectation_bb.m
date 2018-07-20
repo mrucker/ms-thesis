@@ -1,94 +1,94 @@
-function [bestFeatures] = featureExpectation_bb(firstLocation, targetData, finalDepth, actions, reward, gamma, feat)
+function [bestFeatures] = featureExpectation_bb(startingState, finalDepth, actions, reward, gamma, feat)
 
-    depth    = [];    
-    location = [];
-    feature  = [];
-    
+    depths   = [];
+    states   = [];
+    features = [];
+
     pruneCount   = 0;
     visitCount   = 0;
     processCount = 0;
     actionCount  = size(actions,2);
-    
+
     %potentialReward = arrayfun(@(d)(1-gamma^d)/(1-gamma), [finalDepth:-1:1])
 
-    visitTime   = 0;    
+    visitTime   = 0;
     featureTime = [0,0,0,0,0];
     pruneTime   = 0;
     growTime    = 0;
-        
+
     if finalDepth == 0
-        bestFeatures = feat(firstLocation(1:2), firstLocation(3:8), targetData{1});
-        %bestPath     = reshape(firstLocation,[],4);
+        bestFeatures = feat(startingState);
+        %bestPath    = reshape(firstLocation,[],4);
     else
-        depth    = [0];
-        location = firstLocation;
-        feature  = feat(firstLocation(1:2), firstLocation(3:8), targetData{1});
-        
-        %bestPath     = [];
+        depths   = 0;
+        states   = startingState;
+        features = feat(startingState);
+
+        %bestPath    = [];
         bestFeatures = [];
     end
     
-    while ~isempty(feature)
+    while ~isempty(features)
     
-        myTic();            
-            currentDepth    = depth(:,end);
-            currentLocation = location(:,end);
-            currentFeatures = feature(:,end);
-            
-            depth   (:,end) = [];
-            location(:,end) = [];
-            feature (:,end) = [];
+        myTic();
+            currentDepth   = depths  (  end);
+            currentState   = states  (:,end);
+            currentFeature = features(:,end);
+
+            depths  (  end) = [];
+            states  (:,end) = [];
+            features(:,end) = [];
 
             visitCount = visitCount + 1;
         visitTime = visitTime + myToc();
 
         myTic();
-            nextDepth          = currentDepth+1;
-            nextHistory        = reshape(currentLocation(1:6),[],3);
-            nextLocations      = currentLocation(1:2) + actions;            
+            nextDepth  = currentDepth+1;
         featureTime(1) = featureTime(1) + myToc();
 
         myTic();
-            nextFeatures = feat(nextLocations, nextHistory, targetData{nextDepth+1});
-            %nextFeatures = repmat([0;0;0;0;0], 1, 121);
-            assert(all((nextFeatures' * reward)< 1), 'my pruning bounds will not work if we can ever get more reward than 1 on any step');
+            nextStates = huge_trans_post(currentState, actions, false);
         featureTime(2) = featureTime(2) + myToc();
-        
+
         myTic();
-            nextFeatures = currentFeatures + gamma^nextDepth * nextFeatures;
+            nextFeatures = feat(nextStates);
+            assert(all((nextFeatures' * reward)< 1), 'my pruning bounds will not work if we can ever get more reward than 1 on any step');
+        featureTime(3) = featureTime(3) + myToc();
+
+        myTic();
+            nextFeatures = currentFeature + gamma^nextDepth * nextFeatures;
         featureTime(4) = featureTime(4) + myToc();
 
         myTic();
-            isPrunable    = prunable(bestFeatures, nextFeatures, nextDepth, finalDepth, gamma, reward);            
-            
+            isPrunable    = prunable(bestFeatures, nextFeatures, nextDepth, finalDepth, gamma, reward);
+
             if finalDepth ~= nextDepth
                 pruneCount    = pruneCount + sum(isPrunable)*actionCount^(finalDepth-nextDepth);
             end
-            
+
             processCount  = processCount + actionCount;
-            
-            pruneIndexes = find(~isPrunable);
-            allFeatures  = nextFeatures(:,pruneIndexes);
-            allLocations = vertcat(nextLocations(:,pruneIndexes),repmat(currentLocation(1:6),1,sum(~isPrunable)));        
-        
+
+            nextFeatures = nextFeatures(:,~isPrunable);
+            nextStates   = nextStates  (:,~isPrunable);
+
             if nextDepth == finalDepth
-                [val,index] = max(allFeatures' * reward);
-                if ~isempty(allFeatures) && (isempty(bestFeatures) || (val > bestFeatures'*reward))
-                    bestFeatures = allFeatures(:,index);
-                    %bestPath     = reshape(allLocations(:,index),[],4);
+                [val,index] = max(nextFeatures' * reward);
+
+                if ~isempty(nextFeatures) && (isempty(bestFeatures) || (val > bestFeatures'*reward))
+                    bestFeatures = nextFeatures(:,index);
                 end
+
                 continue;
             end
         pruneTime = pruneTime + myToc();
-        
-        myTic();            
-            count        = sum(~isPrunable);
-            depth        = [depth   , ones(1, count)*nextDepth];
-            location     = [location, reshape(allLocations,[],count)];
-            feature      = [feature, allFeatures];
-        growTime = growTime + myToc();                
+
+        myTic();
+            depths   = [depths  , repmat(nextDepth, 1, sum(~isPrunable))];
+            states   = horzcat(states  , nextStates);
+            features = [features, nextFeatures];
+        growTime = growTime + myToc();
     end
-    
+
     %visitCount
     %processCount
     %pruneCount

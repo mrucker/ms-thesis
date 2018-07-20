@@ -1,4 +1,4 @@
-function irl_result = algorithm2run(params, trajectory_observations, verbosity)
+function irl_result = algorithm2run(trajectory_observations, params, verbosity)
 
     fprintf(1,'Start of Algorithm2 \n');
 
@@ -13,9 +13,8 @@ function irl_result = algorithm2run(params, trajectory_observations, verbosity)
     svm_time = 0;
     mdp_time = 0;
     mix_time = 0;
-        
-    %do I want to drop the first 3 states?
-    trajectory_states = adp_basii_states(trajectory_observations);
+
+    trajectory_states = huge_states_from(trajectory_observations);
     
     %trim off the first four states since they have pre-game noise
     trajectory_states(1:4) = [];

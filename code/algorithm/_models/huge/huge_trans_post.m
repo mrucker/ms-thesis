@@ -1,11 +1,18 @@
-function s2 = huge_trans_post(s1, u)
+function s2 = huge_trans_post(s1, a, updateTargets)
+
+    if(nargin < 3)
+        updateTargets = true;
+    end
 
     huge_states_assert(s1);
 
     s2 = s1;
     
-    s2 = update_cursor_state(s2,u);
-    s2 = update_target_states(s2);
+    s2 = update_cursor_state(s2,a);
+    
+    if(updateTargets)
+        s2 = update_target_states(s2);
+    end
 end
 
 function x2 = update_cursor_state(x1,u)
