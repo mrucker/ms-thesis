@@ -1,4 +1,4 @@
-function P = one_step(movements, targets, actions, state2index, ticks, time_on_screen, expected_interarrival)    
+function P = small_trans_matrix(movements, targets, actions, state2index, ticks, time_on_screen, expected_interarrival)    
 
     target_max_count  = size(targets  , 1);
     target_perm_count = size(targets  , 2);

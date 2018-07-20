@@ -1,11 +1,11 @@
-function x2 = adp_transition_post_decision(x1, u)
+function s2 = huge_trans_post(s1, u)
 
-    adp_assert_states(x1);
+    huge_states_assert(s1);
 
-    x2 = x1;
+    s2 = s1;
     
-    x2 = update_cursor_state(x2,u);
-    x2 = update_target_states(x2);
+    s2 = update_cursor_state(s2,u);
+    s2 = update_target_states(s2);
 end
 
 function x2 = update_cursor_state(x1,u)

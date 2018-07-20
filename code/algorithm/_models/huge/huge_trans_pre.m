@@ -1,14 +1,14 @@
-function x2 = adp_transition_exogenous_info(x1)
+function s2 = huge_trans_pre(s1)
 
-    adp_assert_states(x1);
+    huge_states_assert(s1);
     
-    x2 = x1;
+    s2 = s1;
             
-    width  = x1(9);
-    height = x1(10);
-    radius = x1(11);
+    width  = s1(9);
+    height = s1(10);
+    radius = s1(11);
     
-    x2 = create_new_targets(x2, width, height, radius);
+    s2 = create_new_targets(s2, width, height, radius);
 end
 
 

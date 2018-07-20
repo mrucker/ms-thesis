@@ -1,4 +1,6 @@
-function v_thetas = adp_value_approximation(s_1, actions, reward, value_basii, transition_post, transition_pre, gamma, N, M, T)
+%time dependent value, finite horizon, discrete actions, post-decision,
+%forwards-backwards, non-optimistic, recursive linear basis regression.
+function v_thetas = approx_policy_iteration_1(s_1, actions, reward, value_basii, transition_post, transition_pre, gamma, N, M, T)
 
     %the bigger N, the more policies we iterate through when trying to find the best policy
     %the bigger M, the better our estimate of v_theta for the given basis functions
