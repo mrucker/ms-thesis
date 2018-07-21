@@ -114,7 +114,7 @@ function p = prunable(bestFeatures, currentFeatures, currentDepth, finalDepth, g
 
     %Assumes that R \in [-inf,1]; This is a heuristic
     potentialRemainingReward = (gamma^(currentDepth+1)-gamma^(finalDepth+1))/(1-gamma);
-    rewardGainedOnPathSoFar  = currentFeatures' * reward;        
+    rewardGainedOnPathSoFar  = currentFeatures' * reward;
     rewardFromBestPathEver   = bestFeatures' * reward;
     
     % notPossibleToBeatBest
