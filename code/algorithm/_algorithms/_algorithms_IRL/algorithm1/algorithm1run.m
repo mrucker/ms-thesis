@@ -13,9 +13,9 @@ function irl_result = algorithm1run(trajectory_observations, params, verbosity)
     svm_time = 0;
     mdp_time = 0;
     mix_time = 0;
-    
+
     ft = @(s) alg1_reward_basii(s, params);
-    fe = @(ss,d,a,r,g) mean(cell2mat(cellfun(@(s) featureExpectation_bb(s, d, a, r, g, ft),ss, 'UniformOutput', false)),2);
+    fe = @(ss,d,a,r,g) mean(cell2mat(cellfun(@(s) exact_tree_search(s, a, d, g, r, ft, @(s,a) huge_trans_post(s,a,false)),ss, 'UniformOutput', false)),2);
 
     sE = 0;
 
