@@ -9,7 +9,8 @@ function v_thetas = approx_policy_iteration_1(s_1, actions, reward, value_basii,
     S = cell(1,T);
 
     b_cnt = size(value_basii(s_1()),1);
-    theta = mat2cell(ones([T*b_cnt N])*400, ones(1,T)*b_cnt, ones(1,N));
+    %theta = mat2cell(ones([T*b_cnt N])*400, ones(1,T)*b_cnt, ones(1,N));
+    theta = mat2cell(ones([T*b_cnt N])*4  , ones(1,T)*b_cnt, ones(1,N));
     
     for n = 1:N 
         
@@ -40,18 +41,18 @@ function v_thetas = approx_policy_iteration_1(s_1, actions, reward, value_basii,
                 % since policy iteration only changes the policy a little
                 % we should start from our previous observations and update from there
                 % furthermore, if this is the approach we are taking then we shouldn't erase B
-                theta(:,n+1) = theta(:,n);                
+                theta(:,n+1) = theta(:,n);
             end
             
             X = value_basii(cell2mat(S))';
             Y = V;
             
             for t = 1:1
-                [B{t}, theta{t,n+1}] = recursive_linear_regression(B{t}, theta{t,n+1}, X(t,:), Y(t));
+                [B{t}, theta{t,n+1}] = recursive_linear_regression(B{t}, theta{t,n+1}, X(t,:), Y(t), 1);
             end
 
         end    
     end
     
-    v_thetas = theta{1,N+1};
+    v_thetas = theta{1,N+1};   
 end

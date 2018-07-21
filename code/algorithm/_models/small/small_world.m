@@ -1,6 +1,4 @@
-function [states, movements, targets, actions, state2index, target2index] = small_world(w, h, r)
-
-d = 3;
+function [states, movements, targets, actions, state2index, target2index, T] = small_world(d, w, h, r, ticks, survive, arrive)
 
 xs = (1:w)';
 ys = (1:h)';
@@ -58,5 +56,7 @@ y_actions = repmat(1:h, [1 w]);
 actions = vertcat(x_actions, y_actions);
 
 assert(all(state2index(states) == 1:size(states,2)), 'There is a problem with the state to index function. This will brake the one step matrix.')
+
+T = small_trans_matrix(movements, targets, actions, state2index, ticks, survive, arrive);
 
 end

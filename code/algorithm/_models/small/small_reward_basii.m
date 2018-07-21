@@ -26,13 +26,13 @@ function basii = small_reward_basii(states, actions, radius)
 
     state_point_distance_matrix = sqrt(dot(p1,p1,1) + dot(p2,p2,1)' - 2*(p2' * p1));
 
-    tf = sum(and( state_point_distance_matrix <= radius, logical(states(10:end,:))));
+    tf = sum(and(state_point_distance_matrix <= radius, logical(states(10:end,:))));
 
     basii = [
-        df(1,:) == +3;
+%        df(1,:) == +3;
         df(1,:) == +2;
         df(1,:) == +1;
-        df(2,:) == +3;
+%        df(2,:) == +3;
         df(2,:) == +2;
         df(2,:) == +1;
         df(3,:) == +2;
