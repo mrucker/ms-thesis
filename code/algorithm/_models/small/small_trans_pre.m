@@ -1,13 +1,15 @@
-function state_2 = small_trans_pre(state_1, action, states, actions, small_trans_matrix, state2index)
-    a_i = find(all(actions == action),1);
-    pmf = small_trans_matrix{a_i}(state2index(state_1), :);
-    cdf = tril(ones(size(pmf,2))) * pmf';
-        
-    state_i = find(rand <= cdf, 1);
+function s_2 = small_trans_pre(s_1, a_1, targets, target2index, target_cdf)
+
+    t_1   = s_1(10:end);
+    t_1_i = target2index(t_1);
+    t_2_i = find(rand <= target_cdf(t_1_i,:), 1);
+    t_2   = targets(:,t_2_i);
     
-    if isempty(state_i)
-        state_i = find(cdf,1,'last');
+    if ~isempty(a_1)
+        s_2 = small_trans_post(s_1, a_1);
+    else
+        s_2 = s_1;
     end
     
-    state_2 = states(:,state_i);
+    s_2 = [s_2(1:9);t_2];
 end

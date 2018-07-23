@@ -1,4 +1,4 @@
-function P = small_trans_matrix(movements, targets, actions, state2index, ticks, time_on_screen, expected_interarrival)    
+function [P, target_pmf] = small_trans_matrix(movements, targets, actions, state2index, ticks, time_on_screen, expected_interarrival)    
 
     target_max_count  = size(targets  , 1);
     target_perm_count = size(targets  , 2);
@@ -81,8 +81,11 @@ function target_perms_pmf = my_target_pmf(target_perms, sub_add_sty_pmf)
         if all(target_perm == 1)
             target_perms_prob_lambda = @(s_i) factorial(add_k(s_i) + 1) * sub_add_sty_pmf(add_k(s_i)+1, sub_k(s_i), sty_k(s_i));
             target_perms_pmf(t_i,:)  = target_perms_pmf(t_i,:) + arrayfun(target_perms_prob_lambda, 1:target_perms_count);
-        end
+        end        
     end
+    
+    %when changing logic I may want to remove this temporarily for testing
+    target_perms_pmf = diag(1./sum(target_perms_pmf,2)) * target_perms_pmf;    
 end
 
 function sub_add_sty_pmf = my_sub_add_sty_pmf(ticks, max_targs, time_on_screen, expected_interarrival)
