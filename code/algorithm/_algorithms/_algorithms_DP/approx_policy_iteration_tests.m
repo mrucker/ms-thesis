@@ -27,13 +27,21 @@ transition_pre  = @(s,a) small_trans_pre (s, a, targets, target2index, target_cd
 transition_post = @(s,a) small_trans_post(s, a);
 
 g = .9;
-N = 100;
+N = 20;
 M = 40;
 T = 10;
 
 value_basii = @(s) value_basii_3(s, actions, radius, @small_reward_basii);
 
-for i = 1:20
+mse_V1 = [];
+mse_V2 = [];
+mse_P1 = [];
+mse_P2 = [];
+
+exact_V = exact_value_iteration(trans_pmf, RB'*RW', g, .01);
+exact_P = exact_policy_realization(states, actions, exact_V, trans_pmf);
+
+for i = 1:1
     RW     = random_rw(RB);
     reward = @(s) RB(:,state2index(s))' * RW';
     
@@ -45,21 +53,12 @@ for i = 1:20
         [approx_v_theta2, f_time2(i), b_time2(i), v_time2(i)] = approx_policy_iteration_2(s_1, @(s) actions, reward, value_basii, transition_post, transition_pre, g, N, M, T);
     p_time2(i) = toc;
 
-    approx_V1(:,i) = value_basii(states)' * approx_v_theta1;
-    approx_V2(:,i) = value_basii(states)' * approx_v_theta2;
+    mse_V1(i) = mean(power(value_basii(states)' * approx_v_theta1 - exact_V, 2));
+    mse_V2(i) = mean(power(value_basii(states)' * approx_v_theta2 - exact_V, 2));
 
-    approx_P1(:,i) = approx_policy_realization(states, @(s) actions, approx_v_theta1, value_basii, transition_post);
-    approx_P2(:,i) = approx_policy_realization(states, @(s) actions, approx_v_theta2, value_basii, transition_post);
+    mse_P1(i) = mean(approx_policy_realization(states, actions, approx_v_theta1, value_basii, transition_post) == exact_P);
+    mse_P2(i) = mean(approx_policy_realization(states, actions, approx_v_theta2, value_basii, transition_post) == exact_P);
 end
-
-exact_V = exact_value_iteration(trans_pmf, RB'*RW', g, .01);
-exact_P = exact_policy_realization(states, actions, exact_V, trans_pmf);
-
-mse_V1 = mean(power(approx_V1 - exact_V, 2));
-mse_V2 = mean(power(approx_V2 - exact_V, 2));
-
-mse_P1 = mean(approx_P1 == exact_P);
-mse_P2 = mean(approx_P2 == exact_P);
 
 [
     mean(f_time1), mean(b_time1), mean(v_time1), mean(p_time1);

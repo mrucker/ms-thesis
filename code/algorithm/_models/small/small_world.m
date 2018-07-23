@@ -13,13 +13,17 @@ i = 0;
 for xy1 = all_xy
     for xy2 = all_xy
         for xy3 = all_xy
+                
+            if d == 3
                 i = i+1;
                 movements(:,i) = vertcat(xy1,xy2,xy3);
-
-%             for xy4 = all_xy
-%                 i = i+1;
-%                 movements(:,i) = vertcat(xy1,xy2,xy3,xy4);
-%             end
+            else
+                for xy4 = all_xy
+                    i = i+1;
+                    movements(:,i) = vertcat(xy1,xy2,xy3,xy4);
+                end
+            end
+            
         end
     end
 end
@@ -44,7 +48,7 @@ move_index_map = reshape(([w*h;w*h] .^ ([d:-1:1;d:-1:1]-1)) .* [h;1], [1 d*2]);
 targ_index_map = power(2, ((w-2*r)*(h-2*r) - 1):-1:0);
 
 state_move_index = @(s) move_index_map * (s(1:2*d,:)     - ones(2*d,1)) + 1;
-state_targ_index = @(s) targ_index_map * (s((2*3+4):end,:)            ) + 1;
+state_targ_index = @(s) targ_index_map * (s((2*d+4):end,:)            ) + 1;
 
 states       = vertcat(moves_for_each_targ, whr_for_moves_targs, targs_for_each_move);
 state2index  = @(s) (state_move_index(s) - 1) * targ_cnt + state_targ_index(s);

@@ -3,14 +3,12 @@
 function P = approx_policy_realization(states, actions, v_theta, v_basii, transition_post)
     
     P = zeros(size(states,2), 1);
-    
-    for s_i = 1:size(states,2)
-        
-        s = states(:,s_i);
-        
-        action_matrix = actions(s);
-        action_values = v_theta' * v_basii(transition_post(s, action_matrix));
 
-        [~, P(s_i)] = max(action_values);
+    action_values = zeros(size(states,2),size(actions,2));
+    
+    for a_i = 1:size(actions,2)
+        action_values(:,a_i) = v_theta' * v_basii(transition_post(states, actions(:,a_i)));
     end
+
+    [~, P] = max(action_values, [], 2);
 end

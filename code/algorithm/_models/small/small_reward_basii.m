@@ -10,6 +10,7 @@ function basii = small_reward_basii(states, actions, radius)
         1  0 -2  0  1  0 zeros(1,3 + point_count);
         0  1  0 -2  0  1 zeros(1,3 + point_count);
     ];
+
     df = A * states;
 
 
