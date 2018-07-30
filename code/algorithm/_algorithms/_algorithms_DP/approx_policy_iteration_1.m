@@ -1,6 +1,6 @@
 %time dependent value, finite horizon, discrete actions, post-decision,
 %forwards-backwards, non-optimistic, recursive linear basis regression.
-function [v_theta, f_time, b_time, v_time] = approx_policy_iteration_1(s_1, actions, reward, value_basii, transition_post, transition_pre, gamma, N, M, T)
+function [v_func, f_time, b_time, v_time] = approx_policy_iteration_1(s_1, actions, reward, value_basii, transition_post, transition_pre, gamma, N, M, T)
 
     f_time = 0;
     b_time = 0;
@@ -21,7 +21,7 @@ function [v_theta, f_time, b_time, v_time] = approx_policy_iteration_1(s_1, acti
         for m = 1:M 
 
             SA{1} = s_1();
-             S{1} = transition_pre(SA{1},[]);
+            S {1} = transition_pre(SA{1},[]);
 
             t_start = tic;
             for t = 1:(T-1)
@@ -70,5 +70,5 @@ function [v_theta, f_time, b_time, v_time] = approx_policy_iteration_1(s_1, acti
         end    
     end
     
-    v_theta = theta{1,N+1};
+    v_func = @(s) value_basii(s)' * theta{1,N+1};
 end

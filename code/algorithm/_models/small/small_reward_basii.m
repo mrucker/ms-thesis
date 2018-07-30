@@ -1,69 +1,32 @@
-function basii = small_reward_basii(states, actions, radius)
-
-    point_count = size(actions,2);
+function basii = small_reward_basii(states, actions, radius, deriv)
 
     A = [
-        1  0  0  0  0  0 zeros(1,3 + point_count);
-        0  1  0  0  0  0 zeros(1,3 + point_count);
-        1  0 -1  0  0  0 zeros(1,3 + point_count);
-        0  1  0 -1  0  0 zeros(1,3 + point_count);
-        1  0 -2  0  1  0 zeros(1,3 + point_count);
-        0  1  0 -2  0  1 zeros(1,3 + point_count);
+        1  0  0  0  0  0;
+        0  1  0  0  0  0;
+        1  0 -1  0  0  0;
+        0  1  0 -1  0  0;
+        1  0 -2  0  1  0;
+        0  1  0 -2  0  1;
     ];
 
-    df = A * states;
+    df = A(1:deriv*2,1:deriv*2) * states(1:deriv*2,:);
 
-
-    XY = [
-        1  0  0  0  0  0 zeros(1,3 + point_count);
-        0  1  0  0  0  0 zeros(1,3 + point_count);
-    ];
-
-    state_points = XY * states;
-    world_points = actions; 
+    state_points = df(1:2,:);
+    world_points = actions;
 
     p1 = state_points;
     p2 = world_points;
 
     state_point_distance_matrix = sqrt(dot(p1,p1,1) + dot(p2,p2,1)' - 2*(p2' * p1));
 
-    tf = sum(and(state_point_distance_matrix <= radius, logical(states(10:end,:))));
+    tf = sum(and(state_point_distance_matrix <= radius, logical(states((deriv*2+3+1):end,:))));
 
-    basii = [
-%        df(1,:) == +3;
-        df(1,:) == +2;
-        df(1,:) == +1;
-%        df(2,:) == +3;
-        df(2,:) == +2;
-        df(2,:) == +1;
-        df(3,:) == +2;
-        df(3,:) == +1;
-        df(3,:) == +0;
-        df(3,:) == -1;
-        df(3,:) == -2;
-        df(4,:) == +2;
-        df(4,:) == +1;
-        df(4,:) == +0;
-        df(4,:) == -1;
-        df(4,:) == -2;
-        df(5,:) == +4;
-        df(5,:) == +3;
-        df(5,:) == +2;
-        df(5,:) == +1;
-        df(5,:) == +0;
-        df(5,:) == -1;
-        df(5,:) == -2;
-        df(5,:) == -3;
-        df(5,:) == -4;
-        df(6,:) == +4;
-        df(6,:) == +3;
-        df(6,:) == +2;
-        df(6,:) == +1;
-        df(6,:) == +0;
-        df(6,:) == -1;
-        df(6,:) == -2;
-        df(6,:) == -3;
-        df(6,:) == -4;
-        tf;
-    ];
+    dummy = [];
+    
+    for i = 1:deriv*2
+        uni_cnt = numel(unique(df(i,:)));
+        dummy   = [dummy; repmat(df(i,:), [uni_cnt, 1]) == unique(df(i,:))'];
+    end
+    
+    basii = [dummy; tf;];
 end

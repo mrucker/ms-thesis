@@ -1,4 +1,4 @@
-function [P, target_pmf] = small_trans_matrix(movements, targets, actions, state2index, ticks, time_on_screen, expected_interarrival)    
+function [trans_pre, trans_post, target_pmf] = small_trans_matrix(movements, targets, actions, state2index, ticks, time_on_screen, expected_interarrival)    
 
     target_max_count  = size(targets  , 1);
     target_perm_count = size(targets  , 2);
@@ -11,8 +11,8 @@ function [P, target_pmf] = small_trans_matrix(movements, targets, actions, state
     
     sub_add_sty_pmf = my_sub_add_sty_pmf(ticks, target_max_count, time_on_screen, expected_interarrival);
     
-    target_pmf      = my_target_pmf(targets, sub_add_sty_pmf);
-    target_pmf      = round(target_pmf, 3);
+    target_pmf = my_target_pmf(targets, sub_add_sty_pmf);
+    target_pmf = round(target_pmf, 3);
     
     target_pmf_rows = reshape(repmat(1:target_perm_count, [target_perm_count 1]), [target_perm_count^2 1]);
     target_pmf_cols = repmat((1:target_perm_count)', [target_perm_count 1]);
@@ -20,19 +20,38 @@ function [P, target_pmf] = small_trans_matrix(movements, targets, actions, state
     
     target_row_col_val = [target_pmf_rows, target_pmf_cols, target_pmf_vals];    
     target_row_col_val = target_row_col_val( target_row_col_val(:,3) ~=0 ,:);
-            
-    P = cell(1,size(actions,2));
+
+    non_zero_transition_count = movement_count * size(target_row_col_val,1);
+    
+    
+    post = zeros(non_zero_transition_count, 3);
+    
+    for m_i = 1:movement_count
+        m_curr = movements(:,m_i);
+
+        i_curr = state2index([m_curr;0;0;0;targets(:,1)]);
+        i_next = state2index([m_curr;0;0;0;targets(:,1)]);
+
+        p_start   = (m_i-1) * size(target_row_col_val,1) + 1;
+        p_stop    = p_start + size(target_row_col_val,1) - 1;
+        p_indexes = p_start:p_stop;
+
+        my_transitions      = target_row_col_val;
+        my_transitions(:,1) = my_transitions(:,1) + i_curr - 1;
+        my_transitions(:,2) = my_transitions(:,2) + i_next - 1;
+
+        post(p_indexes,:) = my_transitions;
+    end
+    
+    trans_post = sparse(post(:,1),post(:,2),post(:,3), state_count, state_count);
+    
+    trans_pre = cell(1,size(actions,2));
     
     for a_i = 1:size(actions,2)
-
-        %state_count = move_count * target_perms...
-        %so state_count * target_perms == move_count*target_perms^2
+                        
+        pre  = zeros(non_zero_transition_count, 3);
         
-        non_zero_transition_count = movement_count * size(target_row_col_val,1);
-        
-        p = zeros(non_zero_transition_count, 3);
-        
-        tic
+        %tic
         for m_i = 1:movement_count
 
             a = actions  (:,a_i);
@@ -51,10 +70,10 @@ function [P, target_pmf] = small_trans_matrix(movements, targets, actions, state
             my_transitions(:,1) = my_transitions(:,1) + i_curr - 1;
             my_transitions(:,2) = my_transitions(:,2) + i_next - 1;
 
-            p(p_indexes,:) = my_transitions;
+            pre(p_indexes,:) = my_transitions;
         end
-        toc
-        P{a_i} = sparse(p(:,1),p(:,2),p(:,3), state_count, state_count);
+        %toc
+        trans_pre{a_i} = sparse(pre(:,1),pre(:,2),pre(:,3), state_count, state_count);
     end
 end
 

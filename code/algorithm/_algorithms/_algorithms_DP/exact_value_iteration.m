@@ -30,7 +30,7 @@ function [V,P] = exact_value_iteration(T, R, discount, epsilon, max_iter)
 
         for a_i = 1:A_N
             Q(:, a_i) = R + discount*T{a_i}*V;
-            V = max(V, Q(:,a_i)); %I think adding this line makes this closer to the Gauss-Seidel variation (Powell 64)
+            %V = max(V, Q(:,a_i)); %I think adding this line makes this closer to the Gauss-Seidel variation (Powell 64)
         end
 
         [V,P] = max(Q, [], 2);

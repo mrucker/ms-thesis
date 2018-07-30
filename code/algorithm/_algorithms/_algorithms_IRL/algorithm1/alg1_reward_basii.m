@@ -10,7 +10,7 @@ function f = alg1_reward_basii(states, params)
       0  1  0 -3  0  3  0 -1; %y(t-3)
     ];
     
-    huge_states_assert(states);   
+    huge_states_assert(states);
 
     %I'm going to assume all states have equal radius and targets
     %This assumption comes from simply knowing how my algorithm works
