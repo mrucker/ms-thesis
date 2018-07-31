@@ -1,10 +1,9 @@
-clear
-
 run '../../paths.m';
+clear
 
 deriv  = 3;
 width  = 3;
-height = 3;
+height = 2;
 radius = 0;
 
 OPS     = 30;
@@ -14,27 +13,27 @@ survive = 1000;
 
 steps = 30;
 gamma = .9;
-trn_p = .01;
+trn_p = .05;
 
 [states, movements, targets, actions, state2index, target2index, trans_pre_pmf, trans_post_pmf, trans_targ_pmf] = small_world(deriv, width, height ,radius, ticks, survive, arrive);
 
 exact_V = exact_value_iteration(trans_pre_pmf, random_rewards(states, actions), gamma, .01, steps);
 exact_P = exact_policy_realization(states, actions, exact_V, trans_pre_pmf);
 
-train_size = round(trn_p*size(states,2));
+trn_size = min(2000,round(trn_p*size(states,2)));
+tst_size = size(states,2) - trn_size;
 
-rand_is  = randperm(size(states,2));
-train_is = rand_is(1:train_size);
-test_is  = rand_is(train_size+1:end);
+rng_indexes = randperm(size(states,2));
+trn_indexes = rng_indexes(1:trn_size);
+tst_indexes = rng_indexes(trn_size+1:end);
 
 v_basii = value_basii_4(states,actions);
-%v_basii = [ones(1, size(states,2));states];
 
-xs_train = v_basii(:,train_is)';
-ys_train = exact_V(  train_is);
+xs_train = v_basii(:,trn_indexes)';
+ys_train = exact_V(  trn_indexes);
 
-xs_test = v_basii(:,test_is)';
-ys_test = exact_V(  test_is);
+xs_test = v_basii(:,tst_indexes)';
+ys_test = exact_V(  tst_indexes);
 
 %min_train = min(xs_train);
 %max_train = max(xs_train);
@@ -48,14 +47,15 @@ std_train = std(xs_train);
 %xs_train = (xs_train - avg_train) ./ (std_train + (std_train == 0));
 %xs_test  = (xs_test  - avg_train) ./ (std_train + (std_train == 0));
 
-dk_fun = {};
 dk_mse_t = [];
+dk_pse_t = [];
+dk_pse_f = [];
 
 lambdas = .005:.005:.020;
-sigmas  = 0.75:0.25:2.00;
+sigmas  = 1.00:0.50:3.00;
 
 lambdas = .01;
-sigmas  = 1.5;
+sigmas  = 2;
 
 lambda_n = size(lambdas,2);
 sigma_n  = size(sigmas,2);
@@ -68,15 +68,15 @@ for lambda_i = 1:lambda_n
 
         index = sub2ind([sigma_n lambda_n], sigma_i, lambda_i);
 
-        dk_fun{1,index} = batch_ridge_regression(xs_train, ys_train, lambda, k_dot());                       %linear
-        dk_fun{2,index} = batch_ridge_regression(xs_train, ys_train, lambda, k_gaussian(k_norm(),sigma));    %gaussian
-        dk_fun{3,index} = batch_ridge_regression(xs_train, ys_train, lambda, k_exponential(k_norm(),sigma)); %exponential
+        dk_fun_1 = batch_ridge_regression(xs_train, ys_train, lambda, k_dot());                       %linear
+        dk_fun_2 = batch_ridge_regression(xs_train, ys_train, lambda, k_gaussian(k_norm(),sigma));    %gaussian
+        dk_fun_3 = batch_ridge_regression(xs_train, ys_train, lambda, k_exponential(k_norm(),sigma)); %exponential
 
         dk_val_1 = zeros(size(v_basii,2),1);
         dk_val_2 = zeros(size(v_basii,2),1);
         dk_val_3 = zeros(size(v_basii,2),1);
         
-        chunk_size = 100000;
+        chunk_size = 10000;
         
         for chunk_page = 1:ceil(size(v_basii,2)/chunk_size)
 
@@ -84,22 +84,22 @@ for lambda_i = 1:lambda_n
             chunk_stop  = chunk_page*chunk_size;
             chunk_indexes = chunk_start:min(chunk_stop,size(v_basii,2));
             
-            dk_val_1 = dk_fun{1,index}(v_basii(:,chunk_indexes)');
-            dk_val_2 = dk_fun{2,index}(v_basii(:,chunk_indexes)');
-            dk_val_3 = dk_fun{3,index}(v_basii(:,chunk_indexes)');
+            dk_val_1(chunk_indexes) = dk_fun_1(v_basii(:,chunk_indexes)');
+            dk_val_2(chunk_indexes) = dk_fun_2(v_basii(:,chunk_indexes)');
+            dk_val_3(chunk_indexes) = dk_fun_3(v_basii(:,chunk_indexes)');
         end
 
         dk_pol_1 = exact_policy_realization(v_basii, actions, dk_val_1, trans_pre_pmf);
         dk_pol_2 = exact_policy_realization(v_basii, actions, dk_val_2, trans_pre_pmf);
         dk_pol_3 = exact_policy_realization(v_basii, actions, dk_val_3, trans_pre_pmf);
 
-        dk_mse_t(1,index) = mean((ys_test - dk_val_1(test_is)).^2);
-        dk_mse_t(2,index) = mean((ys_test - dk_val_2(test_is)).^2);
-        dk_mse_t(3,index) = mean((ys_test - dk_val_3(test_is)).^2);
+        dk_mse_t(1,index) = mean((ys_test - dk_val_1(tst_indexes)).^2);
+        dk_mse_t(2,index) = mean((ys_test - dk_val_2(tst_indexes)).^2);
+        dk_mse_t(3,index) = mean((ys_test - dk_val_3(tst_indexes)).^2);
 
-        dk_pse_t(1,index) = mean(dk_pol_1(test_is) == exact_P(test_is));
-        dk_pse_t(2,index) = mean(dk_pol_2(test_is) == exact_P(test_is));
-        dk_pse_t(3,index) = mean(dk_pol_3(test_is) == exact_P(test_is));
+        dk_pse_t(1,index) = mean(dk_pol_1(tst_indexes) == exact_P(tst_indexes));
+        dk_pse_t(2,index) = mean(dk_pol_2(tst_indexes) == exact_P(tst_indexes));
+        dk_pse_t(3,index) = mean(dk_pol_3(tst_indexes) == exact_P(tst_indexes));
 
         dk_pse_f(1,index) = mean(dk_pol_1 == exact_P);
         dk_pse_f(2,index) = mean(dk_pol_2 == exact_P);
@@ -116,50 +116,51 @@ end
 [sigma_b_p_f, lambda_b_p_f] = ind2sub([sigma_n lambda_n], best_pse_f);
 
 fprintf('\n');
-fprintf('states %i', size(states,2));
+fprintf('states = %i; train = %i; test = %i', size(states,2), trn_size, tst_size);
 
 fprintf('\n');
 fprintf('lin')
 fprintf('    -- lambda = %05.2f sigma = %05.2f MSE_t = %05.2f',[lambdas(lambda_b_m_t(1)), sigmas(sigma_b_m_t(1)), dk_mse_t(1,best_mse_t(1))]);
-fprintf('    -- lambda = %05.2f sigma = %05.2f PSE_t = %.2f',[lambdas(lambda_b_p_t(1)), sigmas(sigma_b_p_t(1)), dk_pse_t(1,best_pse_t(1))]);
-fprintf('    -- lambda = %05.2f sigma = %05.2f PSE_f = %.2f',[lambdas(lambda_b_p_f(1)), sigmas(sigma_b_p_f(1)), dk_pse_f(1,best_pse_f(1))]);
+fprintf('    -- lambda = %05.2f sigma = %05.2f PSE_t = %.2f'  ,[lambdas(lambda_b_p_t(1)), sigmas(sigma_b_p_t(1)), dk_pse_t(1,best_pse_t(1))]);
+fprintf('    -- lambda = %05.2f sigma = %05.2f PSE_f = %.2f'  ,[lambdas(lambda_b_p_f(1)), sigmas(sigma_b_p_f(1)), dk_pse_f(1,best_pse_f(1))]);
 fprintf('\n');
 
 fprintf('gau')
 fprintf('    -- lambda = %05.2f sigma = %05.2f MSE_t = %05.2f',[lambdas(lambda_b_m_t(2)), sigmas(sigma_b_m_t(2)), dk_mse_t(2,best_mse_t(2))]);
-fprintf('    -- lambda = %05.2f sigma = %05.2f PSE_t = %.2f',[lambdas(lambda_b_p_t(2)), sigmas(sigma_b_p_t(2)), dk_pse_t(2,best_pse_t(2))]);
-fprintf('    -- lambda = %05.2f sigma = %05.2f PSE_f = %.2f',[lambdas(lambda_b_p_f(2)), sigmas(sigma_b_p_f(2)), dk_pse_f(2,best_pse_f(2))]);
+fprintf('    -- lambda = %05.2f sigma = %05.2f PSE_t = %.2f'  ,[lambdas(lambda_b_p_t(2)), sigmas(sigma_b_p_t(2)), dk_pse_t(2,best_pse_t(2))]);
+fprintf('    -- lambda = %05.2f sigma = %05.2f PSE_f = %.2f'  ,[lambdas(lambda_b_p_f(2)), sigmas(sigma_b_p_f(2)), dk_pse_f(2,best_pse_f(2))]);
 fprintf('\n');
 
 fprintf('exp')
 fprintf('    -- lambda = %05.2f sigma = %05.2f MSE_t = %05.2f',[lambdas(lambda_b_m_t(3)), sigmas(sigma_b_m_t(3)), dk_mse_t(3,best_mse_t(3))]);
-fprintf('    -- lambda = %05.2f sigma = %05.2f PSE_t = %.2f',[lambdas(lambda_b_p_t(3)), sigmas(sigma_b_p_t(3)), dk_pse_t(3,best_pse_t(3))]);
-fprintf('    -- lambda = %05.2f sigma = %05.2f PSE_f = %.2f',[lambdas(lambda_b_p_f(3)), sigmas(sigma_b_p_f(3)), dk_pse_f(3,best_pse_f(3))]);
+fprintf('    -- lambda = %05.2f sigma = %05.2f PSE_t = %.2f'  ,[lambdas(lambda_b_p_t(3)), sigmas(sigma_b_p_t(3)), dk_pse_t(3,best_pse_t(3))]);
+fprintf('    -- lambda = %05.2f sigma = %05.2f PSE_f = %.2f'  ,[lambdas(lambda_b_p_f(3)), sigmas(sigma_b_p_f(3)), dk_pse_f(3,best_pse_f(3))]);
 fprintf('\n');
 
-clf
-subplot(3,1,1)
-drawplot(xs_test,ys_test,dk_fun{1,best_mse_t(1)});
-
-subplot(3,1,2)
-drawplot(xs_test,ys_test,dk_fun{2,best_mse_t(2)});
-
-subplot(3,1,3)
-drawplot(xs_test,ys_test,dk_fun{3,best_mse_t(3)});
+if numel(tst_indexes) < 15000
+     clf
+     subplot(3,1,1)
+     drawplot(xs_test,ys_test,dk_val_1(tst_indexes));
+    % 
+     subplot(3,1,2)
+     drawplot(xs_test,ys_test,dk_val_2(tst_indexes));
+    % 
+     subplot(3,1,3)
+     drawplot(xs_test,ys_test,dk_val_3(tst_indexes));
+end
 
 %Drawers
-function drawplot(xs, ys, dk)
+function drawplot(xs, y1, y2)
 
     xlim([1 size(xs,1)])
     hold on
-        scatter(1:size(xs,1),ys    , [], 'r', 'o');
-        scatter(1:size(xs,1),dk(xs), [], 'g', '.');
+        scatter(1:size(xs,1),y1, [], 'r', 'o');
+        scatter(1:size(xs,1),y2, [], 'g', '.');
     hold off
 end
 %Drawers
 
 function rr = random_rewards(states, actions)
-    rr = 50-100*rand(size(states,2),1);
     
     A = [
         1  0  0  0  0  0;

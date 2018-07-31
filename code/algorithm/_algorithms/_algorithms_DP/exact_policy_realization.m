@@ -1,6 +1,6 @@
 %Technically this can also be passed back by the value iteration algorithm.
 %However, to provide symetry with the approx algorithms I add it here too.
-function P = exact_policy_realization(states, actions, V, pre_pdf, post_pdf)
+function P = exact_policy_realization(states, actions, V, pre_pdf)
     S_N = size(states,2);
     A_N = size(actions,2);
     
