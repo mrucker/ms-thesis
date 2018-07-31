@@ -3,7 +3,7 @@ clear
 
 deriv  = 3;
 width  = 3;
-height = 2;
+height = 3;
 radius = 0;
 
 OPS     = 30;
