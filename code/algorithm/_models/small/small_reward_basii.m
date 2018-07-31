@@ -24,8 +24,8 @@ function basii = small_reward_basii(states, actions, radius, deriv)
     dummy = [];
     
     for i = 1:deriv*2
-        uni_cnt = numel(unique(df(i,:)));
-        dummy   = [dummy; repmat(df(i,:), [uni_cnt, 1]) == unique(df(i,:))'];
+        unique_cnt = numel(unique(df(i,:)));
+        dummy      = [dummy; repmat(df(i,:), [unique_cnt, 1]) == unique(df(i,:))'];
     end
     
     basii = [dummy; tf;];
