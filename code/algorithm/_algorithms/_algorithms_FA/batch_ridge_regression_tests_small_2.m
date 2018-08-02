@@ -5,7 +5,7 @@ clear;
 
 deriv  = 3;
 width  = 2;
-height = 2;
+height = 3;
 radius = 0;
 
 OPS     = 30;
@@ -13,7 +13,7 @@ ticks   = floor(1000/OPS);
 arrive  = 200;
 survive = 1000;
 
-steps = 30;
+steps = 20;
 gamma = .9;
 trn_p = .05;
 
@@ -66,23 +66,24 @@ for lambda_i = 1:lambda_n
         dk_fun_1 = batch_ridge_regression(xs_train, ys_train, lambda, k_dot());                       %linear
         dk_fun_2 = batch_ridge_regression(xs_train, ys_train, lambda, k_gaussian(k_norm(),sigma));    %gaussian
         dk_fun_3 = batch_ridge_regression(xs_train, ys_train, lambda, k_exponential(k_norm(),sigma)); %exponential
-
+        
         dk_val_1 = zeros(size(v_basii,2),1);
         dk_val_2 = zeros(size(v_basii,2),1);
         dk_val_3 = zeros(size(v_basii,2),1);
         
-        chunk_size = 10000;
+        chunk_size = 100000;
+
         
         for chunk_page = 1:ceil(size(v_basii,2)/chunk_size)
 
-            chunk_start = 1+(chunk_page-1)*chunk_size;
-            chunk_stop  = chunk_page*chunk_size;
+            chunk_start   = 1+(chunk_page-1)*chunk_size;
+            chunk_stop    = chunk_page*chunk_size;
             chunk_indexes = chunk_start:min(chunk_stop,size(v_basii,2));
             
             dk_val_1(chunk_indexes) = dk_fun_1(v_basii(:,chunk_indexes)');
             dk_val_2(chunk_indexes) = dk_fun_2(v_basii(:,chunk_indexes)');
             dk_val_3(chunk_indexes) = dk_fun_3(v_basii(:,chunk_indexes)');
-        end
+        end        
 
         dk_pol_1 = exact_policy_realization(v_basii, actions, dk_val_1, trans_pre_pmf);
         dk_pol_2 = exact_policy_realization(v_basii, actions, dk_val_2, trans_pre_pmf);
@@ -101,6 +102,26 @@ for lambda_i = 1:lambda_n
         dk_pse_f(3,index) = mean(dk_pol_3 == exact_P);
     end
 end
+
+k_mdl_1 = fitrsvm(xs_train,ys_train,'Standardize',true);
+k_mdl_2 = fitrsvm(xs_train,ys_train,'KernelFunction','gaussian');
+
+kk_val_1 = predict(k_mdl_1,v_basii');
+kk_val_2 = predict(k_mdl_2,v_basii');
+
+kk_pol_1 = exact_policy_realization(v_basii, actions, kk_val_1, trans_pre_pmf);
+kk_pol_2 = exact_policy_realization(v_basii, actions, kk_val_2, trans_pre_pmf);
+
+kk_mse_t(1) = mean((ys_test - kk_val_1(tst_indexes)).^2);
+kk_mse_t(2) = mean((ys_test - kk_val_2(tst_indexes)).^2);
+
+kk_pse_t(1) = mean(kk_pol_1(tst_indexes) == exact_P(tst_indexes));
+kk_pse_t(2) = mean(kk_pol_2(tst_indexes) == exact_P(tst_indexes));
+
+kk_pse_f(1) = mean(kk_pol_1 == exact_P);
+kk_pse_f(2) = mean(kk_pol_2 == exact_P);
+
+a = predict(k_mdl_2, xs_test);
 
 [~,best_mse_t] = min(dk_mse_t, [], 2);
 [~,best_pse_t] = max(dk_pse_t, [], 2);
@@ -130,6 +151,18 @@ fprintf('exp')
 fprintf('    -- lambda = %05.2f sigma = %05.2f MSE_t = %05.2f',[lambdas(lambda_b_m_t(3)), sigmas(sigma_b_m_t(3)), dk_mse_t(3,best_mse_t(3))]);
 fprintf('    -- lambda = %05.2f sigma = %05.2f PSE_t = %.2f'  ,[lambdas(lambda_b_p_t(3)), sigmas(sigma_b_p_t(3)), dk_pse_t(3,best_pse_t(3))]);
 fprintf('    -- lambda = %05.2f sigma = %05.2f PSE_f = %.2f'  ,[lambdas(lambda_b_p_f(3)), sigmas(sigma_b_p_f(3)), dk_pse_f(3,best_pse_f(3))]);
+fprintf('\n');
+
+fprintf('kin');
+fprintf('    -- lambda = %05.2f sigma = %05.2f MSE_t = %05.2f',[0                       ,0                      ,kk_mse_t(1)               ]);
+fprintf('    -- lambda = %05.2f sigma = %05.2f PSE_t = %05.2f',[0                       ,0                      ,kk_pse_t(1)               ]);
+fprintf('    -- lambda = %05.2f sigma = %05.2f PSE_f = %05.2f',[0                       ,0                      ,kk_pse_f(1)               ]);
+fprintf('\n');
+
+fprintf('kau');
+fprintf('    -- lambda = %05.2f sigma = %05.2f MSE_t = %05.2f',[0                       ,0                      ,kk_mse_t(2)               ]);
+fprintf('    -- lambda = %05.2f sigma = %05.2f PSE_t = %05.2f',[0                       ,0                      ,kk_pse_t(2)               ]);
+fprintf('    -- lambda = %05.2f sigma = %05.2f PSE_f = %05.2f',[0                       ,0                      ,kk_pse_f(2)               ]);
 fprintf('\n');
 
 if numel(tst_indexes) < 15000

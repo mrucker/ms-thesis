@@ -1,21 +1,29 @@
+global A;
+
 run '../../paths.m';
 
 test_algos = {
-%   @approx_policy_iteration_1;
+    %@approx_policy_iteration_1;
     @approx_policy_iteration_2;
-%   @approx_policy_iteration_3;
-%   @approx_policy_iteration_4;
+    %@approx_policy_iteration_3;
+    %@approx_policy_iteration_4;
     @approx_policy_iteration_5;
+    @approx_policy_iteration_6;
 };
 
-%plot_i = 2;
+A = [
+    1  0 -1  0  0  0;
+    0  1  0 -1  0  0;
+    1  0 -2  0  1  0;
+    0  1  0 -2  0  1;
+];
 
 samples = 1;
 
 g = .9;
-N = 2;
-M = 5000;
-T = 5;
+N = 6;
+M = 200;
+T = 10;
 
 deriv  = 3;
 width  = 2;
@@ -64,12 +72,33 @@ for i = 1:samples
     exact_P      = exact_policy_realization(states, actions, exact_pre_V, trans_pre_pmf);
 
     for a = 1:size(test_algos,1)
+        
         tic;
-            [approx_post_v{a}, f_time(i,a), b_time(i,a), v_time(i,a)] = test_algos{a}(s_1, @(s) actions, reward, v_basii, transition_post, transition_pre, g, N, M, T, exact_post_V, state2index);
+            if a == 1
+                [approx_post_v{a}, f_time(i,a), b_time(i,a), v_time(i,a)] = test_algos{a}(s_1, @(s) actions, reward, v_basii, transition_post, transition_pre, g, N, M, T);
+            else
+                [approx_post_v{a}, f_time(i,a), b_time(i,a), v_time(i,a)] = test_algos{a}(s_1, @(s) actions, reward, v_basii, transition_post, transition_pre, g, N, M, T+5);
+            end
         a_time(i,a) = toc;
 
-        mse_V(i,a) = mean(power(approx_post_v{a}(states) - exact_post_V, 2));
-        mse_P(i,a) = mean(approx_policy_realization(states, actions, approx_post_v{a}, transition_post) == exact_P);
+        chunk_size = 10000;
+
+        e_V = zeros(size(states,2),1);
+        e_P = zeros(size(states,2),1);
+
+        for chunk_page = 1:ceil(size(v_basii,2)/chunk_size)
+
+            chunk_start   = 1+(chunk_page-1)*chunk_size;
+            chunk_stop    = chunk_page*chunk_size;
+            chunk_indexes = chunk_start:min(chunk_stop,size(states,2));
+            chunk_states  = states(:,chunk_indexes);
+
+            e_V(chunk_indexes) = approx_post_v{a}(chunk_states) - exact_post_V(chunk_indexes);
+            e_P(chunk_indexes) = approx_policy_realization(chunk_states, actions, approx_post_v{a}, transition_post) == exact_P(chunk_indexes);
+        end
+
+        mse_V(i,a) = mean(e_V.^2);
+        mse_P(i,a) = mean(e_P.^2);
     end
 end
 
@@ -79,7 +108,7 @@ end
 %        scatter(1:size(states,2), approx_post_v{plot_i}(states), [], 'b', '.');
 %    hold off
 
-fprintf('%.3f + %.3f + %.3f = %.3f \n', [mean(f_time,1); mean(b_time,1); mean(v_time,1); mean(a_time,1)]);
+fprintf('%.3f + %.3f + %.3f = %.3f \n', [sum(f_time,1); sum(b_time,1); sum(v_time,1); sum(a_time,1)]);
 fprintf('MSE = %.3f; MSP = %.3f \n', [mean(mse_V,1); mean(mse_P,1)])
 
 %sortrows(vertcat(exact_post_V(30:40)',states(:,30:40))',1)'
@@ -156,6 +185,7 @@ function vb = value_basii_4(states, actions, radius)
 end
 
 function vb = value_basii_5(states, actions)
+global A
 
     state_points  = states(1:2,:);
     world_points  = actions;
@@ -183,13 +213,6 @@ function vb = value_basii_5(states, actions)
 
     points_with_decrease_x = curr_xy_dist(1:2:end,:) < prev_xy_dist(1:2:end,:);
     points_with_decrease_y = curr_xy_dist(2:2:end,:) < prev_xy_dist(2:2:end,:);
-
-    A = [
-        1  0 -1  0  0  0;
-        0  1  0 -1  0  0;
-        1  0 -2  0  1  0;
-        0  1  0 -2  0  1;
-    ];
 
     each_states_target_x_decrease_count  = sum(points_with_decrease_x&points_with_targets);
     each_states_target_y_decrease_count  = sum(points_with_decrease_y&points_with_targets);
@@ -222,13 +245,7 @@ function r_theta = r_theta_generate(RB)
 end
 
 function rr = random_rewards(states, actions)
-    
-    A = [
-        1  0 -1  0  0  0;
-        0  1  0 -1  0  0;
-        1  0 -2  0  1  0;
-        0  1  0 -2  0  1;
-    ];
+global A    
 
     derivs = A * states(1:6,:);
     

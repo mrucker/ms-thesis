@@ -1,6 +1,6 @@
 %time-independent value, finite horizon, discrete actions, post-decision,
 %forwards-backwards, non-optimistic, recursive linear basis regression.
-function [v_func, f_time, b_time, v_time] = approx_policy_iteration_5(s_1, actions, reward, value_basii, transition_post, transition_pre, gamma, N, M, T)
+function [v_func, f_time, b_time, v_time] = approx_policy_iteration_6(s_1, actions, reward, value_basii, transition_post, transition_pre, gamma, N, M, T)
 
     w_size = min(10,T);
     lambda = .01;
@@ -19,14 +19,13 @@ function [v_func, f_time, b_time, v_time] = approx_policy_iteration_5(s_1, actio
 
     %the bigger N, the more policies we iterate through when trying to find the best policy
     %the bigger M, the better our estimate of v_theta for the given basis functions
-
-    V = cell (1, N+1);
-    X = [];
-    Y = [];
-    S = [];
-
+    
+    V     = cell (1, N+1);
+    X     = [];
+    Y     = [];
+    
     V{1} = @(xi) 4*ones(1,size(xi,1));
-
+    
     for n = 1:N 
 
         for m = 1:M 
@@ -39,7 +38,7 @@ function [v_func, f_time, b_time, v_time] = approx_policy_iteration_5(s_1, actio
 
             t_start = tic;
             for t = 1:(T-1)
-
+            
                 action_matrix = actions(s_t);
                 post_states   = transition_post(s_t, action_matrix);
                 post_basii    = value_basii(post_states);
@@ -54,26 +53,24 @@ function [v_func, f_time, b_time, v_time] = approx_policy_iteration_5(s_1, actio
                 s_t = transition_pre(s_a, []);
                 X_post(:,t+1) = post_basii(:,a_i);
                 X_rew (:,t+1) = reward(s_t);
+
             end
             f_time = f_time + toc(t_start);
 
             t_start = tic;
                 X = [X, X_post(:,1:T-w_size+1)];
                 Y = [Y, X_rew * g_mat'];
-                S = [S, ones(1,T-w_size+1)];
             b_time = b_time + toc(t_start);
-
         end
 
         t_start = tic;
-                [~,is,gs]=unique(X', 'rows');
+            [~,i,g]=unique(X', 'rows');
 
-                X = X(:,is);
-                Y = grpstats(1:numel(Y),gs, @(gi) sum(Y(gi).*S(gi))/sum(S(gi)) )';
-                S = grpstats(S,gs, @(ss) sum(ss))';
-                k = batch_ridge_regression(X',Y', lambda, k_gaussian(k_norm(),sigma));
-
-            V{n+1} = @(x) k(x);
+            X = X(:,i);
+            Y = grpstats(Y,g)';
+            k = fitrsvm(X',Y','KernelFunction','gaussian');
+            
+            V{n+1} = @(x) predict(k, x);
         v_time = v_time + toc(t_start);
     end
 
