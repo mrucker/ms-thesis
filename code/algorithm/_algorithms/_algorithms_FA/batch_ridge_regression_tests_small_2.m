@@ -1,11 +1,11 @@
 %same as 1 but I average over my identical training features. This reduces
 %my training set size by around 10% or so without appearing to lose accuracy.
 run '../../paths.m';
-clear
+clear;
 
 deriv  = 3;
-width  = 3;
-height = 3;
+width  = 2;
+height = 2;
 radius = 0;
 
 OPS     = 30;
@@ -29,7 +29,7 @@ rng_indexes = randperm(size(states,2));
 trn_indexes = rng_indexes(1:trn_size);
 tst_indexes = rng_indexes(trn_size+1:end);
 
-v_basii = value_basii_4(states,actions);
+v_basii = value_basii(states,actions);
 
 xs_train = v_basii(:,trn_indexes)';
 ys_train = exact_V(  trn_indexes);
@@ -47,10 +47,10 @@ dk_pse_t = [];
 dk_pse_f = [];
 
 lambdas = .005:.005:.020;
-sigmas  = 1.00:0.50:3.00;
+sigmas  = 2.50:0.50:4.50;
 
 lambdas = .01;
-sigmas  = 2;
+sigmas  = 3.5;
 
 lambda_n = size(lambdas,2);
 sigma_n  = size(sigmas,2);
@@ -111,7 +111,7 @@ end
 [sigma_b_p_f, lambda_b_p_f] = ind2sub([sigma_n lambda_n], best_pse_f);
 
 fprintf('\n');
-fprintf('states = %i; train = %i; test = %i', size(states,2), trn_size, tst_size);
+fprintf('states = %i; train = %i; test = %i', size(states,2), size(xs_train,1), tst_size);
 
 fprintf('\n');
 fprintf('lin')
@@ -178,19 +178,20 @@ function rr = random_rewards(states, actions)
 
     state_point_distance_matrix = sqrt(dot(p1,p1,1) + dot(p2,p2,1)' - 2*(p2' * p1));
 
-    points_within_radius = state_point_distance_matrix <= state_radius;
-    points_with_targets  = logical(state_targets);
+    not_touched_last_step = ~all(states(1:2,:) == states(3:4,:));
+    points_within_radius  = state_point_distance_matrix <= state_radius;
+    points_with_targets   = logical(state_targets);
 
-    each_states_touch_count  = sum(points_within_radius&points_with_targets);
-    
-    deriv_1 = [ 0  0  1  1 -1 -1];
-    deriv_2 = [ 0  0 -1 -1 -1 -1];
-    touched = 1;
-    
+    each_states_touch_count  = sum(points_within_radius&points_with_targets&not_touched_last_step);    
+
+    deriv_1 = [ 0  0  1  1 -1 -1] * 10 * (.5-rand);
+    deriv_2 = [ 0  0 -1 -1 -1 -1] * 10 * (.5-rand);
+    touched = 1 * 10 * (.5-rand);
+
     rr = [abs(derivs);abs(derivs).^2;each_states_touch_count]' * [deriv_1,deriv_2,touched]';
 end
 
-function vb = value_basii_4(states, actions)
+function vb = value_basii(states, actions)
 
     state_points  = states(1:2,:);
     world_points  = actions;
@@ -202,12 +203,15 @@ function vb = value_basii_4(states, actions)
 
     state_point_distance_matrix = sqrt(dot(p1,p1,1) + dot(p2,p2,1)' - 2*(p2' * p1));
 
-    points_within_radius = state_point_distance_matrix <= state_radius;
-    points_with_targets  = logical(state_targets);
+    not_touched_last_step = ~all(states(1:2,:) == states(3:4,:));
+    points_within_radius  = state_point_distance_matrix <= state_radius;
+    points_with_targets   = logical(state_targets);
 
     curr_points = repmat(states(1:2,:), [size(world_points,2) 1]);
     prev_points = repmat(states(3:4,:), [size(world_points,2) 1]);
-
+    
+    center_point     = (max(world_points, [], 2) + min(world_points, [], 2))/2;    
+    
     world_points = reshape(world_points, [], 1);
     
     curr_xy_dist = abs(world_points - curr_points);
@@ -217,8 +221,6 @@ function vb = value_basii_4(states, actions)
     points_with_decrease_y = curr_xy_dist(2:2:end,:) < prev_xy_dist(2:2:end,:);
 
     A = [
-        1  0  0  0  0  0;
-        0  1  0  0  0  0;
         1  0 -1  0  0  0;
         0  1  0 -1  0  0;
         1  0 -2  0  1  0;
@@ -226,14 +228,24 @@ function vb = value_basii_4(states, actions)
     ];
 
     each_states_target_x_decrease_count  = sum(points_with_decrease_x&points_with_targets);
-    each_states_target_y_decrease_count  = sum(points_with_decrease_y&points_with_targets);    
-    each_states_target_xy_decrease_count = sum(points_with_decrease_x&points_with_decrease_y&points_with_targets);
+    each_states_target_y_decrease_count  = sum(points_with_decrease_y&points_with_targets);
+    each_states_target_xy_decrease_count = sum(points_with_decrease_x&points_with_decrease_y&points_with_targets&not_touched_last_step);
     each_states_touch_count              = sum(points_within_radius&points_with_targets);
-    each_states_target_count             = sum(state_targets);    
+    each_states_target_count             = sum(state_targets);
     each_states_y_intercept              = ones(1, size(states,2));
     each_states_targets                  = state_targets;
     each_states_derivs                   = A * states(1:6,:);
     each_states                          = states;
-
-    vb = [each_states_y_intercept; each_states_derivs; each_states_touch_count; each_states_target_count];
+    each_states_center_vector            = center_point - state_points;
+    each_states_movement_towards_targets = [each_states_target_x_decrease_count;each_states_target_y_decrease_count;each_states_target_xy_decrease_count];
+    
+    vb = [
+        each_states_y_intercept; 
+        each_states_derivs; 
+        each_states_touch_count; 
+        each_states_target_count; 
+        each_states_movement_towards_targets;     
+        each_states_center_vector
+    ];
+    vb = vb ./ max(vb,[],2);
 end

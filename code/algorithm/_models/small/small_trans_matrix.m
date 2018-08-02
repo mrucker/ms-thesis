@@ -17,35 +17,33 @@ function [trans_pre, trans_post, target_pmf] = small_trans_matrix(movements, tar
     target_pmf_rows = reshape(repmat(1:target_perm_count, [target_perm_count 1]), [target_perm_count^2 1]);
     target_pmf_cols = repmat((1:target_perm_count)', [target_perm_count 1]);
     target_pmf_vals = reshape(target_pmf', [target_perm_count^2 1]);
-    
+
     target_row_col_val = [target_pmf_rows, target_pmf_cols, target_pmf_vals];    
     target_row_col_val = target_row_col_val( target_row_col_val(:,3) ~=0 ,:);
 
     non_zero_transition_count = movement_count * size(target_row_col_val,1);
-    
-    
+
     post = zeros(non_zero_transition_count, 3);
-    
+
     for m_i = 1:movement_count
         m_curr = movements(:,m_i);
 
-        i_curr = state2index([m_curr;0;0;0;targets(:,1)]);
-        i_next = state2index([m_curr;0;0;0;targets(:,1)]);
+        i_curr = state2index([m_curr;0;0;0;targets(:,1)]); %i_curr == the post_state
+        i_next = state2index([m_curr;0;0;0;targets(:,1)]); %i_next == i_curr since we didn't take an action 
 
         p_start   = (m_i-1) * size(target_row_col_val,1) + 1;
         p_stop    = p_start + size(target_row_col_val,1) - 1;
         p_indexes = p_start:p_stop;
 
-        my_transitions      = target_row_col_val;
+        my_transitions      = target_row_col_val; %all the possible transitions assuming we didn't take an action (aka, i_next == i_curr)
         my_transitions(:,1) = my_transitions(:,1) + i_curr - 1;
         my_transitions(:,2) = my_transitions(:,2) + i_next - 1;
 
         post(p_indexes,:) = my_transitions;
     end
     
-    trans_post = sparse(post(:,1),post(:,2),post(:,3), state_count, state_count);
-    
-    trans_pre = cell(1,size(actions,2));
+    trans_post = sparse(post(:,1),post(:,2),post(:,3), state_count, state_count);    
+    trans_pre  = cell(1,size(actions,2));
     
     for a_i = 1:size(actions,2)
                         

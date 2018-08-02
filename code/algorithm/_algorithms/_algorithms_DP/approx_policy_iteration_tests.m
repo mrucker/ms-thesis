@@ -1,20 +1,21 @@
 run '../../paths.m';
 
 test_algos = {
-%    @approx_policy_iteration_1;
+%   @approx_policy_iteration_1;
     @approx_policy_iteration_2;
-%    @approx_policy_iteration_3;
-    @approx_policy_iteration_4;
+%   @approx_policy_iteration_3;
+%   @approx_policy_iteration_4;
+    @approx_policy_iteration_5;
 };
 
 %plot_i = 2;
 
-samples = 10;
+samples = 1;
 
 g = .9;
-N = 10;
-M = 70;
-T = 3;
+N = 2;
+M = 5000;
+T = 5;
 
 deriv  = 3;
 width  = 2;
@@ -42,7 +43,7 @@ transition_pre  = @(s,a) small_trans_pre (s, a, targets, target2index, trans_tar
 transition_post = @(s,a) small_trans_post(s, a);
 
 r_basii = small_reward_basii(states, actions, radius, deriv);
-v_basii = @(v_states) value_basii_4(v_states, actions, radius);
+v_basii = @(v_states) value_basii_5(v_states, actions);
 
 approx_post_v = {};
 
@@ -55,16 +56,16 @@ mse_V = [];
 mse_P = [];
 
 for i = 1:samples
-    r_theta = r_theta_generate(r_basii);
-    reward  = @(s) r_basii(:,state2index(s))' * r_theta';
+    rewards = random_rewards(states, actions);
+    reward  = @(s) rewards(state2index(s));
 
-    exact_pre_V  = exact_value_iteration(trans_pre_pmf, r_basii'*r_theta', g, .01, T);
-    exact_post_V = trans_post_pmf * exact_pre_V;
+    exact_pre_V  = exact_value_iteration(trans_pre_pmf, rewards, g, 0, min(T,30));
+    exact_post_V = trans_post_pmf * exact_pre_V; %this is right V_a(s_t) = E[V(s_{t+1}) | a, s_t] == \sum_{s' \in S} P(s'|s,a) * V(s_t+1) == post_pmf * V
     exact_P      = exact_policy_realization(states, actions, exact_pre_V, trans_pre_pmf);
 
     for a = 1:size(test_algos,1)
         tic;
-            [approx_post_v{a}, f_time(i,a), b_time(i,a), v_time(i,a)] = test_algos{a}(s_1, @(s) actions, reward, v_basii, transition_post, transition_pre, g, N, M, T);
+            [approx_post_v{a}, f_time(i,a), b_time(i,a), v_time(i,a)] = test_algos{a}(s_1, @(s) actions, reward, v_basii, transition_post, transition_pre, g, N, M, T, exact_post_V, state2index);
         a_time(i,a) = toc;
 
         mse_V(i,a) = mean(power(approx_post_v{a}(states) - exact_post_V, 2));
@@ -78,8 +79,8 @@ end
 %        scatter(1:size(states,2), approx_post_v{plot_i}(states), [], 'b', '.');
 %    hold off
 
-fprintf('%.3f + %.3f + %.3f = %.3f \n', [mean(f_time); mean(b_time); mean(v_time); mean(a_time)]);
-fprintf('MSE = %.3f; MSP = %.3f \n', [mean(mse_V); mean(mse_P)])
+fprintf('%.3f + %.3f + %.3f = %.3f \n', [mean(f_time,1); mean(b_time,1); mean(v_time,1); mean(a_time,1)]);
+fprintf('MSE = %.3f; MSP = %.3f \n', [mean(mse_V,1); mean(mse_P,1)])
 
 %sortrows(vertcat(exact_post_V(30:40)',states(:,30:40))',1)'
 
@@ -154,10 +155,102 @@ function vb = value_basii_4(states, actions, radius)
     vb = [y_intercept; states(1:2,:); target_x_decrease_count; target_y_decrease_count; target_xy_decrease_count; each_states_target_count; each_states_touch_count];
 end
 
+function vb = value_basii_5(states, actions)
+
+    state_points  = states(1:2,:);
+    world_points  = actions;
+    state_targets = states((end-size(world_points,2)+1):end,:);
+    state_radius  = states(end-size(world_points,2),1);
+    
+    p1 = state_points;
+    p2 = world_points;
+
+    state_point_distance_matrix = sqrt(dot(p1,p1,1) + dot(p2,p2,1)' - 2*(p2' * p1));
+
+    not_touched_last_step = ~all(states(1:2,:) == states(3:4,:));
+    points_within_radius  = state_point_distance_matrix <= state_radius;
+    points_with_targets   = logical(state_targets);
+
+    curr_points = repmat(states(1:2,:), [size(world_points,2) 1]);
+    prev_points = repmat(states(3:4,:), [size(world_points,2) 1]);
+    
+    center_point     = (max(world_points, [], 2) + min(world_points, [], 2))/2;    
+    
+    world_points = reshape(world_points, [], 1);
+    
+    curr_xy_dist = abs(world_points - curr_points);
+    prev_xy_dist = abs(world_points - prev_points);
+
+    points_with_decrease_x = curr_xy_dist(1:2:end,:) < prev_xy_dist(1:2:end,:);
+    points_with_decrease_y = curr_xy_dist(2:2:end,:) < prev_xy_dist(2:2:end,:);
+
+    A = [
+        1  0 -1  0  0  0;
+        0  1  0 -1  0  0;
+        1  0 -2  0  1  0;
+        0  1  0 -2  0  1;
+    ];
+
+    each_states_target_x_decrease_count  = sum(points_with_decrease_x&points_with_targets);
+    each_states_target_y_decrease_count  = sum(points_with_decrease_y&points_with_targets);
+    each_states_target_xy_decrease_count = sum(points_with_decrease_x&points_with_decrease_y&points_with_targets&not_touched_last_step);
+    each_states_touch_count              = sum(points_within_radius&points_with_targets);
+    each_states_target_count             = sum(state_targets);
+    each_states_y_intercept              = ones(1, size(states,2));
+    each_states_targets                  = state_targets;
+    each_states_derivs                   = A * states(1:6,:);
+    each_states                          = states;
+    each_states_center_vector            = center_point - state_points;
+    each_states_movement_towards_targets = [each_states_target_x_decrease_count;each_states_target_y_decrease_count;each_states_target_xy_decrease_count];
+    
+    vb = [
+        each_states_y_intercept; 
+        each_states_derivs; 
+        each_states_touch_count; 
+        each_states_target_count; 
+        each_states_movement_towards_targets;     
+        each_states_center_vector
+    ];
+end
+
 function r_theta = r_theta_generate(RB)
     max_RW = .5;
     num_RW = size(RB,1)-1;
     rng_RW = max_RW *(1-2*rand(1,num_RW));
     
     r_theta = [rng_RW, .5 * (1 + rand)];
+end
+
+function rr = random_rewards(states, actions)
+    
+    A = [
+        1  0 -1  0  0  0;
+        0  1  0 -1  0  0;
+        1  0 -2  0  1  0;
+        0  1  0 -2  0  1;
+    ];
+
+    derivs = A * states(1:6,:);
+    
+    state_points  = states(1:2,:);
+    world_points  = actions;
+    state_targets = states((end-size(world_points,2)+1):end,:);
+    state_radius  = states(end-size(world_points,2),1);
+    
+    p1 = state_points;
+    p2 = world_points;
+
+    state_point_distance_matrix = sqrt(dot(p1,p1,1) + dot(p2,p2,1)' - 2*(p2' * p1));
+
+    not_touched_last_step = ~all(states(1:2,:) == states(3:4,:));
+    points_within_radius  = state_point_distance_matrix <= state_radius;
+    points_with_targets   = logical(state_targets);
+
+    each_states_touch_count  = sum(points_within_radius&points_with_targets&not_touched_last_step);    
+
+    deriv_1 = [  1  1 -1 -1] * 10 * (.5-rand);
+    deriv_2 = [ -1 -1 -1 -1] * 10 * (.5-rand);
+    touched = 1 * 10 * (.5-rand);
+
+    rr = [abs(derivs);abs(derivs).^2;each_states_touch_count]' * [deriv_1,deriv_2,touched]';
 end
