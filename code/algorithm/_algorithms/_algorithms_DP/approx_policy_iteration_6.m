@@ -1,4 +1,4 @@
-function [Vs, Xs, Ys, f_time, b_time, v_time] = approx_policy_iteration_6(s_1, actions, reward, value_basii, transition_post, transition_pre, gamma, N, M, T, W)
+function [Vs, Xs, Ys, Ks, f_time, b_time, v_time] = approx_policy_iteration_6(s_1, actions, reward, value_basii, transition_post, transition_pre, gamma, N, M, T, W)
 
     g_row = [gamma.^(0:T-1), zeros(1,W-1)];
     g_mat = zeros(W,size(g_row,2));
@@ -14,6 +14,7 @@ function [Vs, Xs, Ys, f_time, b_time, v_time] = approx_policy_iteration_6(s_1, a
     Vs = cell(1, N+1);
     Xs = cell(1, N*M);
     Ys = cell(1, N*M);
+    Ks = cell(1, N*M);
 
     X = [];
     Y = [];
@@ -72,6 +73,7 @@ function [Vs, Xs, Ys, f_time, b_time, v_time] = approx_policy_iteration_6(s_1, a
                 
                 Xs{(n-1)*M +m} = X;
                 Ys{(n-1)*M +m} = Y;
+                Ks{(n-1)*M +m} = K;
 
             b_time = b_time + toc(t_start);
         end

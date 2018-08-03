@@ -1,6 +1,6 @@
 %time-independent value, finite horizon, discrete actions, post-decision,
 %forwards-backwards, non-optimistic, recursive linear basis regression.
-function [Vs, Xs, Ys, f_time, b_time, v_time] = approx_policy_iteration_2(s_1, actions, reward, value_basii, transition_post, transition_pre, gamma, N, M, T, W)
+function [Vs, Xs, Ys, Ks, f_time, b_time, v_time] = approx_policy_iteration_2(s_1, actions, reward, value_basii, transition_post, transition_pre, gamma, N, M, T, W)
 
     %I'm going to visit (T+W-1) states
     g_row = [gamma.^(0:T-1), zeros(1,W-1)];
@@ -17,6 +17,7 @@ function [Vs, Xs, Ys, f_time, b_time, v_time] = approx_policy_iteration_2(s_1, a
     Vs = cell(1, N+1);
     Xs = cell(1, N*M);
     Ys = cell(1, N*M);
+    Ks = cell(1, N*M);
 
     B = [];
     X = [];
@@ -83,6 +84,7 @@ function [Vs, Xs, Ys, f_time, b_time, v_time] = approx_policy_iteration_2(s_1, a
                 
                 Xs{(n-1)*M +m} = X;
                 Ys{(n-1)*M +m} = Y;
+                Ks{(n-1)*M +m} = K;
             b_time = b_time + toc(t_start);
 
             t_start = tic;

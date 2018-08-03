@@ -81,7 +81,7 @@ for a = 1:size(test_algos,1)
     for i = 1:samples
         
         tic;
-            [Vs, Xs, Ys, f_time(i), b_time(i), v_time(i)] = test_algos{a}(s_1, @(s) actions, rewards{i}, v_basii, transition_post, transition_pre, gamma, N, M, T, 5);
+            [Vs, Xs, Ys, Ks, f_time(i), b_time(i), v_time(i)] = test_algos{a}(s_1, @(s) actions, rewards{i}, v_basii, transition_post, transition_pre, gamma, N, M, T, 5);
         a_time(i) = toc;
 
         page_size = 10000;
@@ -89,7 +89,7 @@ for a = 1:size(test_algos,1)
         V_errors = zeros(size(states,2),1);
         P_errors = zeros(size(states,2),1);
 
-        for page_index = 1:ceil(size(v_basii,2)/page_size)
+        for page_index = 1:ceil(size(states,2)/page_size)
             page_start    = 1+(page_index-1)*page_size;
             page_stop     = min(page_index*page_size, size(states,2));            
             page_indexes  = page_start:page_stop;
