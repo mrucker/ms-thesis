@@ -21,7 +21,7 @@ function [Vs, Xs, Ys, f_time, b_time, v_time] = approx_policy_iteration_6(s_1, a
 
     X = [];
     Y = [];
-    S = [];
+    K = [];
 
     Vs{1} = @(xi) 4*ones(1,size(xi,2));
 
@@ -56,21 +56,39 @@ function [Vs, Xs, Ys, f_time, b_time, v_time] = approx_policy_iteration_6(s_1, a
             f_time = f_time + toc(t_start);
 
             t_start = tic;
-                X = [X, X_post(:,1:T-w_size+1)];
-                Y = [Y, X_rewd * g_mat'];
-                S = [S, ones(1,T-w_size+1)];
+%                 X = [X, X_post(:,1:T-w_size+1)];
+%                 Y = [Y, X_rewd * g_mat'];
+%                 S = [S, ones(1,T-w_size+1)];
+                for i = 1:T-w_size+1
+                    xi = coalesce_if_true(~isempty(X), @() all(X == X_post(:,i)));
+                    yv = g_mat(i,:) * X_rewd';
+                    kv = coalesce_if_empty(K(xi),0);
+
+                    if any(xi)
+                        Y(xi) = (1-1/kv)*Y(xi) + (1/kv) * yv;
+                        K(xi) = kv + 1;
+                    else
+                        Y = [Y, yv];
+                        X = [X, X_post(:,i)];
+                        K = [K, 1];
+                    end
+                end
+                
+                Xs{(n-1)*M +m} = X;
+                Ys{(n-1)*M +m} = Y;
+
             b_time = b_time + toc(t_start);
         end
 
-        t_start = tic;
-            [~,is,gs]=unique(X', 'rows');
-            X = X(:,is);
-            Y = grpstats(1:numel(Y),gs, @(gi) sum(Y(gi).*S(gi))/sum(S(gi)) )';
-            S = grpstats(S,gs, @(ss) sum(ss))';
-
-            Xs{(n-1)*M + m} = X;
-            Ys{(n-1)*M + m} = Y;
-        b_time = b_time + toc(t_start);
+%         t_start = tic;
+%             [~,is,gs]=unique(X', 'rows');
+%             X = X(:,is);
+%             Y = grpstats(1:numel(Y),gs, @(gi) sum(Y(gi).*S(gi))/sum(S(gi)) )';
+%             S = grpstats(S,gs, @(ss) sum(ss))';
+%             
+%             Xs{n} = X;
+%             Ys{n} = Y;
+%         b_time = b_time + toc(t_start);
 
         t_start = tic;
             k = fitrsvm(X',Y','KernelFunction','gaussian');

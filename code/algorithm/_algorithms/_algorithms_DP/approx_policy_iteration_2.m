@@ -16,13 +16,13 @@ function [Vs, Xs, Ys, f_time, b_time, v_time] = approx_policy_iteration_2(s_1, a
     v_time = 0;
 
     Vs = cell(1, N+1);
-    Xs = cell(1, N);
-    Ys = cell(1, N);
+    Xs = cell(1, M*N);
+    Ys = cell(1, M*N);
 
     B = [];
     X = [];
     Y = [];
-    S = [];
+    K = [];
     R = [];
 
     theta = ones(size(value_basii(s_1()),1), N) * 4;
@@ -63,9 +63,28 @@ function [Vs, Xs, Ys, f_time, b_time, v_time] = approx_policy_iteration_2(s_1, a
             end
 
             t_start = tic;
-                X = [X, X_post(:,1:T-w_size+1)];
-                Y = [Y, X_rewd * g_mat'];
-                S = [S, ones(1,T-w_size+1)];
+%                 X = [X, X_post(:,1:T-w_size+1)];
+%                 Y = [Y, X_rewd * g_mat'];
+%                 K = [K, ones(1,T-w_size+1)];
+                
+                %50% slower but allows for better convergence checks
+                for i = 1:T-w_size+1
+                    xi = coalesce_if_true(~isempty(X), @() all(X == X_post(:,i)));
+                    yv = g_mat(i,:) * X_rewd';
+                    kv = coalesce_if_empty(K(xi),0);
+
+                    if any(xi)
+                        Y(xi) = (1-1/kv)*Y(xi) + (1/kv) * yv;
+                        K(xi) = kv + 1;
+                    else
+                        Y = [Y, yv];
+                        X = [X, X_post(:,i)];
+                        K = [K, 1];
+                    end
+                end
+                
+                Xs{(n-1)*M +m} = X;
+                Ys{(n-1)*M +m} = Y;
             b_time = b_time + toc(t_start);
 
             t_start = tic;
@@ -77,15 +96,15 @@ function [Vs, Xs, Ys, f_time, b_time, v_time] = approx_policy_iteration_2(s_1, a
             v_time = v_time + toc(t_start);
         end
 
-        t_start = tic;
-            [~,is,gs]=unique(X', 'rows');
-            X = X(:,is);
-            Y = grpstats(1:numel(Y),gs, @(gi) sum(Y(gi).*S(gi))/sum(S(gi)) )';
-            S = grpstats(S,gs, @(ss) sum(ss))';        
-
-            Xs{n} = X;
-            Ys{n} = Y;
-        b_time = b_time + toc(t_start);
+%         t_start = tic;
+%             [~,is,gs]=unique(X', 'rows');
+%             X = X(:,is);
+%             Y = grpstats(1:numel(Y),gs, @(gi) sum(Y(gi).*K(gi))/sum(K(gi)) )';
+%             K = grpstats(K,gs, @(ss) sum(ss))';
+% 
+%             Xs{n} = X;
+%             Ys{n} = Y;
+%         b_time = b_time + toc(t_start);
 
         
         Vs{n+1} = @(s) value_basii(s)' * theta(:,n+1);
