@@ -1,16 +1,13 @@
-%time-independent value, finite horizon, discrete actions, post-decision,
-%forwards-backwards, non-optimistic, recursive linear basis regression.
-function [Vs, Xs, Ys, f_time, b_time, v_time] = approx_policy_iteration_5(s_1, actions, reward, value_basii, transition_post, transition_pre, gamma, N, M, T)
+function [Vs, Xs, Ys, f_time, b_time, v_time] = approx_policy_iteration_5(s_1, actions, reward, value_basii, transition_post, transition_pre, gamma, N, M, T, W)
 
-    w_size = min(10,T);
     lambda = .01;
     sigma  = 3.5;
 
-    g_row = [gamma.^(0:w_size-1), zeros(1,T-w_size)];
-    g_mat = zeros(T-w_size+1,size(g_row,2));
+    g_row = [gamma.^(0:T-1), zeros(1,W-1)];
+    g_mat = zeros(W,size(g_row,2));
 
-    for t = 0:T-w_size
-        g_mat(t+1,:) = circshift(g_row,t);
+    for w = 1:W
+        g_mat(w, :) = circshift(g_row,w-1);
     end
 
     f_time = 0;
@@ -18,8 +15,8 @@ function [Vs, Xs, Ys, f_time, b_time, v_time] = approx_policy_iteration_5(s_1, a
     v_time = 0;
 
     Vs = cell(1, N+1);
-    Xs = cell(1, N);
-    Ys = cell(1, N);
+    Xs = cell(1, N*M);
+    Ys = cell(1, N*M);
 
     X = [];
     Y = [];
@@ -38,7 +35,7 @@ function [Vs, Xs, Ys, f_time, b_time, v_time] = approx_policy_iteration_5(s_1, a
             X_rewd (:,1) = reward(s_t);
 
             t_start = tic;
-            for t = 1:(T-1)
+            for t = 1:((T-1)+(W-1))
 
                 action_matrix = actions(s_t);
 
@@ -58,10 +55,10 @@ function [Vs, Xs, Ys, f_time, b_time, v_time] = approx_policy_iteration_5(s_1, a
             f_time = f_time + toc(t_start);
 
             t_start = tic;
-%                 X = [X, X_post(:,1:T-w_size+1)];
+%                 X = [X, X_post(:,1:W)];
 %                 Y = [Y, X_rewd * g_mat'];
-%                 S = [S, ones(1,T-w_size+1)];
-                for i = 1:T-w_size+1
+%                 S = [S, ones(1,W)];
+                for i = 1:W
                     xi = coalesce_if_true(~isempty(X), @() all(X == X_post(:,i)));
                     yv = g_mat(i,:) * X_rewd';
                     kv = coalesce_if_empty(K(xi),0);

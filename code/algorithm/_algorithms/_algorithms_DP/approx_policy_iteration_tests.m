@@ -81,7 +81,7 @@ for a = 1:size(test_algos,1)
     for i = 1:samples
         
         tic;
-            [Vs, Xs, Ys, f_time(i), b_time(i), v_time(i)] = test_algos{a}(s_1, @(s) actions, rewards{i}, v_basii, transition_post, transition_pre, gamma, N, M, T+4);
+            [Vs, Xs, Ys, f_time(i), b_time(i), v_time(i)] = test_algos{a}(s_1, @(s) actions, rewards{i}, v_basii, transition_post, transition_pre, gamma, N, M, T, 5);
         a_time(i) = toc;
 
         page_size = 10000;
