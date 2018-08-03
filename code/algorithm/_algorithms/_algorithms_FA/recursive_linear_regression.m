@@ -34,7 +34,7 @@ function [B, theta] = recursive_linear_regression(B, theta, x, y, l)
     assert(isscalar(y)     && isnumeric(y)    , 'y must be a numeric scalar')
     assert(size(theta,1) == size(x,2)         , 'theta and x must be equal dimension');
 
-    x = x'; %all the equations below assumes x and y are column vectors;
+    x = x'; %all the equations below assume x and y are column vectors;
 
     e     = theta' * x - y;
     g     = l + x'*B*x;

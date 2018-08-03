@@ -1,26 +1,7 @@
-global A;
-
 run '../../paths.m';
-
-test_algos = {
-    %@approx_policy_iteration_1;
-    @approx_policy_iteration_2;
-    %@approx_policy_iteration_3;
-    %@approx_policy_iteration_4;
-    @approx_policy_iteration_5;
-    @approx_policy_iteration_6;
-};
-
-A = [
-    1  0 -1  0  0  0;
-    0  1  0 -1  0  0;
-    1  0 -2  0  1  0;
-    0  1  0 -2  0  1;
-];
 
 samples = 1;
 
-g = .9;
 N = 6;
 M = 200;
 T = 10;
@@ -30,88 +11,119 @@ width  = 2;
 height = 2;
 radius = 0;
 
+gamma = .9;
+
 OPS     = 30;
 ticks   = floor(1000/OPS);
 arrive  = 200;
 survive = 1000;
 
-[states, movements, targets, actions, state2index, target2index, trans_pre_pmf, trans_post_pmf, trans_targ_pmf] = small_world(deriv, width, height ,radius, ticks, survive, arrive);
+test_algo_names = {
+    'algorithm_2'; %(lin ols   regression)
+    'algorithm_5'; %(gau ridge regression)
+    'algorithm_6'; %(gau svm   regression)
+};
 
-trans_targ_cdf = diag(1./sum(trans_targ_pmf,2)) * trans_targ_pmf * triu(ones(size(trans_targ_pmf,2)));
+test_algos = {
+    @approx_policy_iteration_2;
+    @approx_policy_iteration_5;
+    @approx_policy_iteration_6;
+};
 
-%this seems to be slightly faster but for now I'm not going to do it
-%perhaps I can put this logic into small_world?
-%save('transition_one', 'transition_one', '-v7.3');
-%load('transition_one');
+[states, movements, targets, actions, state2index, target2index, pre_pmf, post_pmf, targ_pmf] = small_world(deriv, width, height ,radius, ticks, survive, arrive);
+
+targ_cdf = diag(1./sum(targ_pmf,2)) * targ_pmf * triu(ones(size(targ_pmf,2)));
 
 s_1 = @() states(:,randperm(size(states,2),1));
-%s_1 = @() states(:,1);
 
-transition_pre  = @(s,a) small_trans_pre (s, a, targets, target2index, trans_targ_cdf);
+transition_pre  = @(s,a) small_trans_pre (s, a, targets, target2index, targ_cdf);
 transition_post = @(s,a) small_trans_post(s, a);
 
-r_basii = small_reward_basii(states, actions, radius, deriv);
-v_basii = @(v_states) value_basii_5(v_states, actions);
+v_basii = @(s) value_basii_5(s, actions);
 
-approx_post_v = {};
+Vs = {};
 
 a_time = [];
 f_time = [];
 b_time = [];
 v_time = [];
 
-mse_V = [];
-mse_P = [];
+V_mse = [];
+P_mse = [];
 
-for i = 1:samples
-    rewards = random_rewards(states, actions);
-    reward  = @(s) rewards(state2index(s));
+rewards  = cell(1, samples);
+exact_Vs = cell(1, samples);
+exact_Ps = cell(1, samples);
 
-    exact_pre_V  = exact_value_iteration(trans_pre_pmf, rewards, g, 0, min(T,30));
-    exact_post_V = trans_post_pmf * exact_pre_V; %this is right V_a(s_t) = E[V(s_{t+1}) | a, s_t] == \sum_{s' \in S} P(s'|s,a) * V(s_t+1) == post_pmf * V
-    exact_P      = exact_policy_realization(states, actions, exact_pre_V, trans_pre_pmf);
+for i = 1:samples    
 
-    for a = 1:size(test_algos,1)
+    reward = random_rewards(states, actions);
+    values = exact_value_iteration(pre_pmf, reward, gamma, 0, min(T,30));
+    
+    rewards{i}  = @(s) reward(state2index(s));
+    exact_Vs{i} = post_pmf * values; %(aka, post-decision-state value)
+    exact_Ps{i} = exact_policy_realization(states, actions, values, pre_pmf);
+    
+    %exact_post_V is definitely right. I have double checked it several times.
+    %(aka, V_a(s_t) = E[V(s_{t+1}) | a, s_t] = \sum_{s' \in S} P(s'|s,a) * V(s_t+1) == post_pmf * V)
+end
+
+for a = 1:size(test_algos,1)
+
+    f_time = zeros(1,samples);
+    b_time = zeros(1,samples);
+    v_time = zeros(1,samples);
+    a_time = zeros(1,samples);
+    
+    V_mse = zeros(1,samples);
+    P_mse = zeros(1,samples);
+    
+    for i = 1:samples
         
         tic;
-            if a == 1
-                [approx_post_v{a}, f_time(i,a), b_time(i,a), v_time(i,a)] = test_algos{a}(s_1, @(s) actions, reward, v_basii, transition_post, transition_pre, g, N, M, T);
-            else
-                [approx_post_v{a}, f_time(i,a), b_time(i,a), v_time(i,a)] = test_algos{a}(s_1, @(s) actions, reward, v_basii, transition_post, transition_pre, g, N, M, T+5);
-            end
-        a_time(i,a) = toc;
+            [Vs, Xs, Ys, f_time(i), b_time(i), v_time(i)] = test_algos{a}(s_1, @(s) actions, rewards{i}, v_basii, transition_post, transition_pre, gamma, N, M, T+4);
+        a_time(i) = toc;
 
-        chunk_size = 10000;
+        page_size = 10000;
 
-        e_V = zeros(size(states,2),1);
-        e_P = zeros(size(states,2),1);
+        V_errors = zeros(size(states,2),1);
+        P_errors = zeros(size(states,2),1);
 
-        for chunk_page = 1:ceil(size(v_basii,2)/chunk_size)
+        for page_index = 1:ceil(size(v_basii,2)/page_size)
+            page_start    = 1+(page_index-1)*page_size;
+            page_stop     = min(page_index*page_size, size(states,2));            
+            page_indexes  = page_start:page_stop;
+            page_states   = states(:,page_indexes);
+            page_states_i = page_indexes;
 
-            chunk_start   = 1+(chunk_page-1)*chunk_size;
-            chunk_stop    = chunk_page*chunk_size;
-            chunk_indexes = chunk_start:min(chunk_stop,size(states,2));
-            chunk_states  = states(:,chunk_indexes);
-
-            e_V(chunk_indexes) = approx_post_v{a}(chunk_states) - exact_post_V(chunk_indexes);
-            e_P(chunk_indexes) = approx_policy_realization(chunk_states, actions, approx_post_v{a}, transition_post) == exact_P(chunk_indexes);
+            V_errors(page_indexes) = Vs{N+1}(page_states) - exact_Vs{i}(page_states_i);
+            P_errors(page_indexes) = approx_policy_realization(page_states, actions, Vs{N+1}, transition_post) == exact_Ps{i}(page_states_i);
+            %P_errors(page_indexes) = approx_policy_realization(page_states, actions, @(s) exact_Vs{i}(state2index(s)), transition_post) == exact_Ps{i}(page_states_i);
         end
 
-        mse_V(i,a) = mean(e_V.^2);
-        mse_P(i,a) = mean(e_P.^2);
+        V_mse(i) = mean(V_errors.^2);
+        P_mse(i) = mean(P_errors.^2);
     end
+    
+    fprintf('\n');
+    fprintf('%s --  ', test_algo_names{a});
+    fprintf('f_time = % 7.3f; ', sum(f_time));
+    fprintf('b_time = % 7.3f; ', sum(b_time));
+    fprintf('v_time = % 7.3f; ', sum(v_time));
+    fprintf('a_time = % 7.3f; ', sum(a_time));
+    fprintf('MSE = % 9.3f; '   , mean(V_mse));
+    fprintf('MSP = %.3f; '     , mean(P_mse,1));
 end
+
 
 %    clf
 %    hold on;
 %        scatter(1:size(states,2), exact_post_V                 , [], 'r', 'o');
 %        scatter(1:size(states,2), approx_post_v{plot_i}(states), [], 'b', '.');
 %    hold off
-
-fprintf('%.3f + %.3f + %.3f = %.3f \n', [sum(f_time,1); sum(b_time,1); sum(v_time,1); sum(a_time,1)]);
-fprintf('MSE = %.3f; MSP = %.3f \n', [mean(mse_V,1); mean(mse_P,1)])
-
 %sortrows(vertcat(exact_post_V(30:40)',states(:,30:40))',1)'
+
+fprintf('\n');
 
 function vb = value_basii_1(ss, actions, radius, deriv, small_reward_basii)
     vb = small_reward_basii(ss, actions, radius, deriv);
@@ -185,7 +197,13 @@ function vb = value_basii_4(states, actions, radius)
 end
 
 function vb = value_basii_5(states, actions)
-global A
+
+    A = [
+        1  0 -1  0  0  0;
+        0  1  0 -1  0  0;
+        1  0 -2  0  1  0;
+        0  1  0 -2  0  1;
+    ];
 
     state_points  = states(1:2,:);
     world_points  = actions;
@@ -236,16 +254,14 @@ global A
     ];
 end
 
-function r_theta = r_theta_generate(RB)
-    max_RW = .5;
-    num_RW = size(RB,1)-1;
-    rng_RW = max_RW *(1-2*rand(1,num_RW));
-    
-    r_theta = [rng_RW, .5 * (1 + rand)];
-end
-
 function rr = random_rewards(states, actions)
-global A    
+
+    A = [
+        1  0 -1  0  0  0;
+        0  1  0 -1  0  0;
+        1  0 -2  0  1  0;
+        0  1  0 -2  0  1;
+    ];
 
     derivs = A * states(1:6,:);
     
