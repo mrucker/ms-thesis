@@ -2,10 +2,10 @@ run('../../paths.m');
 fprintf('\n');
 close all
 
-samples = 1;
+samples = 2;
 
-N = 6;
-M = 200;
+N = 10;
+M = 50;
 T = 10;
 W = 5;
 
@@ -25,12 +25,14 @@ test_algo_names = {
     'algorithm_2'; %(lin ols   regression)
     'algorithm_5'; %(gau ridge regression)
     'algorithm_6'; %(gau svm   regression)
+    'algorithm_7'; %(gau svm   regression with BAKF)
 };
 
 test_algos = {
     @approx_policy_iteration_2;
     @approx_policy_iteration_5;
     @approx_policy_iteration_6;
+    @approx_policy_iteration_7;
 };
 
 [states, movements, targets, actions, state2index, target2index, pre_pmf, post_pmf, targ_pmf] = small_world(deriv, width, height ,radius, ticks, survive, arrive);
@@ -90,7 +92,7 @@ for a = 1:size(test_algos,1)
 
         [V_mse(i), P_mse(i)] = calculate_mse(states, actions, transition_post, Vs{N+1}, exact_Vs{i}, exact_Ps{i});
         
-        d_results(test_algo_names{a}, Xs, Ys, Ks, v_basii(states), exact_Es{i}, exact_Vs{i});
+        %d_results(test_algo_names{a}, Xs, Ys, Ks, v_basii(states), exact_Es{i}, exact_Vs{i});
     end
     
     p_results(test_algo_names{a}, f_time, b_time, v_time, a_time, V_mse, P_mse);
@@ -257,7 +259,7 @@ function rr = random_rewards(states, actions)
     deriv_2 = [ -1 -1 -1 -1] * 10 * (.5-rand);
     touched = 1 * 10 * (.5-rand);
 
-    rr = [abs(derivs);abs(derivs).^2;each_states_touch_count]' * [deriv_1,deriv_2,touched]';
+    rr = [abs(derivs);abs(derivs).^2;each_states_touch_count]' * [deriv_1,deriv_2,touched]' + 3*rand(size(states,2),1);
 end
 
 function ib = intersect_ib(A,B)
@@ -293,7 +295,7 @@ function d_results(test_algo_name, Xs, Ys, Ks, basii, tru_E, tru_V)
     step_visit_error = cell2mat(arrayfun(@(step) [repmat(step, 1, numel(visits1)); visits1; mean(error_x(Xs{step},Ys{step}) .* (visits1 == Ks{step}')) ], 1:5:size(Ks,2), 'UniformOutput', false));
     
     figure('NumberTitle', 'off', 'Name', test_algo_name);
-        
+
     subplot(2,1,1);    
     scatter3(step_visit_count(1,:),step_visit_count(2,:),step_visit_count(3,:), '.');
     title('visitation bins')

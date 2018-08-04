@@ -56,17 +56,17 @@ function [Vs, Xs, Ys, Ks, f_time, b_time, v_time] = approx_policy_iteration_6(s_
 %                 X = [X, X_post(:,1:W)];
 %                 Y = [Y, X_rewd * g_mat'];
 %                 S = [S, ones(1,W)];
-                for i = 1:W
-                    xi = coalesce_if_true(~isempty(X), @() all(X == X_post(:,i)));
-                    yv = g_mat(i,:) * X_rewd';
-                    kv = coalesce_if_empty(K(xi),0);
+                for w = 1:W
+                    i = coalesce_if_true(~isempty(X), @() all(X == X_post(:,w)));
+                    y = g_mat(w,:) * X_rewd';
+                    k = coalesce_if_empty(K(i),0);
 
-                    if any(xi)
-                        Y(xi) = (1-1/kv)*Y(xi) + (1/kv) * yv;
-                        K(xi) = kv + 1;
+                    if any(i)
+                        Y(i) = (1-1/3)*Y(i) + (1/3) * y;
+                        K(i) = k + 1;
                     else
-                        Y = [Y, yv];
-                        X = [X, X_post(:,i)];
+                        Y = [Y, y];
+                        X = [X, X_post(:,w)];
                         K = [K, 1];
                     end
                 end
@@ -89,8 +89,8 @@ function [Vs, Xs, Ys, Ks, f_time, b_time, v_time] = approx_policy_iteration_6(s_
 %         b_time = b_time + toc(t_start);
 
         t_start = tic;
-            k = fitrsvm(X',Y','KernelFunction','gaussian');
-            Vs{n+1} = @(s) predict(k, value_basii(s)');
+            model = fitrsvm(X',Y','KernelFunction','gaussian');
+            Vs{n+1} = @(s) predict(model, value_basii(s)');
         v_time = v_time + toc(t_start);
     end
 

@@ -67,17 +67,17 @@ function [Vs, Xs, Ys, Ks, f_time, b_time, v_time] = approx_policy_iteration_2(s_
 %                 K = [K, ones(1,W)];
                 
                 %50% slower but allows for better convergence checks
-                for i = 1:W
-                    xi = coalesce_if_true(~isempty(X), @() all(X == X_post(:,i)));
-                    yv = g_mat(i,:) * X_rewd';
-                    kv = coalesce_if_empty(K(xi),0);
+                for w = 1:W
+                    i = coalesce_if_true(~isempty(X), @() all(X == X_post(:,w)));
+                    y = g_mat(w,:) * X_rewd';
+                    k = coalesce_if_empty(K(i),0);
 
-                    if any(xi)
-                        Y(xi) = (1-1/kv)*Y(xi) + (1/kv) * yv;
-                        K(xi) = kv + 1;
+                    if any(i)
+                        Y(i) = (1-1/3)*Y(i) + (1/3) * y;
+                        K(i) = k + 1;
                     else
-                        Y = [Y, yv];
-                        X = [X, X_post(:,i)];
+                        Y = [Y, y];
+                        X = [X, X_post(:,w)];
                         K = [K, 1];
                     end
                 end
@@ -88,9 +88,9 @@ function [Vs, Xs, Ys, Ks, f_time, b_time, v_time] = approx_policy_iteration_2(s_
             b_time = b_time + toc(t_start);
 
             t_start = tic;
-                for i = 1:W
-                    x = X_post(:,i);
-                    y = g_mat(i,:) * X_rewd';
+                for w = 1:W
+                    x = X_post(:,w);
+                    y = g_mat(w,:) * X_rewd';
                     [B, theta(:,n+1)] = recursive_linear_regression(B, theta(:,n+1), x', y, 1);
                 end
             v_time = v_time + toc(t_start);
