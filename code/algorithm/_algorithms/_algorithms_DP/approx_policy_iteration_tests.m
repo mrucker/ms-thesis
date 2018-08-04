@@ -2,16 +2,16 @@ run('../../paths.m');
 fprintf('\n');
 close all
 
-samples = 10;
+samples = 1;
 
 N = 10;
-M = 50;
+M = 200;
 T = 10;
 W = 5;
 
 deriv  = 3;
-width  = 2;
-height = 2;
+width  = 3;
+height = 3;
 radius = 0;
 
 gamma = .9;
@@ -23,14 +23,14 @@ survive = 1000;
 
 test_algo_names = {
     'algorithm_2'; %(lin ols   regression)
-    'algorithm_5'; %(gau ridge regression)
+    %'algorithm_5'; %(gau ridge regression)
     'algorithm_6'; %(gau svm   regression)
     'algorithm_7'; %(gau svm   regression with BAKF)
 };
 
 test_algos = {
     @approx_policy_iteration_2;
-    @approx_policy_iteration_5;
+    %@approx_policy_iteration_5;
     @approx_policy_iteration_6;
     @approx_policy_iteration_7;
 };
@@ -53,27 +53,45 @@ f_time = [];
 b_time = [];
 v_time = [];
 
-V_mse = [];
-P_mse = [];
-
-rewards  = cell(1, samples);
-exact_Vs = cell(1, samples);
-exact_Ps = cell(1, samples);
-exact_Es = cell(1, samples);
+rewards     = cell(1, samples);
+exact_Vs    = cell(1, samples);
+exact_Ps    = cell(1, samples);
+exact_Es    = cell(1, samples);
+eval_states = cell(1, samples);
 
 for i = 1:samples
 
     reward = random_rewards(states, actions);
+    reward = reward./max(abs(reward));
+
     values = exact_value_iteration(pre_pmf, reward, gamma, 0, min(T,30));
 
     rewards{i}  = @(s) reward(state2index(s));
-    exact_Vs{i} = post_pmf * values; %(aka, post-decision-state value)
     exact_Ps{i} = exact_policy_realization(states, actions, values, pre_pmf);
+
+    %exact_Vs{i} is definitely right. I have double and triple checked it
+    %(aka, V_a(s_t) = E[V(s_{t+1}) | a, s_t] = \sum_{s' \in S} P(s'|s,a) * V(s_t+1) == post_pmf * V)
+    exact_Vs{i} = post_pmf * values; %(aka, post-decision-state value)
+
+    %I have some big doubts about the accuracy of the exact_E values
+    %These are only used for evaluation though so semi-close is acceptable
     exact_Es{i} = exact_steady_state(pre_pmf, exact_Ps{i}, W);
 
-    %exact_post_V is definitely right. I have double checked it several times.
-    %(aka, V_a(s_t) = E[V(s_{t+1}) | a, s_t] = \sum_{s' \in S} P(s'|s,a) * V(s_t+1) == post_pmf * V)
+    %aka, 10 random states... kind of ugly, but I'm feeling lazy.
+    eval_states{i} = [s_1(),s_1(),s_1(),s_1(),s_1(),s_1(),s_1(),s_1(),s_1(),s_1()];
+
+    fprintf('sample %i - R in [%.2f, %.2f], V in [%.2f, %.2f] \n', [i, max(reward), min(reward), max(exact_Vs{i}), min(exact_Vs{i})]);
 end
+
+V_mse = zeros(1,samples);
+P_mse = zeros(1,samples);
+P_val = zeros(1,samples);
+
+for i = 1:samples
+    [V_mse(i), P_mse(i), P_val(i)] = calculate_mse(states, actions, rewards{i}, gamma, T, eval_states{i}, @(s) exact_Vs{i}(state2index(s)), exact_Vs{i}, exact_Ps{i}, transition_post, transition_pre, state2index);    
+end
+
+p_results('exact_value', 0, 0, 0, 0, V_mse, P_mse, P_val);
 
 for a = 1:size(test_algos,1)
 
@@ -84,19 +102,22 @@ for a = 1:size(test_algos,1)
 
     V_mse = zeros(1,samples);
     P_mse = zeros(1,samples);
-
+    P_val = zeros(1,samples);
+    
     for i = 1:samples
         tic;
             [Vs, Xs, Ys, Ks, f_time(i), b_time(i), v_time(i)] = test_algos{a}(s_1, @(s) actions, rewards{i}, v_basii, transition_post, transition_pre, gamma, N, M, T, W);
         a_time(i) = toc;
 
-        [V_mse(i), P_mse(i)] = calculate_mse(states, actions, transition_post, Vs{N+1}, exact_Vs{i}, exact_Ps{i});
-        
-        %d_results(test_algo_names{a}, Xs, Ys, Ks, v_basii(states), exact_Es{i}, exact_Vs{i});
+        [V_mse(i), P_mse(i), P_val(i)] = calculate_mse(states, actions, rewards{i}, gamma, T, eval_states{i}, Vs{N+1}, exact_Vs{i}, exact_Ps{i}, transition_post, transition_pre, state2index);
+
+        if samples < 3
+            d_results(test_algo_names{a}, Xs, Ys, Ks, v_basii(states), exact_Es{i}, exact_Vs{i});
+        end
     end
-    
-    p_results(test_algo_names{a}, f_time, b_time, v_time, a_time, V_mse, P_mse);
-    
+
+    p_results(test_algo_names{a}, f_time, b_time, v_time, a_time, V_mse, P_mse, P_val);
+
 end
 
 function vb = value_basii_1(ss, actions, radius, deriv, small_reward_basii)
@@ -266,14 +287,15 @@ function ib = intersect_ib(A,B)
     [~, ~, ib] = intersect(A, B, 'rows');
 end
 
-function p_results(test_algo_name, f_time, b_time, v_time, a_time, V_mse, P_mse)
+function p_results(test_algo_name, f_time, b_time, v_time, a_time, V_mse, P_mse, P_val)
     fprintf('%s -- ', test_algo_name);
     fprintf('f_time = % 7.3f; ', sum(f_time));
     fprintf('b_time = % 7.3f; ', sum(b_time));
     fprintf('v_time = % 7.3f; ', sum(v_time));
     fprintf('a_time = % 7.3f; ', sum(a_time));
-    fprintf('MSE = % 9.3f; '   , mean(V_mse));
+    fprintf('MSE = % 6.3f; '     , mean(V_mse));
     fprintf('MSP = %.3f; '     , mean(P_mse));
+    fprintf('VAL = %.3f; '     , mean(P_val));
     fprintf('\n');
 end
 
@@ -305,24 +327,53 @@ function d_results(test_algo_name, Xs, Ys, Ks, basii, tru_E, tru_V)
     title('convergence rate')
 end
 
-function [V_mse, P_mse] = calculate_mse(states, actions, transition_post, est_V, tru_V, tru_P)
+function [V_mse, P_mse, P_val] = calculate_mse(states, actions, reward, gamma, T, eval_states, est_V, tru_Vs, tru_Ps, transition_post, transition_pre, state2index)
     page_size = 10000;
 
-    V_errors = zeros(size(states,2),1);
-    P_errors = zeros(size(states,2),1);
-
+    est_Vs = zeros(size(states,2),1);
+    est_Ps = zeros(size(states,2),1);
+    
     for page_index = 1:ceil(size(states,2)/page_size)
         page_start    = 1+(page_index-1)*page_size;
         page_stop     = min(page_index*page_size, size(states,2));
         page_indexes  = page_start:page_stop;
         page_states   = states(:,page_indexes);
-        page_states_i = page_indexes;
 
-        V_errors(page_indexes) = est_V(page_states) - tru_V(page_states_i); %this includes bias since we'll visit some states more
-        P_errors(page_indexes) = approx_policy_realization(page_states, actions, est_V, transition_post) == tru_P(page_states_i);
-        %P_errors(page_indexes) = approx_policy_realization(page_states, actions, @(s) exact_Vs{i}(state2index(s)), transition_post) == exact_Ps{i}(page_states_i);
+        est_Vs(page_indexes) = est_V(page_states);
+        est_Ps(page_indexes) = approx_policy_realization(page_states, actions, est_V, transition_post);
     end
 
-    V_mse = mean(V_errors.^2);
-    P_mse = mean(P_errors.^2);
+    V_mse = mean((est_Vs -  tru_Vs).^2);
+    P_mse = mean((est_Ps == tru_Ps).^2);
+    P_val = evaluate_policy_at_states(est_Ps, eval_states, actions, reward, gamma, T, 100, state2index, transition_pre);
+end
+
+function V = evaluate_policy_at_states(policy, states, actions, reward, gamma, T, samples, state2index, transition_pre)
+    v = 0;
+    for state = states
+        v = v + evaluate_policy_at_state(policy, state, actions, reward, gamma, T, samples, state2index, transition_pre);
+    end
+    
+    V = v/size(states,2);
+end
+
+function V = evaluate_policy_at_state(policy, state, actions, reward, gamma, T, samples, state2index, transition_pre)
+
+    V = 0;    
+    
+    for n = 1:samples
+
+        s = state;
+        v = 0;
+        
+        for t = 1:T
+            v = v + gamma^(t-1) * reward(s);
+            a = actions(:, policy(state2index(s)));
+            s = transition_pre(s,a);
+        end
+        
+        V = V + v;
+    end
+    
+    V = V/samples;
 end

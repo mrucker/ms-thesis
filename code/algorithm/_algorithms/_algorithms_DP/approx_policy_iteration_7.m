@@ -76,7 +76,7 @@ function [Vs, Xs, Ys, Ks, f_time, b_time, v_time] = approx_policy_iteration_7(s_
                         %Approximate Dynamic Programming by Powell in 2011
                         e = Y(i) - y;
                         
-                        if(e == 0 && k > 4)
+                        if(e == 0 && k > 2)
                             %for some reason I keep getting 0 error in my
                             %estimate, even after four iterations. This in turn
                             %causes my estimate of my estimators bias (b) 
@@ -92,7 +92,7 @@ function [Vs, Xs, Ys, Ks, f_time, b_time, v_time] = approx_policy_iteration_7(s_
                         v = (1-eta(i))*nu(i) + eta(i)*(e^2);
                         s = (v - b^2)/(1+lambda(i));
 
-                        if(k > 4)
+                        if(k > 2)
                             assert(~( (s/v) > 10000 || any(isnan([e, b, v, s, s/v])) || any(isinf([e, b, v, s, s/v])) ))
                         end
                         
@@ -108,7 +108,7 @@ function [Vs, Xs, Ys, Ks, f_time, b_time, v_time] = approx_policy_iteration_7(s_
                         
                         %the book suggests k <= 2... but it just seems to take longer
                         %for my particlar setup to get an estimate of the bias
-                        if (k <= 4)
+                        if (k <= 2)
                             a = 1/(k+1);
                         else
                             a = 1 - (s/v);

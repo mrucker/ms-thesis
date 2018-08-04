@@ -62,7 +62,7 @@ function [Vs, Xs, Ys, Ks, f_time, b_time, v_time] = approx_policy_iteration_6(s_
                     k = coalesce_if_empty(K(i),0);
 
                     if any(i)
-                        Y(i) = (1-1/3)*Y(i) + (1/3) * y;
+                        Y(i) = (1-1/k)*Y(i) + (1/k) * y;
                         K(i) = k + 1;
                     else
                         Y = [Y, y];
