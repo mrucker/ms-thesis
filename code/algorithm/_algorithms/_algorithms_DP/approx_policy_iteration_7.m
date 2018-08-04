@@ -72,15 +72,28 @@ function [Vs, Xs, Ys, Ks, f_time, b_time, v_time] = approx_policy_iteration_7(s_
                     k = coalesce_if_empty(K(i),0);
 
                     if any(i)
-                        
+                        %these step size calculations taken from Pg. 446-447 in
+                        %Approximate Dynamic Programming by Powell in 2011
                         e = Y(i) - y;
+                        
+                        if(e == 0 && k > 4)
+                            %for some reason I keep getting 0 error in my
+                            %estimate, even after four iterations. This in turn
+                            %causes my estimate of my estimators bias (b) 
+                            %and the estimate of its variance (v) to become
+                            %zero in some cases making my stepsize (a) NaN.
+                            %to combat this I'll add a small perturbation
+                            %with zero mean. That way the bias will be
+                            %small but still existant
+                            e = .5*(.5 - rand);
+                        end
+                        
                         b = (1-eta(i))*beta(i) + eta(i)*e;
                         v = (1-eta(i))*nu(i) + eta(i)*(e^2);
-                        s = (nu(i) - beta(i)^2)/(1+lambda(i));
-                        
-                        %abs(epsilon(xi)) <= .00001
+                        s = (v - b^2)/(1+lambda(i));
+
                         if(k > 4)
-                            assert(~(v <= .00001 || any(isnan([e, b, v, s])) || any(isinf([e, b, v, s])) ))
+                            assert(~( (s/v) > 10000 || any(isnan([e, b, v, s, s/v])) || any(isinf([e, b, v, s, s/v])) ))
                         end
                         
                         epsilon(i) = e;
@@ -93,12 +106,12 @@ function [Vs, Xs, Ys, Ks, f_time, b_time, v_time] = approx_policy_iteration_7(s_
                         
                         l = ((1-alpha(i))^2)*lambda(i) + alpha(i)^2;
                         
-                        %they book suggests two... but it just seems to take longer
+                        %the book suggests k <= 2... but it just seems to take longer
                         %for my particlar setup to get an estimate of the bias
                         if (k <= 4)
                             a = 1/(k+1);
                         else
-                            a = 1 - (sig_sq(i)/nu(i));
+                            a = 1 - (s/v);
                         end
 
                         if(k == 1)

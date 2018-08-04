@@ -2,7 +2,7 @@ run('../../paths.m');
 fprintf('\n');
 close all
 
-samples = 2;
+samples = 10;
 
 N = 10;
 M = 50;
