@@ -5,14 +5,14 @@ run('../../paths.m');
 samples = 1;
 gamma = .9;
 
-N = 2;
-M = 2;
-T = 2;
+N = 30;
+M = 200;
+T = 5;
 W = 3;
 
 algos = {
-   %@approx_policy_iteration_2, 'algorithm_2'; %(lin ols   regression)
-   %@approx_policy_iteration_5, 'algorithm_5'; %(gau ridge regression)
+    @approx_policy_iteration_2, 'algorithm_2'; %(lin ols   regression)
+    %@approx_policy_iteration_5, 'algorithm_5'; %(gau ridge regression)
     @approx_policy_iteration_6, 'algorithm_6'; %(gau svm   regression)
     @approx_policy_iteration_7, 'algorithm_7'; %(gau svm   regression with BAKF)
 };
@@ -74,27 +74,26 @@ function vb = value_basii_5(states)
 
     vb = zeros(14,size(states,2));
 
-    for i = 1:size(states,2)
-        if iscell(states)
+    if iscell(states)
+        for i = numel(states)
             state = states{i};
-        else
-            state = states(:,i);
+            
+            vb(1    , i) = 1;
+            vb(2:7  , i) = state(3:8);
+            vb(8    , i) = target_count(state);
+            vb(9    , i) = touch_count(state);
+            vb(10:12, i) = target_movement(state);
+            vb(13:14, i) = state(9:10)/2 - state(1:2);
         end
         
-        vb(1    , i) = 1;
-        vb(2:7  , i) = state(3:8);
-        vb(8    , i) = target_count(state);
-        vb(9    , i) = touch_count(state);
-        vb(10:12, i) = target_movement(state);
-        vb(13:14, i) = state(9:10)/2 - state(1:2);
-
+    else
+        vb(1    , :) = 1;
+        vb(2:7  , :) = states(3:8,:);
+        vb(8    , :) = target_count(states(:,1));
+        vb(9    , :) = touch_count(states);
+        vb(10:12, :) = target_movement(states);
+        vb(13:14, :) = states(9:10,1)/2 - states(1:2,:);
     end
-%     vb = [
-%         1 each_states_y_intercept; 
-%         6 each_states_derivs;      
-%         1 each_states_target_count; 
-%     ];
-
 end
 
 function rb = reward_basii(states)
@@ -113,43 +112,42 @@ function rb = reward_basii(states)
     end    
 end
 
-function tc = touch_count(state)
-    r  = state(11);
-    cp = state(1:2);
-    pp = state(1:2) - state(3:4);
+function tc = touch_count(states)
+    r2 = states(11, 1).^2;
+    cp = states(1:2,:);
+    pp = states(1:2,:) - states(3:4,:);
     
-    tp = [state(12:3:end)';state(13:3:end)'];
-        
-    pt = sqrt(dot(pp,pp,1)'+dot(tp,tp,1)-2*(pp'*tp)) <= r;
-    ct = sqrt(dot(cp,cp,1)'+dot(tp,tp,1)-2*(cp'*tp)) <= r;
+    tp = [states(12:3:end, 1)';states(13:3:end, 1)'];
+
+    pt = (dot(pp,pp,1)+dot(tp,tp,1)'-2*(tp'*pp)) <= r2;
+    ct = (dot(cp,cp,1)+dot(tp,tp,1)'-2*(tp'*cp)) <= r2;
     
     %not perfect, if a target simply appears on top 
     %of you then it won't count as an actual touch for us
-    tc = sum(ct&~pt);
+    tc = sum(ct&~pt, 1);
 end
 
-function tm = target_movement(state)
+function tm = target_movement(states)
     
-    cp = state(1:2);
-    pp = state(1:2) - state(3:4);
+    cp = states(1:2, :);
+    pp = states(1:2, :) - states(3:4, :);
+
+    tp = [states(12:3:end, 1)';states(13:3:end, 1)'];
+
+    curr_targ_xy_dist = abs(reshape(tp, [], 1) - repmat(cp, [size(tp,2), 1]));
+    prev_targ_xy_dist = abs(reshape(tp, [], 1) - repmat(pp, [size(tp,2), 1]));
+
+    targs_with_decrease_x = curr_targ_xy_dist(1:2:end,:) < prev_targ_xy_dist(1:2:end,:);
+    targs_with_decrease_y = curr_targ_xy_dist(2:2:end,:) < prev_targ_xy_dist(2:2:end,:);
     
-    tp = [state(12:3:end)';state(13:3:end)'];
-    
-    
-    curr_xy_dist = abs(tp - cp);
-    prev_xy_dist = abs(tp - pp);
-    
-    points_with_decrease_x = curr_xy_dist(1:2:end,:) < prev_xy_dist(1:2:end,:);
-    points_with_decrease_y = curr_xy_dist(2:2:end,:) < prev_xy_dist(2:2:end,:);
-    
-    points_with_decrease_x_count  = sum(points_with_decrease_x);
-    points_with_decrease_y_count  = sum(points_with_decrease_y);
-    points_with_decrease_xy_count = sum(points_with_decrease_x&points_with_decrease_y);
+    targs_with_decrease_x_count  = sum(targs_with_decrease_x,1);
+    targs_with_decrease_y_count  = sum(targs_with_decrease_y,1);
+    targs_with_decrease_xy_count = sum(targs_with_decrease_x&targs_with_decrease_y,1);
     
     tm = [
-        points_with_decrease_x_count;
-        points_with_decrease_y_count;
-        points_with_decrease_xy_count;
+        targs_with_decrease_x_count;
+        targs_with_decrease_y_count;
+        targs_with_decrease_xy_count;
     ];
 end
 
@@ -187,7 +185,8 @@ end
 function V = evaluate_policy_at_states(Pf, eval_states, reward, gamma, T, transition_pre, sample_size)
     V = 0;
     
-    for eval_state = eval_states
+    for i = 1:size(eval_states,2)
+        eval_state = eval_states{i};
         V = V + evaluate_policy_at_state(Pf, eval_state, reward, gamma, T, transition_pre, sample_size);
     end
     

@@ -44,9 +44,14 @@ function [Vf, Xs, Ys, Ks, f_time, b_time, v_time, a_time] = approx_policy_iterat
 
                 action_matrix = actions(s_t);
 
+                
                 post_states = transition_post(s_t, action_matrix);
+                %post_basii  = value_basii(post_states);
+                
+                
                 post_values = Vf{n}(post_states);
-
+                
+                
                 a_m = max(post_values);
                 a_i = find(post_values == a_m);
                 a_i = a_i(randi(length(a_i)));
@@ -58,6 +63,7 @@ function [Vf, Xs, Ys, Ks, f_time, b_time, v_time, a_time] = approx_policy_iterat
                 X_rewd(:,t+1) = reward(s_t);
             end
             f_time = f_time + toc(t_start);
+            
 
             if m == 1
                 theta(:,n+1) = theta(:,n);
