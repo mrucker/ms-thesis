@@ -5,7 +5,7 @@ function b = adp_basii_reward(states)
     %basis = [dx, dy, ddx, ddy, dddx, dddy, touch_count]
     b = zeros(13,size(states,2));
 
-    for i = 1:size(states,2)
+    for i = 1:numel(states)
         if iscell(states)
             b(:,i) = state_to_reward_basii(states{i});
         else

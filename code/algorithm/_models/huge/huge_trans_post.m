@@ -1,7 +1,7 @@
-function s2 = huge_trans_post(s1, a, updateTargets)
+function s2 = huge_trans_post(s1, a, should_update_targets)
 
     if(nargin < 3)
-        updateTargets = true;
+        should_update_targets = true;
     end
 
     huge_states_assert(s1);
@@ -10,7 +10,7 @@ function s2 = huge_trans_post(s1, a, updateTargets)
     
     s2 = update_cursor_state(s2,a);
     
-    if(updateTargets)
+    if(should_update_targets)
         s2 = update_target_states(s2);
     end
 end

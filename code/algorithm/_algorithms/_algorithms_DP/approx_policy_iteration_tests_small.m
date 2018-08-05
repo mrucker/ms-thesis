@@ -4,14 +4,14 @@ close all
 
 samples = 1;
 
-N = 10;
-M = 200;
+N = 30;
+M = 50;
 T = 10;
-W = 5;
+W = 3;
 
 deriv  = 3;
-width  = 3;
-height = 3;
+width  = 2;
+height = 2;
 radius = 0;
 
 gamma = .9;
@@ -21,37 +21,28 @@ ticks   = floor(1000/OPS);
 arrive  = 200;
 survive = 1000;
 
-test_algo_names = {
-    'algorithm_2'; %(lin ols   regression)
-    %'algorithm_5'; %(gau ridge regression)
-    'algorithm_6'; %(gau svm   regression)
-    'algorithm_7'; %(gau svm   regression with BAKF)
-};
-
-test_algos = {
-    @approx_policy_iteration_2;
-    %@approx_policy_iteration_5;
-    @approx_policy_iteration_6;
-    @approx_policy_iteration_7;
+algos = {
+   %@approx_policy_iteration_2, 'algorithm_2'; %(lin ols   regression)
+   %@approx_policy_iteration_5, 'algorithm_5'; %(gau ridge regression)
+    @approx_policy_iteration_6, 'algorithm_6'; %(gau svm   regression)
+    @approx_policy_iteration_7, 'algorithm_7'; %(gau svm   regression with BAKF)
 };
 
 [states, movements, targets, actions, state2index, target2index, pre_pmf, post_pmf, targ_pmf] = small_world(deriv, width, height ,radius, ticks, survive, arrive);
 
 targ_cdf = diag(1./sum(targ_pmf,2)) * targ_pmf * triu(ones(size(targ_pmf,2)));
 
-s_1 = @() states(:,randperm(size(states,2),1));
+s_1 = @( ) states(:,randperm(size(states,2),1));
+s_a = @(s) actions;
+v_b = @(s) value_basii_5(s, actions);
 
 transition_pre  = @(s,a) small_trans_pre (s, a, targets, target2index, targ_cdf);
 transition_post = @(s,a) small_trans_post(s, a);
 
-v_basii = @(s) value_basii_5(s, actions);
-
-Vs = {};
-
-a_time = [];
 f_time = [];
 b_time = [];
-v_time = [];
+m_time = [];
+a_time = [];
 
 rewards     = cell(1, samples);
 exact_Vs    = cell(1, samples);
@@ -88,16 +79,16 @@ P_mse = zeros(1,samples);
 P_val = zeros(1,samples);
 
 for i = 1:samples
-    [V_mse(i), P_mse(i), P_val(i)] = calculate_mse(states, actions, rewards{i}, gamma, T, eval_states{i}, @(s) exact_Vs{i}(state2index(s)), exact_Vs{i}, exact_Ps{i}, transition_post, transition_pre, state2index);    
+    [V_mse(i), P_mse(i), P_val(i)] = result_statistics(states, actions, rewards{i}, gamma, T, eval_states{i}, @(s) exact_Vs{i}(state2index(s)), exact_Vs{i}, exact_Ps{i}, transition_post, transition_pre, state2index);    
 end
 
 p_results('exact_value', 0, 0, 0, 0, V_mse, P_mse, P_val);
 
-for a = 1:size(test_algos,1)
+for a = 1:size(algos,1)
 
     f_time = zeros(1,samples);
     b_time = zeros(1,samples);
-    v_time = zeros(1,samples);
+    m_time = zeros(1,samples);
     a_time = zeros(1,samples);
 
     V_mse = zeros(1,samples);
@@ -105,18 +96,17 @@ for a = 1:size(test_algos,1)
     P_val = zeros(1,samples);
     
     for i = 1:samples
-        tic;
-            [Vs, Xs, Ys, Ks, f_time(i), b_time(i), v_time(i)] = test_algos{a}(s_1, @(s) actions, rewards{i}, v_basii, transition_post, transition_pre, gamma, N, M, T, W);
-        a_time(i) = toc;
-
-        [V_mse(i), P_mse(i), P_val(i)] = calculate_mse(states, actions, rewards{i}, gamma, T, eval_states{i}, Vs{N+1}, exact_Vs{i}, exact_Ps{i}, transition_post, transition_pre, state2index);
+        
+        [Vf, Xs, Ys, Ks, f_time(i), b_time(i), m_time(i), a_time(i)] = algos{a, 1}(s_1, @(s) actions, rewards{i}, v_basii, transition_post, transition_pre, gamma, N, M, T, W);        
+        
+        [V_mse(i), P_mse(i), P_val(i)] = result_statistics(states, actions, rewards{i}, gamma, T, eval_states{i}, Vf{N+1}, exact_Vs{i}, exact_Ps{i}, transition_post, transition_pre, state2index);
 
         if samples < 3
-            d_results(test_algo_names{a}, Xs, Ys, Ks, v_basii(states), exact_Es{i}, exact_Vs{i});
+            d_results(algos{a, 2}, Xs, Ys, Ks, v_basii(states), exact_Es{i}, exact_Vs{i});
         end
     end
 
-    p_results(test_algo_names{a}, f_time, b_time, v_time, a_time, V_mse, P_mse, P_val);
+    p_results(algos{a, 2}, f_time, b_time, m_time, a_time, V_mse, P_mse, P_val);
 
 end
 
@@ -217,7 +207,7 @@ function vb = value_basii_5(states, actions)
     curr_points = repmat(states(1:2,:), [size(world_points,2) 1]);
     prev_points = repmat(states(3:4,:), [size(world_points,2) 1]);
 
-    center_point     = (max(world_points, [], 2) + min(world_points, [], 2))/2;    
+    center_point     = (max(world_points, [], 2) + min(world_points, [], 2))/2;
 
     world_points = reshape(world_points, [], 1);
 
@@ -244,7 +234,7 @@ function vb = value_basii_5(states, actions)
         each_states_derivs; 
         each_states_touch_count; 
         each_states_target_count; 
-        each_states_movement_towards_targets;     
+        each_states_movement_towards_targets;
         each_states_center_vector
     ];
 end
@@ -327,7 +317,7 @@ function d_results(test_algo_name, Xs, Ys, Ks, basii, tru_E, tru_V)
     title('convergence rate')
 end
 
-function [V_mse, P_mse, P_val] = calculate_mse(states, actions, reward, gamma, T, eval_states, est_V, tru_Vs, tru_Ps, transition_post, transition_pre, state2index)
+function [V_mse, P_mse, P_val] = result_statistics(states, actions, reward, gamma, T, eval_states, est_V, tru_Vs, tru_Ps, transition_post, transition_pre, state2index)
     page_size = 10000;
 
     est_Vs = zeros(size(states,2),1);

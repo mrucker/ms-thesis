@@ -1,13 +1,25 @@
-function s2 = huge_trans_pre(s1)
+function s2 = huge_trans_pre(s1, a, should_update_targets)
 
     huge_states_assert(s1);
+
+    if(nargin < 2)
+        a = [];
+    end
+
+    if(nargin < 3)
+        should_update_targets = true;
+    end
     
-    s2 = s1;
-            
+    if ~isempty(a)
+        s2 = huge_trans_post(s1, a, should_update_targets);
+    else
+        s2 = s1;    
+    end
+
     width  = s1(9);
     height = s1(10);
     radius = s1(11);
-    
+
     s2 = create_new_targets(s2, width, height, radius);
 end
 
