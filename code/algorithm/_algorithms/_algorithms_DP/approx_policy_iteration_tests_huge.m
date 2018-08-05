@@ -5,9 +5,9 @@ run('../../paths.m');
 samples = 1;
 gamma = .9;
 
-N = 30;
-M = 200;
-T = 5;
+N = 10;
+M = 100;
+T = 10;
 W = 3;
 
 algos = {
@@ -30,7 +30,7 @@ for i = 1:samples
     states_r{i} = {s_1(),s_1(),s_1(),s_1(),s_1(),s_1(),s_1(),s_1(),s_1(),s_1()};
 end
 
-s_a = @(s) actions();
+s_a = @(s) actions(s);
 s_r = @(i) reward_r{i}; 
 v_b = @(s) value_basii_5(s);
 
@@ -44,15 +44,15 @@ for a = 1:size(algos,1)
     
     for i = 1:samples
 
-        [Vf, Xs, Ys, Ks, Ts(1,i), Ts(2,i), Ts(3,i), Ts(4,i)] = algos{a,1}(s_1, s_a, s_r(i), v_b, trans_pst, trans_pre, gamma, N, M, T, W);
+        [Vf, Xs, Ys, Ks, As, Ts(1,i), Ts(2,i), Ts(3,i), Ts(4,i)] = algos{a,1}(s_1, s_a, s_r(i), v_b, trans_pst, trans_pre, gamma, N, M, T, W);
 
         ia = @(a,i) a(:,i);
-        Pf = @(s) ia(s_a(a), max_i(Vf{N+1}(trans_pst(s, s_a(s)))));
+        Pf = @(s) ia(s_a(s), max_i(Vf{N+1}(trans_pst(s, s_a(s)))));
         
         Pv(i) = evaluate_policy_at_states(Pf, states_r{i}, reward_r{i}, gamma, T, trans_pre, 10);
 
         if samples < 3
-            %d_results(test_algo_names{a}, Xs, Ys, Ks, v_basii(states), exact_Es{i}, exact_Vs{i});
+            d_results(algos{a,2}, Ks, As);
         end
     end
 
@@ -169,17 +169,56 @@ function p_results(test_algo_name, f_time, b_time, v_time, a_time, P_val)
     fprintf('\n');
 end
 
-function d_results(test_algo_name, As, Ks)
-    
-    figure('NumberTitle', 'off', 'Name', test_algo_name);
+function d_results(test_algo_name, Ks, As)
 
-    subplot(2,1,1);    
-    %scatter3(step_visit_count(1,:),step_visit_count(2,:),step_visit_count(3,:), '.');
-    title('visitation bins')
+    flat_ns = cell2mat(arrayfun(@(ni) ni*ones(size(Ks{ni})), 1:numel(Ks), 'UniformOutput', false));
+    flat_ks = cell2mat(Ks);
+    flat_as = cell2mat(As);
     
-    subplot(2,1,2);
-    %scatter3(step_visit_error(1,:),step_visit_error(2,:),step_visit_error(3,:), '.');
-    title('convergence rate')
+    [k_val,~,gk] = unique(flat_ks);
+    [n_val,~,gn] = unique(flat_ns);    
+
+    %max(K), average(K), var(K), number of (K) each Ks{i}
+    nk_avg = grpstats(flat_ks, gn, @mean);
+    nk_max = grpstats(flat_ks, gn, @max);
+    nk_var = grpstats(flat_ks, gn, @var);
+    nk_num = grpstats(flat_ks, gn, @numel);
+
+    %max(A), average(A), var(A), min(A) per unique value of N over all Ns, As
+    na_min = grpstats(flat_as, gn, @min);
+    na_avg = grpstats(flat_as, gn, @mean);
+    na_max = grpstats(flat_as, gn, @max);
+    na_var = grpstats(flat_as, gn, @var);
+
+    %max(A), min(A), average(A), Var(A) per unique value of K over all Ks, As    
+    ka_min = grpstats(flat_as, gk, @min);
+    ka_avg = grpstats(flat_as, gk, @mean);
+    ka_max = grpstats(flat_as, gk, @max);
+    ka_var = grpstats(flat_as, gk, @var);
+           
+    figure('NumberTitle', 'off', 'Name', test_algo_name);
+    
+    subplot(3,1,1);
+    plot(n_val, nk_num, n_val, nk_avg, n_val, nk_max, n_val, nk_var);
+    title('step stats for N-M iteration')
+    xlabel('N-M iteration index')
+    %ylabel('vb visit count statistical values')
+    legend('k num', 'k avg', 'k max', 'k var')
+    
+    subplot(3,1,2);
+    plot(n_val, na_min, n_val, na_avg, n_val, na_max, n_val, na_var);
+    title('step stats for N-M iteration')
+    xlabel('N-M iteration index')
+    %ylabel('alpha statistical values')
+    legend('a min', 'a avg', 'a max', 'a var')
+    
+    subplot(3,1,3);
+    hold on
+    plot(k_val, ka_min, k_val, ka_avg, k_val, ka_max, k_val, ka_var);
+    title('step stats for visit count')
+    xlabel('vb visitation count')
+    %ylabel('alpha statistical values')
+    legend('a min', 'a avg', 'a max', 'a var')
 end
 
 function V = evaluate_policy_at_states(Pf, eval_states, reward, gamma, T, transition_pre, sample_size)
@@ -218,7 +257,7 @@ function i = max_i(M)
  [~, i] = max(M);
 end
 
-function a = actions()
+function a = actions(s)
     % The actions matrix should be 2 x |number of actions| where the first row is dx and the second row is dy.
     % This means each column in the matrix represents a dx/dy pair that is the action taken. 
     % The small model assumes an action is the location on the grid so be careful when going between the two.
@@ -241,4 +280,15 @@ function a = actions()
     %dy = [1,1];
     
     a = vertcat(reshape(repmat(dx,numel(dx),1), [1,numel(dx)^2]), reshape(repmat(dy',1,numel(dy)), [1,numel(dy)^2]));
+    
+    np = s(1:2) + a;
+        
+    np_too_small_x = np(1,:) < 0;
+    np_too_small_y = np(2,:) < 0;
+    np_too_large_x = np(1,:) > s(9);
+    np_too_large_y = np(2,:) > s(10);
+    
+    valid_actions = ~(np_too_small_x|np_too_small_y|np_too_large_x|np_too_large_y);
+    
+    a = a(:, valid_actions);
 end

@@ -1,4 +1,4 @@
-function [Vs, Xs, Ys, Ks, f_time, b_time, v_time, a_time] = approx_policy_iteration_7(s_1, actions, reward, value_basii, transition_post, transition_pre, gamma, N, M, T, W)
+function [Vf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_policy_iteration_7(s_1, actions, reward, value_basii, transition_post, transition_pre, gamma, N, M, T, W)
 
     a_start = tic;
 
@@ -13,14 +13,16 @@ function [Vs, Xs, Ys, Ks, f_time, b_time, v_time, a_time] = approx_policy_iterat
     b_time = 0;
     v_time = 0;
 
-    Vs = cell(1, N+1);
+    Vf = cell(1, N+1);
     Xs = cell(1, N*M);
     Ys = cell(1, N*M);
     Ks = cell(1, N*M);
+    As = cell(1, N*M);
 
     X = [];
     Y = [];
     K = [];
+    A = [];
 
     %one for every value_basii
     %updated for entire life of program
@@ -32,7 +34,7 @@ function [Vs, Xs, Ys, Ks, f_time, b_time, v_time, a_time] = approx_policy_iterat
     eta     = [];
     lambda  = [];
 
-    Vs{1} = @(xi) 4*ones(1,size(xi,2));
+    Vf{1} = @(xi) 500*ones(1,size(xi,2));
 
     for n = 1:N 
 
@@ -50,7 +52,7 @@ function [Vs, Xs, Ys, Ks, f_time, b_time, v_time, a_time] = approx_policy_iterat
                 action_matrix = actions(s_t);
 
                 post_states = transition_post(s_t, action_matrix);
-                post_values = Vs{n}(post_states);
+                post_values = Vf{n}(post_states);
 
                 a_m = max(post_values);
                 a_i = find(post_values == a_m);
@@ -105,6 +107,7 @@ function [Vs, Xs, Ys, Ks, f_time, b_time, v_time, a_time] = approx_policy_iterat
                         
                         Y(i) = (1-alpha(i))*Y(i) + alpha(i)*y;
                         K(i) = k + 1;
+                        A(i) = alpha(i);
                         
                         l = ((1-alpha(i))^2)*lambda(i) + alpha(i)^2;
                         
@@ -135,6 +138,7 @@ function [Vs, Xs, Ys, Ks, f_time, b_time, v_time, a_time] = approx_policy_iterat
                         Y = [Y, y];
                         X = [X, X_post(:,w)];
                         K = [K, 1];
+                        A = [A, 1];
                         
                         %for all intents and purposes this is the 0th 
                         %(aka, initialization) step from the algorithm
@@ -148,9 +152,10 @@ function [Vs, Xs, Ys, Ks, f_time, b_time, v_time, a_time] = approx_policy_iterat
                     end
                 end
                 
-                Xs{(n-1)*M +m} = X;
-                Ys{(n-1)*M +m} = Y;
-                Ks{(n-1)*M +m} = K;
+                Xs{(n-1)*M + m} = X;
+                Ys{(n-1)*M + m} = Y;
+                Ks{(n-1)*M + m} = K;
+                As{(n-1)*M + m} = A;
 
             b_time = b_time + toc(t_start);
         end
@@ -167,7 +172,7 @@ function [Vs, Xs, Ys, Ks, f_time, b_time, v_time, a_time] = approx_policy_iterat
 
         t_start = tic;
             model = fitrsvm(X',Y','KernelFunction','gaussian');
-            Vs{n+1} = @(ss) predict(model, value_basii(ss)');
+            Vf{n+1} = @(ss) predict(model, value_basii(ss)');
         v_time = v_time + toc(t_start);
     end
 

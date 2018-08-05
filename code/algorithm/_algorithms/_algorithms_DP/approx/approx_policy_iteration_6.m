@@ -1,4 +1,4 @@
-function [Vf, Xs, Ys, Ks, f_time, b_time, v_time, a_time] = approx_policy_iteration_6(s_1, actions, reward, value_basii, transition_post, transition_pre, gamma, N, M, T, W)
+function [Vf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_policy_iteration_6(s_1, actions, reward, value_basii, transition_post, transition_pre, gamma, N, M, T, W)
 
     a_start = tic;
 
@@ -17,10 +17,13 @@ function [Vf, Xs, Ys, Ks, f_time, b_time, v_time, a_time] = approx_policy_iterat
     Xs = cell(1, N*M);
     Ys = cell(1, N*M);
     Ks = cell(1, N*M);
+    As = cell(1, N*M);
+    
 
     X = [];
     Y = [];
     K = [];
+    A = [];
 
     Vf{1} = @(xi) 4*ones(1,size(xi,2));
 
@@ -64,18 +67,21 @@ function [Vf, Xs, Ys, Ks, f_time, b_time, v_time, a_time] = approx_policy_iterat
                     k = coalesce_if_empty(K(i),0);
 
                     if any(i)
+                        A(i) = 1/k;
                         Y(i) = (1-1/k)*Y(i) + (1/k) * y;
                         K(i) = k + 1;
                     else
                         Y = [Y, y];
                         X = [X, X_post(:,w)];
                         K = [K, 1];
+                        A = [A, 1];
                     end
                 end
-                
-                Xs{(n-1)*M +m} = X;
-                Ys{(n-1)*M +m} = Y;
-                Ks{(n-1)*M +m} = K;
+
+                Xs{(n-1)*M + m} = X;
+                Ys{(n-1)*M + m} = Y;
+                Ks{(n-1)*M + m} = K;
+                As{(n-1)*M + m} = A;
 
             b_time = b_time + toc(t_start);
         end

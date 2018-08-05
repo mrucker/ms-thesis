@@ -1,6 +1,6 @@
 %time-independent value, finite horizon, discrete actions, post-decision,
 %forwards-backwards, non-optimistic, recursive linear basis regression.
-function [Vf, Xs, Ys, Ks, f_time, b_time, v_time, a_time] = approx_policy_iteration_2(s_1, actions, reward, value_basii, transition_post, transition_pre, gamma, N, M, T, W)
+function [Vf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_policy_iteration_2(s_1, actions, reward, value_basii, transition_post, transition_pre, gamma, N, M, T, W)
 
     a_start = tic;
     
@@ -16,17 +16,19 @@ function [Vf, Xs, Ys, Ks, f_time, b_time, v_time, a_time] = approx_policy_iterat
     b_time = 0;
     v_time = 0;
 
-    Vf = cell(1, N+1);
+    Vf = cell(1, N+1);    
     Xs = cell(1, N*M);
     Ys = cell(1, N*M);
     Ks = cell(1, N*M);
+    As = cell(1, N*M);
 
     B = [];
     X = [];
     Y = [];
     K = [];
+    A = [];
 
-    theta = ones(size(value_basii(s_1()),1), N) * 4;
+    theta = ones(size(value_basii(s_1()),1), N) * 200;
 
     Vf{1} = @(s) value_basii(s)' * theta(:,1);
 
@@ -43,15 +45,12 @@ function [Vf, Xs, Ys, Ks, f_time, b_time, v_time, a_time] = approx_policy_iterat
             for t = 1:((T-1)+(W-1))
 
                 action_matrix = actions(s_t);
-
-                
+ 
                 post_states = transition_post(s_t, action_matrix);
                 %post_basii  = value_basii(post_states);
-                
-                
+
                 post_values = Vf{n}(post_states);
-                
-                
+
                 a_m = max(post_values);
                 a_i = find(post_values == a_m);
                 a_i = a_i(randi(length(a_i)));
@@ -81,18 +80,22 @@ function [Vf, Xs, Ys, Ks, f_time, b_time, v_time, a_time] = approx_policy_iterat
                     k = coalesce_if_empty(K(i),0);
 
                     if any(i)
+                        A(i) = 1/3;
                         Y(i) = (1-1/3)*Y(i) + (1/3) * y;
                         K(i) = k + 1;
                     else
                         Y = [Y, y];
                         X = [X, X_post(:,w)];
                         K = [K, 1];
+                        A = [A, 1];
                     end
                 end
                 
-                Xs{(n-1)*M +m} = X;
-                Ys{(n-1)*M +m} = Y;
-                Ks{(n-1)*M +m} = K;
+                Xs{(n-1)*M + m} = X;
+                Ys{(n-1)*M + m} = Y;
+                Ks{(n-1)*M + m} = K;
+                As{(n-1)*M + m} = A;
+                
             b_time = b_time + toc(t_start);
 
             t_start = tic;
