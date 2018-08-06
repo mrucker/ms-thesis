@@ -1,4 +1,4 @@
-function [Vf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_policy_iteration_6(s_1, actions, reward, value_basii, transition_post, transition_pre, gamma, N, M, T, W)
+function [Vf, Pf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_policy_iteration_6(s_1, actions, reward, value_basii, trans_post, trans_pre, gamma, N, M, T, W)
 
     a_start = tic;
 
@@ -32,7 +32,7 @@ function [Vf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_policy_it
         for m = 1:M 
 
             s_a = s_1();
-            s_t = transition_pre(s_a, []);
+            s_t = trans_pre(s_a, []);
 
             X_post(:,1) = value_basii(s_a);
             X_rewd (:,1) = reward(s_t);
@@ -42,7 +42,7 @@ function [Vf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_policy_it
 
                 action_matrix = actions(s_t);
 
-                post_states = transition_post(s_t, action_matrix);
+                post_states = trans_post(s_t, action_matrix);
                 post_values = Vf{n}(post_states);
 
                 a_m = max(post_values);
@@ -50,7 +50,7 @@ function [Vf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_policy_it
                 a_i = a_i(randi(length(a_i)));
 
                 s_a = post_states(:,a_i);
-                s_t = transition_pre(s_a, []);
+                s_t = trans_pre(s_a, []);
 
                 X_post(:,t+1) = value_basii(s_a);
                 X_rewd(:,t+1) = reward(s_t);
@@ -102,5 +102,7 @@ function [Vf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_policy_it
         v_time = v_time + toc(t_start);
     end
 
+    Pf = policy_function(actions, Vf{N+1}, trans_post);
+    
     a_time = toc(a_start);
 end

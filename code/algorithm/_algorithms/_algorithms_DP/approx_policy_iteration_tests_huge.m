@@ -44,11 +44,8 @@ for a = 1:size(algos,1)
     
     for i = 1:samples
 
-        [Vf, Xs, Ys, Ks, As, Ts(1,i), Ts(2,i), Ts(3,i), Ts(4,i)] = algos{a,1}(s_1, s_a, s_r(i), v_b, trans_pst, trans_pre, gamma, N, M, T, W);
+        [Vf, Pf, Xs, Ys, Ks, As, Ts(1,i), Ts(2,i), Ts(3,i), Ts(4,i)] = algos{a,1}(s_1, s_a, s_r(i), v_b, trans_pst, trans_pre, gamma, N, M, T, W);
 
-        ia = @(a,i) a(:,i);
-        Pf = @(s) ia(s_a(s), max_i(Vf{N+1}(trans_pst(s, s_a(s)))));
-        
         Pv(i) = evaluate_policy_at_states(Pf, states_r{i}, reward_r{i}, gamma, T, trans_pre, 10);
 
         if samples < 3
@@ -200,22 +197,22 @@ function d_results(test_algo_name, Ks, As)
     
     subplot(3,1,1);
     plot(n_val, nk_num, n_val, nk_avg, n_val, nk_max, n_val, nk_var);
-    title('step stats for N-M iteration')
-    xlabel('N-M iteration index')
+    title('visits by iteration')
+    xlabel('iteration index')
     %ylabel('vb visit count statistical values')
     legend('k num', 'k avg', 'k max', 'k var')
     
     subplot(3,1,2);
     plot(n_val, na_min, n_val, na_avg, n_val, na_max, n_val, na_var);
-    title('step stats for N-M iteration')
-    xlabel('N-M iteration index')
+    title('alpha by iteration')
+    xlabel('iteration index')
     %ylabel('alpha statistical values')
     legend('a min', 'a avg', 'a max', 'a var')
     
     subplot(3,1,3);
     hold on
     plot(k_val, ka_min, k_val, ka_avg, k_val, ka_max, k_val, ka_var);
-    title('step stats for visit count')
+    title('alpha by visits')
     xlabel('vb visitation count')
     %ylabel('alpha statistical values')
     legend('a min', 'a avg', 'a max', 'a var')
@@ -226,31 +223,13 @@ function V = evaluate_policy_at_states(Pf, eval_states, reward, gamma, T, transi
     
     for i = 1:size(eval_states,2)
         eval_state = eval_states{i};
-        V = V + evaluate_policy_at_state(Pf, eval_state, reward, gamma, T, transition_pre, sample_size);
+        eval_stats = evaluate_policy_at_state(Pf, eval_state, reward, gamma, T, transition_pre, sample_size);
+        eval_state_avg_reward = mean(cellfun(@(stats) sum(stats),eval_stats));
+        
+        V = V + eval_state_avg_reward;
     end
     
     V = V/size(eval_states,2);
-end
-
-function V = evaluate_policy_at_state(Pf, state, reward, gamma, T, transition_pre, sample_size)
-
-    V = 0;    
-    
-    for n = 1:sample_size
-
-        s = state;
-        v = 0;
-        
-        for t = 1:T
-            v = v + gamma^(t-1) * reward(s);
-            a = Pf(s);
-            s = transition_pre(s,a);
-        end
-        
-        V = V + v;
-    end
-    
-    V = V/sample_size;
 end
 
 function i = max_i(M)

@@ -4,8 +4,8 @@ close all
 
 samples = 1;
 
-N = 30;
-M = 50;
+N = 3;
+M = 500;
 T = 10;
 W = 3;
 
@@ -55,18 +55,22 @@ for i = 1:samples
     reward = random_rewards(states, actions);
     reward = reward./max(abs(reward));
 
-    values = exact_value_iteration(pre_pmf, reward, gamma, 0, min(T,30));
-
+    pre_values  = exact_value_iteration(pre_pmf, reward, gamma, 0, min(T,30));
     rewards{i}  = @(s) reward(state2index(s));
-    exact_Ps{i} = exact_policy_realization(states, actions, values, pre_pmf);
+    exact_Ps{i} = policy_vector_pre(states, actions, pre_values, pre_pmf);
 
     %exact_Vs{i} is definitely right. I have double and triple checked it
     %(aka, V_a(s_t) = E[V(s_{t+1}) | a, s_t] = \sum_{s' \in S} P(s'|s,a) * V(s_t+1) == post_pmf * V)
-    exact_Vs{i} = post_pmf * values; %(aka, post-decision-state value)
+    exact_Vs{i} = post_pmf * pre_values; %(aka, post-decision-state value)
 
     %I have some big doubts about the accuracy of the exact_E values
     %These are only used for evaluation though so semi-close is acceptable
-    exact_Es{i} = exact_steady_state(pre_pmf, exact_Ps{i}, W);
+    %This shows that adding W biases our estimated trans value since we
+    %sample by a different rate than a uniform distribution. Even with this
+    %bias though adding in a few W does seem to improve the accuracy by
+    %quite a bit
+    %exact_Es{i} = exact_steady_state(pre_pmf, exact_Ps{i}, W);
+    exact_Es{i} = exact_Vs{i};
 
     %aka, 10 random states... kind of ugly, but I'm feeling lazy.
     eval_states{i} = [s_1(),s_1(),s_1(),s_1(),s_1(),s_1(),s_1(),s_1(),s_1(),s_1()];
@@ -97,12 +101,12 @@ for a = 1:size(algos,1)
     
     for i = 1:samples
         
-        [Vf, Xs, Ys, Ks, f_time(i), b_time(i), m_time(i), a_time(i)] = algos{a, 1}(s_1, @(s) actions, rewards{i}, v_basii, transition_post, transition_pre, gamma, N, M, T, W);        
+        [Vf, Pf, Xs, Ys, Ks, As, f_time(i), b_time(i), m_time(i), a_time(i)] = algos{a, 1}(s_1, @(s) actions, rewards{i}, v_b, transition_post, transition_pre, gamma, N, M, T, W);
         
         [V_mse(i), P_mse(i), P_val(i)] = result_statistics(states, actions, rewards{i}, gamma, T, eval_states{i}, Vf{N+1}, exact_Vs{i}, exact_Ps{i}, transition_post, transition_pre, state2index);
 
         if samples < 3
-            d_results(algos{a, 2}, Xs, Ys, Ks, v_basii(states), exact_Es{i}, exact_Vs{i});
+            d_results(algos{a, 2}, Xs, Ys, Ks, v_b(states), exact_Es{i}, exact_Vs{i});
         end
     end
 
@@ -300,11 +304,11 @@ function d_results(test_algo_name, Xs, Ys, Ks, basii, tru_E, tru_V)
     visits1 = 0:10;
     visits2 = 1:10;
     
-    value_x = @(x) value(intersect_ib(x', basii'));
+    value_x = @(x) tru_V(intersect_ib(x', basii'));
     error_x = @(x,y) abs(value_x(x) - y');
     
-    step_visit_count = cell2mat(arrayfun(@(step) [repmat(step, 1, numel(visits1)); visits1; [size(basii,2) - size(Ks{step},2),histc(Ks{step}, visits2)]], 1:5:size(Ks,2), 'UniformOutput', false));
-    step_visit_error = cell2mat(arrayfun(@(step) [repmat(step, 1, numel(visits1)); visits1; mean(error_x(Xs{step},Ys{step}) .* (visits1 == Ks{step}')) ], 1:5:size(Ks,2), 'UniformOutput', false));
+    step_visit_count = cell2mat(arrayfun(@(step) [step*ones(1, numel(visits1)); visits1; [size(basii,2) - size(Ks{step},2),histc(Ks{step}, visits2)]], 1:5:size(Ks,2), 'UniformOutput', false));
+    step_visit_error = cell2mat(arrayfun(@(step) [step*ones(1, numel(visits2)); visits2; mean(error_x(Xs{step},Ys{step}) .* (visits2 == Ks{step}'),1) ], 1:5:size(Ks,2), 'UniformOutput', false));
     
     figure('NumberTitle', 'off', 'Name', test_algo_name);
 
@@ -317,7 +321,7 @@ function d_results(test_algo_name, Xs, Ys, Ks, basii, tru_E, tru_V)
     title('convergence rate')
 end
 
-function [V_mse, P_mse, P_val] = result_statistics(states, actions, reward, gamma, T, eval_states, est_V, tru_Vs, tru_Ps, transition_post, transition_pre, state2index)
+function [V_mse, P_mse, P_val] = result_statistics(states, actions, reward, gamma, T, eval_states, est_Vf, tru_Vs, tru_Ps, transition_post, transition_pre, state2index)
     page_size = 10000;
 
     est_Vs = zeros(size(states,2),1);
@@ -329,8 +333,8 @@ function [V_mse, P_mse, P_val] = result_statistics(states, actions, reward, gamm
         page_indexes  = page_start:page_stop;
         page_states   = states(:,page_indexes);
 
-        est_Vs(page_indexes) = est_V(page_states);
-        est_Ps(page_indexes) = approx_policy_realization(page_states, actions, est_V, transition_post);
+        est_Vs(page_indexes) = est_Vf(page_states);
+        est_Ps(page_indexes) = policy_vector_post(page_states, actions, est_Vf, transition_post);
     end
 
     V_mse = mean((est_Vs -  tru_Vs).^2);
