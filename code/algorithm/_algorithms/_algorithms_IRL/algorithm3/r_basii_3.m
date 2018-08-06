@@ -1,38 +1,35 @@
-function b = r_basii_3(states)
+function rb = r_basii_3(states)
 
-    adp_assert_states(states);
+    %this could be made faster, 
+    %it just doesn't seem to matter
+
+    huge_states_assert(states);
     
-    %basis = [dx, dy, ddx, ddy, dddx, dddy, touch_count]
-    b = zeros(13,size(states,2));
+    rb = zeros(7,size(states,2));
 
-    for i = 1:numel(states)
+    for i = 1:size(states,2)
         if iscell(states)
-            b(:,i) = state_to_reward_basii(states{i});
+            state = states{i};
         else
-            b(:,i) = state_to_reward_basii(states(:,i));
+            state = states(:,i);
         end
+        %[dx, dy, ddx, ddy, dddx, dddy, touch_count]
+        rb(1:6, i) = state(3:8);
+        rb(  7, i) = touch_count(state);
     end
 end
 
-function b = state_to_reward_basii(s)
-    r = s(11);
-    t = s(12:end);
-
-    if isempty(t)
-        touch_count = 0;
-    else
-        t = reshape(t, [], numel(t)/3);
-
-        x1 = s(1:2);
-        x2 = t(1:2,:);
-
-        touch_count = sum(sqrt(dot(x2,x2,1)+dot(x1,x1,1)'-2*(x1'*x2)) <= r);
-    end
-
-    derivative = s(3:8);
+function tc = touch_count(states)
+    r2 = states(11, 1).^2;
+    cp = states(1:2,:);
+    pp = states(1:2,:) - states(3:4,:);
     
-    derivative_pos = (derivative > 0) .*  derivative;
-    derivative_neg = (derivative < 0) .* -derivative;
+    tp = [states(12:3:end, 1)';states(13:3:end, 1)'];
+
+    pt = (dot(pp,pp,1)+dot(tp,tp,1)'-2*(tp'*pp)) <= r2;
+    ct = (dot(cp,cp,1)+dot(tp,tp,1)'-2*(tp'*cp)) <= r2;
     
-    b = [derivative_pos; derivative_neg; touch_count];
+    %not perfect, if a target simply appears on top 
+    %of you then it won't count as an actual touch for us
+    tc = sum(ct&~pt, 1);
 end

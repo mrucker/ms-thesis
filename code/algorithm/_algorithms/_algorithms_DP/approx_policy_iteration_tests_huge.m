@@ -106,14 +106,14 @@ function rb = reward_basii(states)
         %[dx, dy, ddx, ddy, dddx, dddy, touch_count]
         rb(1:6, i) = state(3:8);
         rb(  7, i) = touch_count(state);
-    end    
+    end
 end
 
 function tc = touch_count(states)
     r2 = states(11, 1).^2;
     cp = states(1:2,:);
     pp = states(1:2,:) - states(3:4,:);
-    
+
     tp = [states(12:3:end, 1)';states(13:3:end, 1)'];
 
     pt = (dot(pp,pp,1)+dot(tp,tp,1)'-2*(tp'*pp)) <= r2;

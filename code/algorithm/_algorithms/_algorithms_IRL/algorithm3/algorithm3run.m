@@ -1,5 +1,11 @@
 function irl_result = algorithm3run(trajectory_observations, params, verbosity)
 
+    N=10; 
+    M=10;
+    T=10;
+    S=100;
+    W=5;
+
     fprintf(1,'Start of Algorithm3 \n');
 
     params = setDefaults(params);
@@ -18,25 +24,30 @@ function irl_result = algorithm3run(trajectory_observations, params, verbosity)
     
     %trim off the first four states since they have pre-game noise
     trajectory_states(1:4) = [];
-    
-    trajectory_r_basii = r_basii_3(trajectory_states);
-    
-    T  = 10;
-    sE = 0;
+        
+    E = 0;
 
+    s_1 = @( ) trajectory_states{randi(numel(trajectory_states))};
+    s_a = @s_act_3;
+    s_b = @v_basii_3;
+    
     tic;
     for t = 1:T
-        sE = sE + params.gamma^(t-1) * r_basii_3(trajectory_states(:,t));
+        E = E + params.gamma^(t-1) * r_basii_3(trajectory_states(:,t));
     end
     exp_time = exp_time + toc;
-
-    [Vf, Xs, Ys, Ks, As, Ts(1,i), Ts(2,i), Ts(3,i), Ts(4,i)] = approx_policy_iteration_7(s_1, s_a, s_r(i), v_b, trans_pst, trans_pre, gamma, N, M, T, W);
     
     % Generate random policy.
     tic;
-    rand_r = rand(1,size(sE,1))';
+    rand_r = rand(size(E,1),1);
     rand_r = rand_r/sum(rand_r);
-    rand_s = approx_policy_iteration_7();
+        
+    s_r = @(s) rand_r'*r_basii_3(s);
+    [~ , Pf, ~ , ~ , ~ , ~ , ~     , ~     , ~     , ~     ] = approx_policy_iteration_7(s_1, s_a    , s_r   , s_b        , @huge_trans_post, @huge_trans_pre, params.gamma, N, M, T, W);
+    rand_s = policy_eval_at_state(Pf{N+1}, trajectory_states{1}, @r_basii_3, params.gamma, T, @huge_trans_pre, S);
+    rand_s = sum(cell2mat(rand_s),2)./S;
+    
+    
     mdp_time = mdp_time + toc;
 
     rs = {rand_r};
@@ -53,11 +64,15 @@ function irl_result = algorithm3run(trajectory_observations, params, verbosity)
     while 1
 
         tic;
-        rs{i}    = (sE-sb{i-1});
-        ss{i}    = adp_feature_expectation(rs{i}, T, trajectory_states{1}, params.gamma);
+        rs{i} = (E-sb{i-1});
+        s_r   = @(s) rs{i}'*r_basii_3(s);
+        [~, Pf, ~, ~, ~, ~, ~, ~, ~, ~] = approx_policy_iteration_7(s_1, s_a, s_r, s_b, @huge_trans_post, @huge_trans_pre, params.gamma, N, M, T, W);
+        ss{i} = policy_eval_at_state(Pf{N+1}, trajectory_states{1}, @r_basii_3, params.gamma, T, @huge_trans_pre, S);
+        ss{i} = sum(cell2mat(ss{i}),2)./S;
+        
         mdp_time = mdp_time + toc;
 
-        ts{i} = sqrt(sE'*sE + sb{i-1}'*sb{i-1} - 2*sE'*sb{i-1});
+        ts{i} = sqrt(E'*E + sb{i-1}'*sb{i-1} - 2*E'*sb{i-1});
 
         if verbosity ~= 0
             fprintf(1,'Completed IRL iteration, i=%d, t=%f\n',i,ts{i});
@@ -70,7 +85,7 @@ function irl_result = algorithm3run(trajectory_observations, params, verbosity)
         i = i + 1;
 
         tic;
-        sn       = (ss{i-1}-sb{i-2})'*(sE-sb{i-2});
+        sn       = (ss{i-1}-sb{i-2})'*(E-sb{i-2});
         sd       = (ss{i-1}-sb{i-2})'*(ss{i-1}-sb{i-2});
         sc       = sn/sd;
         sb{i-1}  = sb{i-2} + sc*(ss{i-1}-sb{i-2});
@@ -78,7 +93,8 @@ function irl_result = algorithm3run(trajectory_observations, params, verbosity)
     end;
 
     tic;
-    [~,idx] = max(mixPolicies(sE, ss));
+    %[~,idx] = max(mixPolicies(E, ss));
+    idx = i;
     mix_time = mix_time + toc;
 
     t  = ts{idx};
@@ -94,15 +110,18 @@ function irl_result = algorithm3run(trajectory_observations, params, verbosity)
     fprintf(1,'mdp_time=%f \n',mdp_time);
     fprintf(1,'mix_time=%f \n',mix_time);
 
-    [~,i] = min(sqdist(sE,cell2mat(ss)));
+    x1 = E;
+    x2 = cell2mat(ss);
+    
+    [~,i] = min((dot(x1,x1,1)+dot(x2,x2,1)'-2*(x2'*x1)));
     %-diff(ps{idx},1,2)
     %-diff(ps{i},1,2)
     %-diff(pE(:,1:4),1,2)
 
-%    ss{i}
+    ss{i}
 %    ss{idx}
-%    sE
-%    rs{i}
+    E
+    rs{i}
 %    rs{idx}
 
     irl_result = r;
