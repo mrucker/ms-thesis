@@ -1,4 +1,4 @@
-function [ss] = exact_steady_state(T, P, W)
+function [ss] = W_estimation_bias(T, P, W)
 
     chain_T = cell2mat(arrayfun(@(s_i)T{P(s_i)}(s_i,:), 1:size(P,1), 'UniformOutput', false)');
     

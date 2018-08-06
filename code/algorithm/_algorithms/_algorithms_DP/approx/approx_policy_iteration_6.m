@@ -14,6 +14,7 @@ function [Vf, Pf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_polic
     v_time = 0;
 
     Vf = cell(1, N+1);
+    Pf = cell(1, N+1);
     Xs = cell(1, N*M);
     Ys = cell(1, N*M);
     Ks = cell(1, N*M);
@@ -98,11 +99,12 @@ function [Vf, Pf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_polic
 
         t_start = tic;
             model = fitrsvm(X',Y','KernelFunction','gaussian');
+            
             Vf{n+1} = @(s) predict(model, value_basii(s)');
-        v_time = v_time + toc(t_start);
+            Pf{n+1} = policy_function(actions, Vf{n+1}, trans_post);
+        
+            v_time = v_time + toc(t_start);
     end
 
-    Pf = policy_function(actions, Vf{N+1}, trans_post);
-    
     a_time = toc(a_start);
 end

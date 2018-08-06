@@ -36,8 +36,8 @@ s_1 = @( ) states(:,randperm(size(states,2),1));
 s_a = @(s) actions;
 v_b = @(s) value_basii_5(s, actions);
 
-transition_pre  = @(s,a) small_trans_pre (s, a, targets, target2index, targ_cdf);
-transition_post = @(s,a) small_trans_post(s, a);
+trans_pre  = @(s,a) small_trans_pre (s, a, targets, target2index, targ_cdf);
+trans_post = @(s,a) small_trans_post(s, a);
 
 f_time = [];
 b_time = [];
@@ -69,7 +69,7 @@ for i = 1:samples
     %sample by a different rate than a uniform distribution. Even with this
     %bias though adding in a few W does seem to improve the accuracy by
     %quite a bit
-    %exact_Es{i} = exact_steady_state(pre_pmf, exact_Ps{i}, W);
+    %exact_Es{i} = W_estimation_bias(pre_pmf, exact_Ps{i}, W);
     exact_Es{i} = exact_Vs{i};
 
     %aka, 10 random states... kind of ugly, but I'm feeling lazy.
@@ -83,7 +83,10 @@ P_mse = zeros(1,samples);
 P_val = zeros(1,samples);
 
 for i = 1:samples
-    [V_mse(i), P_mse(i), P_val(i)] = result_statistics(states, actions, rewards{i}, gamma, T, eval_states{i}, @(s) exact_Vs{i}(state2index(s)), exact_Vs{i}, exact_Ps{i}, transition_post, transition_pre, state2index);    
+    est_Vf = @(s) exact_Vs{i}(state2index(s));
+    est_Pf = @(s) actions(:,exact_Ps{i}(state2index(s)));
+
+    [V_mse(i), P_mse(i), P_val(i)] = result_statistics(states, actions, rewards{i}, gamma, T, eval_states{i}, est_Vf, est_Pf, exact_Vs{i}, exact_Ps{i}, trans_pre, trans_post);
 end
 
 p_results('exact_value', 0, 0, 0, 0, V_mse, P_mse, P_val);
@@ -101,9 +104,9 @@ for a = 1:size(algos,1)
     
     for i = 1:samples
         
-        [Vf, Pf, Xs, Ys, Ks, As, f_time(i), b_time(i), m_time(i), a_time(i)] = algos{a, 1}(s_1, @(s) actions, rewards{i}, v_b, transition_post, transition_pre, gamma, N, M, T, W);
+        [Vf, Pf, Xs, Ys, Ks, As, f_time(i), b_time(i), m_time(i), a_time(i)] = algos{a, 1}(s_1, @(s) actions, rewards{i}, v_b, trans_post, trans_pre, gamma, N, M, T, W);
         
-        [V_mse(i), P_mse(i), P_val(i)] = result_statistics(states, actions, rewards{i}, gamma, T, eval_states{i}, Vf{N+1}, exact_Vs{i}, exact_Ps{i}, transition_post, transition_pre, state2index);
+        [V_mse(i), P_mse(i), P_val(i)] = result_statistics(states, actions, rewards{i}, gamma, T, eval_states{i}, Vf{N+1}, Pf{N+1}, exact_Vs{i}, exact_Ps{i}, trans_pre, trans_post);
 
         if samples < 3
             d_results(algos{a, 2}, Xs, Ys, Ks, v_b(states), exact_Es{i}, exact_Vs{i});
@@ -321,7 +324,7 @@ function d_results(test_algo_name, Xs, Ys, Ks, basii, tru_E, tru_V)
     title('convergence rate')
 end
 
-function [V_mse, P_mse, P_val] = result_statistics(states, actions, reward, gamma, T, eval_states, est_Vf, tru_Vs, tru_Ps, transition_post, transition_pre, state2index)
+function [V_mse, P_mse, P_val] = result_statistics(states, actions, reward, gamma, T, eval_states, est_Vf, est_Pf, tru_Vs, tru_Ps, trans_pre, trans_post)
     page_size = 10000;
 
     est_Vs = zeros(size(states,2),1);
@@ -334,40 +337,23 @@ function [V_mse, P_mse, P_val] = result_statistics(states, actions, reward, gamm
         page_states   = states(:,page_indexes);
 
         est_Vs(page_indexes) = est_Vf(page_states);
-        est_Ps(page_indexes) = policy_vector_post(page_states, actions, est_Vf, transition_post);
+        est_Ps(page_indexes) = policy_vector_post(page_states, actions, est_Vf, trans_post);
     end
 
     V_mse = mean((est_Vs -  tru_Vs).^2);
     P_mse = mean((est_Ps == tru_Ps).^2);
-    P_val = evaluate_policy_at_states(est_Ps, eval_states, actions, reward, gamma, T, 100, state2index, transition_pre);
+    P_val = policy_eval_at_states(est_Pf, eval_states, reward, gamma, T, trans_pre, 50);
 end
 
-function V = evaluate_policy_at_states(policy, states, actions, reward, gamma, T, samples, state2index, transition_pre)
+function V = policy_eval_at_states(Pf, states, reward, gamma, T, trans_pre, samples)
     v = 0;
     for state = states
-        v = v + evaluate_policy_at_state(policy, state, actions, reward, gamma, T, samples, state2index, transition_pre);
+        
+        r_each_sample_state = policy_eval_at_state(Pf, state, reward, gamma, T, trans_pre, samples);
+        v_each_sample_state = cellfun(@sum, r_each_sample_state);
+        
+        v = v + mean(v_each_sample_state);
     end
     
     V = v/size(states,2);
-end
-
-function V = evaluate_policy_at_state(policy, state, actions, reward, gamma, T, samples, state2index, transition_pre)
-
-    V = 0;    
-    
-    for n = 1:samples
-
-        s = state;
-        v = 0;
-        
-        for t = 1:T
-            v = v + gamma^(t-1) * reward(s);
-            a = actions(:, policy(state2index(s)));
-            s = transition_pre(s,a);
-        end
-        
-        V = V + v;
-    end
-    
-    V = V/samples;
 end

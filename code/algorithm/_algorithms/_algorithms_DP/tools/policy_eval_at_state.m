@@ -1,4 +1,4 @@
-function V = evaluate_policy_at_state(Pf, state, eval_statistic, gamma, T, transition_pre, sample_size)
+function V = policy_eval_at_state(Pf, state, eval_statistic, gamma, T, transition_pre, sample_size)
 
     V = cell(1, sample_size);
     
