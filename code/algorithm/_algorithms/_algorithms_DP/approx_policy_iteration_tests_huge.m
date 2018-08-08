@@ -2,19 +2,22 @@ close all
 fprintf('\n');
 run('../../paths.m');
 
-samples = 1;
+samples = 5;
 gamma = .9;
 
-N = 10;
-M = 100;
-T = 10;
-W = 3;
+N = 25;
+M = 80;
+T = 20;
+S = 5;
+W = 5;
 
 algos = {
     @approx_policy_iteration_2, 'algorithm_2'; %(lin ols   regression)
     %@approx_policy_iteration_5, 'algorithm_5'; %(gau ridge regression)
-    @approx_policy_iteration_6, 'algorithm_6'; %(gau svm   regression)
+    %@approx_policy_iteration_6, 'algorithm_6'; %(gau svm   regression)
     @approx_policy_iteration_7, 'algorithm_7'; %(gau svm   regression with BAKF)
+    %@approx_policy_iteration_8, 'algorithm_8'; %(gau svm   regression with BAKF, and ONPOLICY trajectory sampling)
+    %@approx_policy_iteration_9, 'algorithm_9'; %(gau svm   regression with BAKF, with interval estimation)
 };
 
 s_1 = @() state_rand();
@@ -41,19 +44,22 @@ for a = 1:size(algos,1)
     
     Ts = zeros(4,samples);    
     Pv = zeros(1,samples);
+    Pt = zeros(1,samples);
     
     for i = 1:samples
 
-        [Vf, Pf, Xs, Ys, Ks, As, Ts(1,i), Ts(2,i), Ts(3,i), Ts(4,i)] = algos{a,1}(s_1, s_a, s_r(i), v_b, trans_pst, trans_pre, gamma, N, M, T, W);
+        [Vf, Pf, Xs, Ys, Ks, As, Ts(1,i), Ts(2,i), Ts(3,i), Ts(4,i)] = algos{a,1}(s_1, s_a, s_r(i), v_b, trans_pst, trans_pre, gamma, N, M, S, W);
 
-        Pv(i) = evaluate_policy_at_states(Pf{N+1}, states_r{i}, reward_r{i}, gamma, T, trans_pre, 10);
+        Pv(i) = evaluate_policy_at_states(Pf{N+1}, states_r{i}, reward_r{i} , gamma, T, trans_pre, 20);
+        Pt(i) = evaluate_policy_at_states(Pf{N+1}, states_r{i}, @touch_count, 1    , T, trans_pre, 20);
+        %Pd(i) = evaluate_policy_at_states(Pf{N+1}, states_r{i}, @target_dist, 1    , T, trans_pre, 100);
 
         if samples < 3
             d_results(algos{a,2}, Ks, As);
         end
     end
 
-    p_results(algos{a,2}, Ts(1,i), Ts(2,i), Ts(3,i), Ts(4,i), Pv);
+    p_results(algos{a,2}, Ts(1,i), Ts(2,i), Ts(3,i), Ts(4,i), Pv, Pt);
 
 end
 
@@ -94,7 +100,7 @@ function vb = value_basii_5(states)
 end
 
 function rb = reward_basii(states)
-    
+
     rb = zeros(7,size(states,2));
 
     for i = 1:size(states,2)
@@ -104,7 +110,7 @@ function rb = reward_basii(states)
             state = states(:,i);
         end
         %[dx, dy, ddx, ddy, dddx, dddy, touch_count]
-        rb(1:6, i) = state(3:8);
+        rb(1:6, i) = abs(state(3:8));
         rb(  7, i) = touch_count(state);
     end
 end
@@ -113,15 +119,20 @@ function tc = touch_count(states)
     r2 = states(11, 1).^2;
     cp = states(1:2,:);
     pp = states(1:2,:) - states(3:4,:);
-
-    tp = [states(12:3:end, 1)';states(13:3:end, 1)'];
-
-    pt = (dot(pp,pp,1)+dot(tp,tp,1)'-2*(tp'*pp)) <= r2;
-    ct = (dot(cp,cp,1)+dot(tp,tp,1)'-2*(tp'*cp)) <= r2;
+    
+    pt = target_dist([pp;states(3:end,:)]) <= r2;
+    ct = target_dist([cp;states(3:end,:)]) <= r2;
     
     %not perfect, if a target simply appears on top 
     %of you then it won't count as an actual touch for us
     tc = sum(ct&~pt, 1);
+end
+
+function td = target_dist(states)
+    cp = states(1:2,:);
+    tp = [states(12:3:end, 1)';states(13:3:end, 1)'];
+    
+    td = dot(cp,cp,1)+dot(tp,tp,1)'-2*(tp'*cp);
 end
 
 function tm = target_movement(states)
@@ -153,16 +164,18 @@ function tc = target_count(state)
 end
 
 function rt = reward_theta_rand(basii_count)
-    rt = rand(basii_count,1);
+    %rt = [zeros(basii_count-1,1);1];
+    rt = 2*rand(basii_count,1) - 1;
 end
 
-function p_results(test_algo_name, f_time, b_time, v_time, a_time, P_val)
+function p_results(test_algo_name, f_time, b_time, v_time, a_time, P_val, P_tch)
     fprintf('%s -- ', test_algo_name);
     fprintf('f_time = % 7.3f; ', sum(f_time));
     fprintf('b_time = % 7.3f; ', sum(b_time));
     fprintf('v_time = % 7.3f; ', sum(v_time));
     fprintf('a_time = % 7.3f; ', sum(a_time));
     fprintf('VAL = %.3f; '     , mean(P_val));
+    fprintf('TCH = %f; '       , mean(P_tch));
     fprintf('\n');
 end
 
@@ -215,12 +228,12 @@ function d_results(test_algo_name, Ks, As)
     legend('a min', 'a avg', 'a max', 'a var')
 end
 
-function V = evaluate_policy_at_states(Pf, eval_states, reward, gamma, T, transition_pre, sample_size)
+function V = evaluate_policy_at_states(Pf, eval_states, eval_stat, gamma, T, transition_pre, sample_size)
     V = 0;
     
     for i = 1:size(eval_states,2)
         eval_state = eval_states{i};
-        eval_stats = policy_eval_at_state(Pf, eval_state, reward, gamma, T, transition_pre, sample_size);
+        eval_stats = policy_eval_at_state(Pf, eval_state, eval_stat, gamma, T, transition_pre, sample_size);
         eval_state_avg_reward = mean(cellfun(@(stats) sum(stats),eval_stats));
         
         V = V + eval_state_avg_reward;

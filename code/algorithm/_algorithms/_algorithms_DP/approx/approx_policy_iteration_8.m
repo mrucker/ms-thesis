@@ -1,5 +1,6 @@
-function [Vf, Pf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_policy_iteration_7(s_1, actions, reward, value_basii, trans_post, trans_pre, gamma, N, M, T, W)
+function [Vf, Pf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_policy_iteration_8(s_1, actions, reward, value_basii, trans_post, trans_pre, gamma, N, M, T, W)
 
+    ONPOLICY_STATES = {s_1()};
     a_start = tic;
 
     g_row = [gamma.^(0:T-1), zeros(1,W-1)];
@@ -24,7 +25,6 @@ function [Vf, Pf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_polic
     Y = [];
     K = [];
     A = [];
-    S = [];
 
     %one for every value_basii
     %updated for entire life of program
@@ -35,26 +35,21 @@ function [Vf, Pf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_polic
     alpha   = [];
     eta     = [];
     lambda  = [];
+    iter    = [];
 
     Vf{1} = @(xi) 500*ones(1,size(xi,2));
 
     for n = 1:N 
 
-        X_b_m = cell(1, M);
-        X_r_m = cell(1, M);
+        for m = 1:M 
 
-        t_start = tic;
-        parfor m = 1:M 
-
-            s_a = s_1();
+            s_a = ONPOLICY_STATES{randi(size(ONPOLICY_STATES,2))};
             s_t = trans_pre(s_a, []);
-            
-            X_b_m{m} = [];
-            X_r_m{m} = [];
-            
-            X_b_m{m}(:,1) = value_basii(s_a);
-            X_r_m{m}(:,1) = reward(s_t);
-            
+
+            X_post(:,1) = value_basii(s_a);
+            X_rewd(:,1) = reward(s_t);
+
+            t_start = tic;
             for t = 1:((T-1)+(W-1))
 
                 action_matrix = actions(s_t);
@@ -69,19 +64,19 @@ function [Vf, Pf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_polic
                 s_a = post_states(:,a_i);
                 s_t = trans_pre(s_a, []);
 
-                X_b_m{m}(:,t+1) = value_basii(s_a);
-                X_r_m{m}(:,t+1) = reward(s_t);
-            end            
-        end
-        f_time = f_time + toc(t_start);
+                ONPOLICY_STATES{end+1} = s_a;
+                
+                X_post(:,t+1) = value_basii(s_a);
+                X_rewd(:,t+1) = reward(s_t);
+            end
+            f_time = f_time + toc(t_start);
 
-        t_start = tic;
-        for m = 1:M
-            X_base = X_b_m{m};
-            X_rewd = X_r_m{m};
-
+            t_start = tic;
+%                 X = [X, X_post(:,1:W)];
+%                 Y = [Y, X_rewd * g_mat'];
+%                 S = [S, ones(1,W)];
                 for w = 1:W
-                    i = coalesce_if_true(~isempty(X), @() all(X == X_base(:,w)));
+                    i = coalesce_if_true(~isempty(X), @() all(X == X_post(:,w)));
                     y = g_mat(w,:) * X_rewd';
                     k = coalesce_if_empty(K(i),0);
 
@@ -114,14 +109,13 @@ function [Vf, Pf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_polic
                         beta(i)    = b;
                         nu(i)      = v;
                         sig_sq(i)  = s;
-
+                        
                         Y(i) = (1-alpha(i))*Y(i) + alpha(i)*y;
                         K(i) = k + 1;
                         A(i) = alpha(i);
-                        S(i) = sig_sq(i);
-
+                        
                         l = ((1-alpha(i))^2)*lambda(i) + alpha(i)^2;
-
+                        
                         %the book suggests k <= 2... but it just seems to take longer
                         %for my particlar setup to get an estimate of the bias
                         if (k <= 2)
@@ -135,22 +129,23 @@ function [Vf, Pf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_polic
                         else
                             e = eta(i)/(1+eta(i)-.05);
                         end
-
+       
                         %while it seems incorrect... I think it is ok for
                         %alpha to be less than one... I think... any([a,e] < 0)
                         assert(~( any(1 < [a,e]) || any(isnan([a, e, l])) || any(isinf([a, e, l]))));
-
+                        
                         alpha(i)  = a;
                         eta(i)    = e;
                         lambda(i) = l;
-
+                        iter(i)   = n;
+                        
+                        
                     else
                         Y = [Y, y];
-                        X = [X, X_base(:,w)];
+                        X = [X, X_post(:,w)];
                         K = [K, 1];
                         A = [A, 1];
-                        S = [S, 2];
-
+                        
                         %for all intents and purposes this is the 0th 
                         %(aka, initialization) step from the algorithm
                         epsilon = [epsilon;0]; %simply reserving space, this value isn't used
@@ -159,17 +154,29 @@ function [Vf, Pf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_polic
                         alpha   = [alpha;1];
                         eta     = [eta;1];
                         lambda  = [lambda;0];  % we don't use for a few iterations  
-
+                        iter    = [iter,n];
+                        sig_sq  = [sig_sq,2];
                     end
                 end
-
+                
                 Xs{(n-1)*M + m} = X;
                 Ys{(n-1)*M + m} = Y;
                 Ks{(n-1)*M + m} = K;
                 As{(n-1)*M + m} = A;
+
+            b_time = b_time + toc(t_start);
         end
-        b_time = b_time + toc(t_start);
-        
+
+%         t_start = tic;
+%             [~,is,gs]=unique(X', 'rows');
+%             X = X(:,is);
+%             Y = grpstats(1:numel(Y),gs, @(gi) sum(Y(gi).*S(gi))/sum(S(gi)) )';
+%             S = grpstats(S,gs, @(ss) sum(ss))';
+%             
+%             Xs{n} = X;
+%             Ys{n} = Y;
+%         b_time = b_time + toc(t_start);
+
         t_start = tic;
             model = fitrsvm(X',Y','KernelFunction','gaussian', 'Standardize',true);
             

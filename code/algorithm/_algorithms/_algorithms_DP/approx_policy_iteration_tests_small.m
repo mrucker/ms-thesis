@@ -4,13 +4,14 @@ close all
 
 samples = 1;
 
-N = 3;
-M = 500;
+N = 30;
+M = 100;
 T = 10;
-W = 3;
+S = 2;
+W = 5;
 
 deriv  = 3;
-width  = 2;
+width  = 3;
 height = 2;
 radius = 0;
 
@@ -24,8 +25,10 @@ survive = 1000;
 algos = {
    %@approx_policy_iteration_2, 'algorithm_2'; %(lin ols   regression)
    %@approx_policy_iteration_5, 'algorithm_5'; %(gau ridge regression)
-    @approx_policy_iteration_6, 'algorithm_6'; %(gau svm   regression)
-    @approx_policy_iteration_7, 'algorithm_7'; %(gau svm   regression with BAKF)
+   %@approx_policy_iteration_6, 'algorithm_6'; %(gau svm   regression)
+   @approx_policy_iteration_7, 'algorithm_7'; %(gau svm   regression with BAKF)
+   %@approx_policy_iteration_8, 'algorithm_8'; %(gau svm   regression with BAKF, and ONPOLICY trajectory sampling)
+   %@approx_policy_iteration_9, 'algorithm_9'; %(gau svm   regression with BAKF, with interval estimation)
 };
 
 [states, movements, targets, actions, state2index, target2index, pre_pmf, post_pmf, targ_pmf] = small_world(deriv, width, height ,radius, ticks, survive, arrive);
@@ -53,7 +56,7 @@ eval_states = cell(1, samples);
 for i = 1:samples
 
     reward = random_rewards(states, actions);
-    reward = reward./max(abs(reward));
+    reward = reward./(5*max(abs(reward)));
 
     pre_values  = exact_value_iteration(pre_pmf, reward, gamma, 0, min(T,30));
     rewards{i}  = @(s) reward(state2index(s));
@@ -104,7 +107,7 @@ for a = 1:size(algos,1)
     
     for i = 1:samples
         
-        [Vf, Pf, Xs, Ys, Ks, As, f_time(i), b_time(i), m_time(i), a_time(i)] = algos{a, 1}(s_1, @(s) actions, rewards{i}, v_b, trans_post, trans_pre, gamma, N, M, T, W);
+        [Vf, Pf, Xs, Ys, Ks, As, f_time(i), b_time(i), m_time(i), a_time(i)] = algos{a, 1}(s_1, @(s) actions, rewards{i}, v_b, trans_post, trans_pre, gamma, N, M, S, W);
         
         [V_mse(i), P_mse(i), P_val(i)] = result_statistics(states, actions, rewards{i}, gamma, T, eval_states{i}, Vf{N+1}, Pf{N+1}, exact_Vs{i}, exact_Ps{i}, trans_pre, trans_post);
 
