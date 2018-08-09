@@ -1,4 +1,4 @@
-function [Vf, Pf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_policy_iteration_8(s_1, actions, reward, value_basii, trans_post, trans_pre, gamma, N, M, T, W)
+function [Vf, Pf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_policy_iteration_10(s_1, actions, reward, value_basii, trans_post, trans_pre, gamma, N, M, T, W)
 
     a_start = tic;
 
@@ -13,6 +13,7 @@ function [Vf, Pf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_polic
     b_time = 0;
     v_time = 0;
 
+    If = cell(1, N+1);
     Vf = cell(1, N+1);
     Pf = cell(1, N+1);
     Xs = cell(1, N*M);
@@ -36,7 +37,9 @@ function [Vf, Pf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_polic
     eta     = [];
     lambda  = [];
 
-    Vf{1} = @(xi) 3*ones(1,size(xi,2));
+    Vf{1} = @(xi) 3*ones(size(xi,2),1);
+    If{1} = @(xi) Vf{1}(xi);
+    
 
     for n = 1:N 
 
@@ -68,7 +71,16 @@ function [Vf, Pf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_polic
                 action_matrix = actions(s_t);
 
                 post_states = trans_post(s_t, action_matrix);
-                post_values = Vf{n}(post_states);
+                post_basii  = value_basii(post_states);
+                post_values = If{n}(post_basii);
+                post_std    = 1 * ones(size(post_states,2),1);
+
+                if ~isempty(X)
+                    [~, ib, ix] = intersect(post_basii', X', 'rows');
+                    post_std(ib) = sqrt(S(ix));
+                end
+
+                post_values = post_values + 2*post_std;
 
                 a_m = max(post_values);
                 a_i = find(post_values == a_m);
@@ -78,7 +90,7 @@ function [Vf, Pf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_polic
                 s_t = trans_pre(s_a, []);
 
                 X_s_m{m} = horzcat(X_s_m{m}, s_t);
-                X_b_m{m}(:,t+1) = value_basii(s_a);
+                X_b_m{m}(:,t+1) = post_basii(:,a_i);
                 X_r_m{m}(:,t+1) = reward(s_t);
  
             end
@@ -188,7 +200,8 @@ function [Vf, Pf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_polic
         
         t_start = tic;
             model = fitrsvm(X',Y','KernelFunction','gaussian', 'Standardize',true);
-            
+   
+            If{n+1} = @(vb) predict(model, vb');
             Vf{n+1} = @(ss) predict(model, value_basii(ss)');
             Pf{n+1} = policy_function(actions, Vf{n+1}, trans_post);
             

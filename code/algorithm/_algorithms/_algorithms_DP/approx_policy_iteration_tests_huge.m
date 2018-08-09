@@ -5,22 +5,30 @@ run('../../paths.m');
 samples = 5;
 gamma = .9;
 
-N = 25;
+% N = 30;
+% M = 80;
+% T = 20;
+% S = 5;
+% W = 5;
+
+N = 2;
 M = 80;
 T = 20;
 S = 5;
 W = 5;
 
 algos = {
-    @approx_policy_iteration_2, 'algorithm_2'; %(lin ols   regression)
-    %@approx_policy_iteration_5, 'algorithm_5'; %(gau ridge regression)
-    %@approx_policy_iteration_6, 'algorithm_6'; %(gau svm   regression)
-    @approx_policy_iteration_7, 'algorithm_7'; %(gau svm   regression with BAKF)
-    %@approx_policy_iteration_8, 'algorithm_8'; %(gau svm   regression with BAKF, and ONPOLICY trajectory sampling)
-    %@approx_policy_iteration_9, 'algorithm_9'; %(gau svm   regression with BAKF, with interval estimation)
+    @approx_policy_iteration_2 , 'algorithm_2 '; %(lin ols   regression)
+    %@approx_policy_iteration_5, 'algorithm_5 '; %(gau ridge regression)
+    %@approx_policy_iteration_6, 'algorithm_6 '; %(gau svm   regression)
+    %@approx_policy_iteration_7 , 'algorithm_7 '; %(gau svm   regression with BAKF)
+    @approx_policy_iteration_8 , 'algorithm_8 '; %(gau svm   regression with BAKF with ONPOLICY sampling)
+    %@approx_policy_iteration_9 , 'algorithm_9 '; %(gau svm   regression with BAKF with interval estimation)
+    %@approx_policy_iteration_10, 'algorithm_10'; %(gau svm   regression with BAKF with ONPOLICY sampling and interval estimation)
 };
 
-s_1 = @() state_rand();
+s_1 = @( ) state_rand();
+v_b = @(s) value_basii_cells(s, @value_basii_2);
 
 states_r = cell(1, samples);
 reward_r = cell(1, samples);
@@ -35,7 +43,6 @@ end
 
 s_a = @(s) actions(s);
 s_r = @(i) reward_r{i}; 
-v_b = @(s) value_basii_5(s);
 
 trans_pre = @(s,a) huge_trans_pre (s,a);
 trans_pst = @(s,a) huge_trans_post(s,a);
@@ -44,22 +51,23 @@ for a = 1:size(algos,1)
     
     Ts = zeros(4,samples);    
     Pv = zeros(1,samples);
-    Pt = zeros(1,samples);
+    Pt = zeros(2,samples);
     
     for i = 1:samples
 
         [Vf, Pf, Xs, Ys, Ks, As, Ts(1,i), Ts(2,i), Ts(3,i), Ts(4,i)] = algos{a,1}(s_1, s_a, s_r(i), v_b, trans_pst, trans_pre, gamma, N, M, S, W);
 
-        Pv(i) = evaluate_policy_at_states(Pf{N+1}, states_r{i}, reward_r{i} , gamma, T, trans_pre, 20);
-        Pt(i) = evaluate_policy_at_states(Pf{N+1}, states_r{i}, @touch_count, 1    , T, trans_pre, 20);
-        %Pd(i) = evaluate_policy_at_states(Pf{N+1}, states_r{i}, @target_dist, 1    , T, trans_pre, 100);
-
+        Pv(:,i) = evaluate_policy_at_states(Pf{N+1}, states_r{i}, reward_r{i}     , gamma, T, trans_pre, 10);
+        Pt(:,i) = evaluate_policy_at_states(Pf{N+1}, states_r{i}, @target_new_touch_count, 1    , T, trans_pre, 10);
+        %Pb    = evaluate_policy_at_states(Pf{N+1}, states_r{i}, @reward_basii  , 1    , T, trans_pre, 20);
+        %Pd(i) = evaluate_policy_at_states(Pf{N+1}, states_r{i}, @target_dist   , 1    , T, trans_pre, 100);        
+        
         if samples < 3
             d_results(algos{a,2}, Ks, As);
         end
     end
 
-    p_results(algos{a,2}, Ts(1,i), Ts(2,i), Ts(3,i), Ts(4,i), Pv, Pt);
+    p_results(algos{a,2}, Ts(1,:), Ts(2,:), Ts(3,:), Ts(4,:), Pv, Pt(1,:));
 
 end
 
@@ -73,30 +81,57 @@ function s = state_rand()
     s = population{randi(numel(population))};
 end
 
-function vb = value_basii_5(states)
-
-    vb = zeros(14,size(states,2));
-
+function vb = value_basii_cells(states, VBf)
+    vb = [];
+    
     if iscell(states)
         for i = numel(states)
-            state = states{i};
-            
-            vb(1    , i) = 1;
-            vb(2:7  , i) = state(3:8);
-            vb(8    , i) = target_count(state);
-            vb(9    , i) = touch_count(state);
-            vb(10:12, i) = target_movement(state);
-            vb(13:14, i) = state(9:10)/2 - state(1:2);
+            vb(:,i) = VBf(states{i});
         end
         
     else
-        vb(1    , :) = 1;
-        vb(2:7  , :) = states(3:8,:);
-        vb(8    , :) = target_count(states(:,1));
-        vb(9    , :) = touch_count(states);
-        vb(10:12, :) = target_movement(states);
-        vb(13:14, :) = states(9:10,1)/2 - states(1:2,:);
+        vb = VBf(states);
     end
+end
+
+function vb = value_basii_1(states)
+
+    vb = zeros(14,size(states,2));
+    
+    vb(1    , :) = 1;
+    vb(2:7  , :) = states(3:8,:);
+    vb(8    , :) = target_count(states(:,1));
+    vb(9    , :) = target_new_touch_count(states);
+    vb(10:12, :) = target_relative_movement(states);
+    vb(13:14, :) = states(9:10,1)/2 - states(1:2,:);
+end
+
+function vb = value_basii_2(states)    
+
+    xs = states(1,:);
+    ys = states(2,:);
+    ds = abs(states(3:8,:));
+    
+    screen_w  = states(9,1);
+    screen_h = states(10,1);
+    
+    grid = [3 3];
+    
+    cell_w = screen_w/grid(1);
+    cell_h = screen_h/grid(2);
+    
+    b_w = horzcat((1:grid(1))'-1, (1:grid(1))'-0) * cell_w;
+    b_h = horzcat((1:grid(2))'-1, (1:grid(2))'-0) * cell_h;
+    
+    vb = [
+        double(0  <= ds & ds < 15 );
+        double(15 <= ds & ds < 50 );
+        double(50 <= ds & ds < inf);
+        target_new_touch_count(states);
+        target_relative_movement(states);
+        double(b_w(:,1) <= xs & xs < b_w(:,2));
+        double(b_h(:,1) <= ys & ys < b_h(:,2));
+    ];
 end
 
 function rb = reward_basii(states)
@@ -109,33 +144,39 @@ function rb = reward_basii(states)
         else
             state = states(:,i);
         end
+
+        tc = target_new_touch_count(state);
+        
         %[dx, dy, ddx, ddy, dddx, dddy, touch_count]
-        rb(1:6, i) = abs(state(3:8));
-        rb(  7, i) = touch_count(state);
+        rb(1:6, i) = (abs(state(3:8)) > 50).*abs(state(3:8));
+        rb(  7, i) = tc(1,:);
     end
 end
 
-function tc = touch_count(states)
+function tc = target_new_touch_count(states)
     r2 = states(11, 1).^2;
     cp = states(1:2,:);
     pp = states(1:2,:) - states(3:4,:);
-    
-    pt = target_dist([pp;states(3:end,:)]) <= r2;
-    ct = target_dist([cp;states(3:end,:)]) <= r2;
-    
+
+    pt = target_distance([pp;states(3:end,:)]) <= r2;
+    ct = target_distance([cp;states(3:end,:)]) <= r2;
+
     %not perfect, if a target simply appears on top 
     %of you then it won't count as an actual touch for us
-    tc = sum(ct&~pt, 1);
+    tc = [
+        sum(ct&~pt, 1);
+        sum(~ct&pt, 1);
+    ];
 end
 
-function td = target_dist(states)
+function td = target_distance(states)
     cp = states(1:2,:);
     tp = [states(12:3:end, 1)';states(13:3:end, 1)'];
     
     td = dot(cp,cp,1)+dot(tp,tp,1)'-2*(tp'*cp);
 end
 
-function tm = target_movement(states)
+function tm = target_relative_movement(states)
     
     cp = states(1:2, :);
     pp = states(1:2, :) - states(3:4, :);
@@ -164,16 +205,17 @@ function tc = target_count(state)
 end
 
 function rt = reward_theta_rand(basii_count)
-    %rt = [zeros(basii_count-1,1);1];
-    rt = 2*rand(basii_count,1) - 1;
+    rt = [zeros(basii_count-1,1);1];
+    %rt = 2*rand(basii_count,1) - 1;
+    %rt = [-.25*rand(basii_count-1,1);100];
 end
 
 function p_results(test_algo_name, f_time, b_time, v_time, a_time, P_val, P_tch)
     fprintf('%s -- ', test_algo_name);
-    fprintf('f_time = % 7.3f; ', sum(f_time));
-    fprintf('b_time = % 7.3f; ', sum(b_time));
-    fprintf('v_time = % 7.3f; ', sum(v_time));
-    fprintf('a_time = % 7.3f; ', sum(a_time));
+    fprintf('f_time = % 7.2f; ', sum(f_time));
+    fprintf('b_time = % 7.2f; ', sum(b_time));
+    fprintf('v_time = % 7.2f; ', sum(v_time));
+    fprintf('a_time = % 7.2f; ', sum(a_time));
     fprintf('VAL = %.3f; '     , mean(P_val));
     fprintf('TCH = %f; '       , mean(P_tch));
     fprintf('\n');
@@ -234,7 +276,7 @@ function V = evaluate_policy_at_states(Pf, eval_states, eval_stat, gamma, T, tra
     for i = 1:size(eval_states,2)
         eval_state = eval_states{i};
         eval_stats = policy_eval_at_state(Pf, eval_state, eval_stat, gamma, T, transition_pre, sample_size);
-        eval_state_avg_reward = mean(cellfun(@(stats) sum(stats),eval_stats));
+        eval_state_avg_reward = mean(cell2mat(eval_stats),2);
         
         V = V + eval_state_avg_reward;
     end

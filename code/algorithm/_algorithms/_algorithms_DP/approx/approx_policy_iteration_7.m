@@ -36,7 +36,7 @@ function [Vf, Pf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_polic
     eta     = [];
     lambda  = [];
 
-    Vf{1} = @(xi) 500*ones(1,size(xi,2));
+    Vf{1} = @(xi) 3*ones(1,size(xi,2));
 
     for n = 1:N 
 
@@ -171,7 +171,8 @@ function [Vf, Pf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_polic
         b_time = b_time + toc(t_start);
         
         t_start = tic;
-            model = fitrsvm(X',Y','KernelFunction','gaussian', 'Standardize',true);
+            model = fitrsvm(X',Y','KernelFunction','gaussian', 'ShrinkagePeriod',1000, 'Standardize',true);
+            %model = fitrsvm(X',Y','KernelFunction','polynomial', 'PolynomialOrder', 2, 'ShrinkagePeriod',1000, 'Standardize',true);
             
             Vf{n+1} = @(ss) predict(model, value_basii(ss)');
             Pf{n+1} = policy_function(actions, Vf{n+1}, trans_post);

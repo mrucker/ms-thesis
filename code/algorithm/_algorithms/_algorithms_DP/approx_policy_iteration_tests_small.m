@@ -2,10 +2,22 @@ run('../../paths.m');
 fprintf('\n');
 close all
 
-samples = 1;
+%polynomial
+%N=3
+%M=30
+%S=2
+%W=5
+
+%gaussian
+%N=30
+%M=50
+%S=2
+%W=5
+
+samples = 5;
 
 N = 30;
-M = 100;
+M = 50;
 T = 10;
 S = 2;
 W = 5;
@@ -112,7 +124,7 @@ for a = 1:size(algos,1)
         [V_mse(i), P_mse(i), P_val(i)] = result_statistics(states, actions, rewards{i}, gamma, T, eval_states{i}, Vf{N+1}, Pf{N+1}, exact_Vs{i}, exact_Ps{i}, trans_pre, trans_post);
 
         if samples < 3
-            d_results(algos{a, 2}, Xs, Ys, Ks, v_b(states), exact_Es{i}, exact_Vs{i});
+            %d_results(algos{a, 2}, Xs, Ys, Ks, v_b(states), exact_Es{i}, exact_Vs{i});
         end
     end
 
@@ -293,9 +305,9 @@ function p_results(test_algo_name, f_time, b_time, v_time, a_time, V_mse, P_mse,
     fprintf('b_time = % 7.3f; ', sum(b_time));
     fprintf('v_time = % 7.3f; ', sum(v_time));
     fprintf('a_time = % 7.3f; ', sum(a_time));
-    fprintf('MSE = % 6.3f; '     , mean(V_mse));
-    fprintf('MSP = %.3f; '     , mean(P_mse));
-    fprintf('VAL = %.3f; '     , mean(P_val));
+    fprintf('MVE = % 6.3f; '   , mean(V_mse));
+    fprintf('MPE = %.3f; '     , mean(P_mse));
+    fprintf('MPV = %.3f; '     , mean(P_val));
     fprintf('\n');
 end
 

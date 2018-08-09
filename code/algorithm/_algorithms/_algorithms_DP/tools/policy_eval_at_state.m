@@ -13,7 +13,7 @@ function V = policy_eval_at_state(Pf, state, eval_statistic, gamma, T, transitio
             s       = transition_pre(s,a);
         end
         
-        V{n} = v;
+        V{n} = sum(v,2);
     end
     
 end
