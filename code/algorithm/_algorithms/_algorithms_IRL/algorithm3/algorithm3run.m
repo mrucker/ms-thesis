@@ -100,35 +100,20 @@ function irl_result = algorithm3run(episodes, params, verbosity)
         svm_time = svm_time + toc;
     end
 
-    tic;
-    %[~,idx] = max(mixPolicies(E, ss));
-    idx = i;
-    mix_time = mix_time + toc;
-
-    t  = ts{idx};
-    r  = rs{idx};
-
-    if verbosity ~= 0
-        fprintf(1,'FINISHED IRL,i=%d, t=%f \n',idx,t);
-    end
-
-    fprintf(1,'exp_time=%f \n',exp_time);
-    fprintf(1,'krn_time=%f \n',krn_time);
-    fprintf(1,'svm_time=%f \n',svm_time);
-    fprintf(1,'mdp_time=%f \n',mdp_time);
-    fprintf(1,'mix_time=%f \n',mix_time);
-
     x1 = E;
     x2 = cell2mat(ss);
-    
+
     [~,i] = min((dot(x1,x1,1)+dot(x2,x2,1)'-2*(x2'*x1)));
-    %-diff(ps{idx},1,2)
-    %-diff(ps{i},1,2)
-    %-diff(pE(:,1:4),1,2)
 
-    [ss{i},E,rs{i}]
+    if verbosity ~= 0
+        fprintf('\n');
+        fprintf(1,'FINISHED IRL,i=%d, t=%f \n',i,ts{i});
+        fprintf(1,'exp_time=%.2f;  krn_time=%.2f; svm_time=%.2f; mdp_time=%.2f; \n',[exp_time, krn_time, svm_time, mdp_time]);
+    end
 
-    irl_result = r;
+    [E,ss{i},rs{i}]
+
+    irl_result = rs{i};
 end
 
 function p = setDefaults(params)

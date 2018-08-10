@@ -1,6 +1,6 @@
-run '../../../paths';
+try run '../../../paths'; catch; end
 
-N = 30;
+N = 40;
 M = 80;
 
 %N = 10;
@@ -10,6 +10,9 @@ T = 10;
 S = 5;
 W = 5;
 g = .9;
+
+trans_pre = @huge_trans_pre;
+trans_pst = @huge_trans_post;
 
 s_1 = @( ) state_rand();
 s_a = @s_act_3;
@@ -22,21 +25,25 @@ r_b_count = size(r_b(s_1()),1);
 s_r = @(s) [zeros(1,r_b_count-1),1] * r_b(s);
 
 tic
-Pf = approx_policy_iteration_8(s_1, s_a, s_r, v_b, @huge_trans_post, @huge_trans_pre, g, N, M, S, W);
+Pf = approx_policy_iteration_8(s_1, s_a, s_r, v_b, trans_pst, trans_pre, g, N, M, S, W);
 toc
 
 %this needs to be episodes not feature expectation
 
-E = policy_eval_at_states(Pf{N+1}, {s_1(),s_1(),s_1()}, r_b, 1, T, @huge_trans_pre, 20);
+E = policy_eval_at_states(Pf{N+1}, {s_1(),s_1(),s_1()}, r_b, 1, T, trans_pre, 20);
 
 fprintf('touches = %.2f', E(end));
 fprintf('\n');
 
-episodes1 = generate_episodes_from_state(Pf{N+1}, s_1(), @huge_trans_pre, T, 15);
-episodes2 = generate_episodes_from_state(Pf{N+1}, s_1(), @huge_trans_pre, T, 15);
-episodes3 = generate_episodes_from_state(Pf{N+1}, s_1(), @huge_trans_pre, T, 15);
+episodes = cell(1,5);
 
-episodes = horzcat(episodes1,episodes2,episodes3);
+episodes{1} = generate_episodes_from_state(Pf{N+1}, s_1(), trans_pre, T, 15);
+episodes{2} = generate_episodes_from_state(Pf{N+1}, s_1(), trans_pre, T, 15);
+episodes{3} = generate_episodes_from_state(Pf{N+1}, s_1(), trans_pre, T, 15);
+episodes{4} = generate_episodes_from_state(Pf{N+1}, s_1(), trans_pre, T, 15);
+episodes{5} = generate_episodes_from_state(Pf{N+1}, s_1(), trans_pre, T, 15);
+
+episodes = horzcat(episodes{:});
 
 params = struct ('epsilon',.0001, 'gamma',.9, 'seed',0);
 result = algorithm3run(episodes, params, 1);

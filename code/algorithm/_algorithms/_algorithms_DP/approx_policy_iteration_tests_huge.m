@@ -11,7 +11,7 @@ gamma = .9;
 % S = 5;
 % W = 5;
 
-N = 10;
+N = 30;
 M = 80;
 T = 20;
 S = 5;
@@ -35,7 +35,7 @@ reward_r = cell(1, samples);
 
 for i = 1:samples
     reward_basii_n = size(reward_basii(s_1()),1);
-    reward_theta_r = reward_theta_rand(reward_basii_n);
+    reward_theta_r = reward_theta(reward_basii_n);
     
     reward_r{i} = @(s) reward_theta_r'*reward_basii(s);
     states_r{i} = {s_1(),s_1(),s_1(),s_1(),s_1(),s_1(),s_1(),s_1(),s_1(),s_1()};
@@ -152,6 +152,13 @@ function rb = reward_basii(states)
     end
 end
 
+function rt = reward_theta(basii_count)
+    rt = [zeros(basii_count-1,1);1];
+    %rt = 2*rand(basii_count,1) - 1;
+    %rt = [-.25*rand(basii_count-1,1);100];
+end
+
+
 function tc = target_new_touch_count(states)
     r2 = states(11, 1).^2;
     cp = states(1:2,:);
@@ -201,12 +208,6 @@ end
 
 function tc = target_count(state)
     tc = (numel(state) - 11)/3;
-end
-
-function rt = reward_theta_rand(basii_count)
-    rt = [zeros(basii_count-1,1);1];
-    %rt = 2*rand(basii_count,1) - 1;
-    %rt = [-.25*rand(basii_count-1,1);100];
 end
 
 function p_results(test_algo_name, f_time, b_time, v_time, a_time, P_val, P_tch)
