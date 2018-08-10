@@ -1,3 +1,4 @@
+cd '.'
 close all
 fprintf('\n');
 run('../../paths.m');
@@ -11,7 +12,7 @@ gamma = .9;
 % S = 5;
 % W = 5;
 
-N = 2;
+N = 10;
 M = 80;
 T = 20;
 S = 5;
@@ -55,20 +56,19 @@ for a = 1:size(algos,1)
     
     for i = 1:samples
 
-        [Vf, Pf, Xs, Ys, Ks, As, Ts(1,i), Ts(2,i), Ts(3,i), Ts(4,i)] = algos{a,1}(s_1, s_a, s_r(i), v_b, trans_pst, trans_pre, gamma, N, M, S, W);
+        [Pf, Vf, Xs, Ys, Ks, As, Ts(1,i), Ts(2,i), Ts(3,i), Ts(4,i)] = algos{a,1}(s_1, s_a, s_r(i), v_b, trans_pst, trans_pre, gamma, N, M, S, W);
 
-        Pv(:,i) = evaluate_policy_at_states(Pf{N+1}, states_r{i}, reward_r{i}     , gamma, T, trans_pre, 10);
-        Pt(:,i) = evaluate_policy_at_states(Pf{N+1}, states_r{i}, @target_new_touch_count, 1    , T, trans_pre, 10);
-        %Pb    = evaluate_policy_at_states(Pf{N+1}, states_r{i}, @reward_basii  , 1    , T, trans_pre, 20);
-        %Pd(i) = evaluate_policy_at_states(Pf{N+1}, states_r{i}, @target_dist   , 1    , T, trans_pre, 100);        
-        
+        Pv(:,i) = policy_eval_at_states(Pf{N+1}, states_r{i}, reward_r{i}            , gamma, T, trans_pre, 10);
+        Pt(:,i) = policy_eval_at_states(Pf{N+1}, states_r{i}, @target_new_touch_count, 1    , T, trans_pre, 10);
+        Pb      = policy_eval_at_states(Pf{N+1}, states_r{i}, @reward_basii          , 1    , T, trans_pre, 20);
+        %Pd(i)  = evaluate_policy_at_states(Pf{N+1}, states_r{i}, @target_dist   , 1    , T, trans_pre, 100);        
+
         if samples < 3
             d_results(algos{a,2}, Ks, As);
         end
     end
 
     p_results(algos{a,2}, Ts(1,:), Ts(2,:), Ts(3,:), Ts(4,:), Pv, Pt(1,:));
-
 end
 
 function s = state_rand()
@@ -106,7 +106,7 @@ function vb = value_basii_1(states)
     vb(13:14, :) = states(9:10,1)/2 - states(1:2,:);
 end
 
-function vb = value_basii_2(states)    
+function vb = value_basii_2(states)
 
     xs = states(1,:);
     ys = states(2,:);
@@ -268,20 +268,6 @@ function d_results(test_algo_name, Ks, As)
     title('alpha by visits')
     xlabel('vb visitation count')
     legend('a min', 'a avg', 'a max', 'a var')
-end
-
-function V = evaluate_policy_at_states(Pf, eval_states, eval_stat, gamma, T, transition_pre, sample_size)
-    V = 0;
-    
-    for i = 1:size(eval_states,2)
-        eval_state = eval_states{i};
-        eval_stats = policy_eval_at_state(Pf, eval_state, eval_stat, gamma, T, transition_pre, sample_size);
-        eval_state_avg_reward = mean(cell2mat(eval_stats),2);
-        
-        V = V + eval_state_avg_reward;
-    end
-    
-    V = V/size(eval_states,2);
 end
 
 function a = actions(s)

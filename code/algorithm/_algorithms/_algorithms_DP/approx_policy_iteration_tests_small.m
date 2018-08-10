@@ -14,9 +14,9 @@ close all
 %S=2
 %W=5
 
-samples = 5;
+samples = 10;
 
-N = 30;
+N = 10;
 M = 50;
 T = 10;
 S = 2;
@@ -38,8 +38,8 @@ algos = {
    %@approx_policy_iteration_2, 'algorithm_2'; %(lin ols   regression)
    %@approx_policy_iteration_5, 'algorithm_5'; %(gau ridge regression)
    %@approx_policy_iteration_6, 'algorithm_6'; %(gau svm   regression)
-   @approx_policy_iteration_7, 'algorithm_7'; %(gau svm   regression with BAKF)
-   %@approx_policy_iteration_8, 'algorithm_8'; %(gau svm   regression with BAKF, and ONPOLICY trajectory sampling)
+   %@approx_policy_iteration_7, 'algorithm_7'; %(gau svm   regression with BAKF)
+   @approx_policy_iteration_8, 'algorithm_8'; %(gau svm   regression with BAKF, and ONPOLICY trajectory sampling)
    %@approx_policy_iteration_9, 'algorithm_9'; %(gau svm   regression with BAKF, with interval estimation)
 };
 
@@ -119,7 +119,7 @@ for a = 1:size(algos,1)
     
     for i = 1:samples
         
-        [Vf, Pf, Xs, Ys, Ks, As, f_time(i), b_time(i), m_time(i), a_time(i)] = algos{a, 1}(s_1, @(s) actions, rewards{i}, v_b, trans_post, trans_pre, gamma, N, M, S, W);
+        [Pf, Vf, Xs, Ys, Ks, As, f_time(i), b_time(i), m_time(i), a_time(i)] = algos{a, 1}(s_1, @(s) actions, rewards{i}, v_b, trans_post, trans_pre, gamma, N, M, S, W);
         
         [V_mse(i), P_mse(i), P_val(i)] = result_statistics(states, actions, rewards{i}, gamma, T, eval_states{i}, Vf{N+1}, Pf{N+1}, exact_Vs{i}, exact_Ps{i}, trans_pre, trans_post);
 

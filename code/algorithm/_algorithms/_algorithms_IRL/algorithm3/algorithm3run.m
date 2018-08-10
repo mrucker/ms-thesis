@@ -1,13 +1,23 @@
-function irl_result = algorithm3run(trajectory_observations, params, verbosity)
+function irl_result = algorithm3run(episodes, params, verbosity)
 
-    N=10; 
-    M=50;
-    T=10;
-    S=100;
-    W=5;
+    N = 30;
+    M = 80;
+    T = 20;
+    S = 5;
+    W = 5;
 
-    s_r_b = @r_basii_4;
+    episode_count  = numel(episodes);
+    episode_length = size(episodes{1},2);
     
+    episode_states = horzcat(episodes{:});
+    epsidoe_starts = episode_states(1:episode_length:episode_count*episode_length);
+
+    s_1 = @( ) epsidoe_starts{randi(numel(epsidoe_starts))};
+    s_a = @s_act_3;    
+    r_b = @r_basii_3_3;        
+    v_b = @v_basii_3_2;
+
+
     fprintf(1,'Start of Algorithm3 \n');
 
     params = setDefaults(params);
@@ -21,52 +31,38 @@ function irl_result = algorithm3run(trajectory_observations, params, verbosity)
     svm_time = 0;
     mdp_time = 0;
     mix_time = 0;
-
-    trajectory_states = huge_states_from(trajectory_observations);
-    
-    %trim off the first four states since they have pre-game noise
-    trajectory_states(1:4) = [];
         
     E = 0;
-
-    s_1 = @( ) trajectory_states{randi(numel(trajectory_states))};
-    s_a = @s_act_3;
-    s_b = @v_basii_3;
-    
-    tic;
-    for i = 1:30
-        for t = 1:T
-            E = E + params.gamma^(t-1) * s_r_b(trajectory_states(:,i+t-1));
+       
+    for e = 1:numel(episodes)
+        for t = 1:size(episodes{e},2)
+            E = E + params.gamma^(t-1) * r_b(episodes{e}(:,t));
         end
     end
-    
-    E = E./30;
-    
-    exp_time = exp_time + toc;
-    
+
+    E = E./numel(episodes);    
+
     % Generate random policy.
     tic;
-    rand_r = rand(size(E,1),1);
-    rand_r = rand_r/sum(abs(rand_r));
-        
-    s_r = @(s) rand_r'*s_r_b(s);
-    [~ , Pf, ~ , ~ , ~ , ~ , ~     , ~     , ~     , ~     ] = approx_policy_iteration_7(s_1, s_a    , s_r   , s_b        , @huge_trans_post, @huge_trans_pre, params.gamma, N, M, T, W);
-    rand_s = policy_eval_at_state(Pf{N+1}, trajectory_states{1}, s_r_b, params.gamma, T, @huge_trans_pre, S);
-    rand_s = sum(cell2mat(rand_s),2)./S;
-    
+
+        rand_r = rand(size(E,1),1);
+        rand_r = rand_r/sum(abs(rand_r));
+
+        s_r = @(s) rand_r'*r_b(s);
+
+        Pf = approx_policy_iteration_7(s_1, s_a, s_r, v_b, @huge_trans_post, @huge_trans_pre, params.gamma, N, M, S, W);
+        rand_s = policy_eval_at_states(Pf{N+1}, epsidoe_starts, r_b, params.gamma, T, @huge_trans_pre, S);
     
     mdp_time = mdp_time + toc;
 
     rs = {rand_r};
     ss = {rand_s};
     sb = {rand_s};
-    ts = {Inf};
+    ts = {Inf};    
 
-    
-    
     if verbosity ~= 0
         fprintf(1,'Completed IRL iteration, i=%d, t=%f\n',1,ts{1});
-    end;
+    end
 
     i = 2;
 
@@ -75,9 +71,11 @@ function irl_result = algorithm3run(trajectory_observations, params, verbosity)
         tic;
         rs{i} = (E-sb{i-1});
         rs{i} = rs{i}./sum(abs(rs{i}));
-        s_r   = @(s) rs{i}'*s_r_b(s);
-        [~, Pf, ~, ~, ~, ~, ~, ~, ~, ~] = approx_policy_iteration_7(s_1, s_a, s_r, s_b, @huge_trans_post, @huge_trans_pre, params.gamma, N, M, T, W);
-        ss{i} = policy_eval_at_state(Pf{N+1}, trajectory_states{1}, s_r_b, params.gamma, T, @huge_trans_pre, S);
+        s_r   = @(s) rs{i}'*r_b(s);
+        
+        Pf = approx_policy_iteration_7(s_1, s_a, s_r, v_b, @huge_trans_post, @huge_trans_pre, params.gamma, N, M, S, W);
+        ss{i} = policy_eval_at_states(Pf{N+1}, epsidoe_starts, r_b, params.gamma, T, @huge_trans_pre, S);                
+        
         ss{i} = sum(cell2mat(ss{i}),2)./S;
         
         mdp_time = mdp_time + toc;
@@ -155,58 +153,7 @@ function p = setDefaults(params)
         params.('epsilon') = .01;
     end
 
-    if ~isfield(params,'steps')
-        params.('steps') = 1;
-    end
-
     p = params;
-end
-
-function a = createActionsMatrix()
-    % The actions matrix should be 2 x |number of actions| where the first row is dx and the second row is dy.
-    % This means each column in the matrix represents a dx/dy pair that is the action taken.
-
-    %all combinations of (dx,dy) for dx,dy \in [-10,10]
-
-    dx = -1:1:1;
-    dy = -1:1:1;
-
-    dx = dx*100;
-    dy = dy*100;
-    
-    dx = [100,50,10,2,0];
-    dy = [100,50,10,2,0];
-    
-    dx = horzcat(dx,0,-dx);
-    dy = horzcat(dy,0,-dy);
-        
-    %dx = 1:2;
-    %dy = [1,1];
-    
-    a = vertcat(reshape(repmat(dx,numel(dx),1), [1,numel(dx)^2]), reshape(repmat(dy',1,numel(dy)), [1,numel(dy)^2]));
-end
-
-function l = mixPolicies(sE, ss)
-
-    s_mat = cell2mat(ss);
-    s_cnt = size(s_mat,2);
-
-    ssffss = s_mat'*s_mat;
-    seffse = sE'*sE;
-    seffss = sE'*s_mat;
-
-    % In Abbeel & Ng's algorithm, we should use lambda to construct a stochastic policy. 
-    % However for our purposes, we'll simply pick the reward with the largest lambda weight.
-    cvx_begin
-        cvx_quiet(true);
-        variables lambda(s_cnt);
-        minimize(lambda'*ssffss*lambda + seffse - 2*seffss*lambda);
-        subject to
-            lambda      >= 0;
-            sum(lambda) == 1;
-    cvx_end
-    
-    l = lambda;
 end
 
 function k = k(x1, x2, params)

@@ -1,11 +1,11 @@
-function rb = r_basii_4(states)
+function rb = r_basii_3_1(states)
 
     %this could be made faster, 
     %it just doesn't seem to matter
 
     huge_states_assert(states);
     
-    rb = zeros(31,size(states,2));
+    rb = zeros(25,size(states,2));
 
     for i = 1:size(states,2)
         if iscell(states)
@@ -14,15 +14,11 @@ function rb = r_basii_4(states)
             state = states(:,i);
         end
         %[dx, dy, ddx, ddy, dddx, dddy, touch_count]
-                
-        rb(:, i) = [
-            double(abs(state(1:6)) < 5)                          ;
-            double(abs(state(1:6)) > 5  & abs(state(1:6)) < 10);
-            double(abs(state(1:6)) > 10 & abs(state(1:6)) < 20);
-            double(abs(state(1:6)) > 20 & abs(state(1:6)) < 50);
-            double(abs(state(1:6)) > 50)                         ;
-            touch_count(state);
-        ];
+        rb(1: 6,  i) = state(3:8);
+        rb(7:12,  i) = sign(state(3:8)) .* state(3:8).^2;
+        rb(13:18, i) = abs(state(3:8));
+        rb(19:24, i) = abs(state(3:8)).^2;
+        rb(   25, i) = touch_count(state);
     end
 end
 

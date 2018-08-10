@@ -1,4 +1,4 @@
-function [Vf, Pf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_policy_iteration_10(s_1, actions, reward, value_basii, trans_post, trans_pre, gamma, N, M, T, W)
+function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_policy_iteration_10(s_1, actions, reward, value_basii, trans_post, trans_pre, gamma, N, M, T, W)
 
     a_start = tic;
 

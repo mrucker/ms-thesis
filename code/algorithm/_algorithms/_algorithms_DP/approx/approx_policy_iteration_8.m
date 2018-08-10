@@ -1,4 +1,4 @@
-function [Vf, Pf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_policy_iteration_8(s_1, actions, reward, value_basii, trans_post, trans_pre, gamma, N, M, T, W)
+function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_policy_iteration_8(s_1, actions, reward, value_basii, trans_post, trans_pre, gamma, N, M, T, W)
 
     a_start = tic;
 
@@ -59,7 +59,7 @@ function [Vf, Pf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_polic
             X_b_m{m} = [];
             X_r_m{m} = [];
 
-            X_s_m{m} = {s_t}; 
+            X_s_m{m}      = {s_t}; 
             X_b_m{m}(:,1) = value_basii(s_a);
             X_r_m{m}(:,1) = reward(s_t);
             
@@ -77,7 +77,7 @@ function [Vf, Pf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_polic
                 s_a = post_states(:,a_i);
                 s_t = trans_pre(s_a, []);
 
-                X_s_m{m} = horzcat(X_s_m{m}, s_t);
+                X_s_m{m}        = horzcat(X_s_m{m}, s_t);
                 X_b_m{m}(:,t+1) = value_basii(s_a);
                 X_r_m{m}(:,t+1) = reward(s_t);
  
@@ -187,7 +187,7 @@ function [Vf, Pf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_polic
         b_time = b_time + toc(t_start);
         
         t_start = tic;
-            model = fitrsvm(X',Y','KernelFunction','gaussian', 'Standardize',true);
+            model = fitrsvm(X',Y','KernelFunction','polynomial', 'Solver', 'SMO', 'Standardize',true);
             
             Vf{n+1} = @(ss) predict(model, value_basii(ss)');
             Pf{n+1} = policy_function(actions, Vf{n+1}, trans_post);

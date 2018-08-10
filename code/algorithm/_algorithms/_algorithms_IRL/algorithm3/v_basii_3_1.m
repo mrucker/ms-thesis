@@ -1,4 +1,4 @@
-function vb = v_basii_3(states)
+function vb = v_basii_3_1(states)
 
     huge_states_assert(states);
 
