@@ -1,8 +1,11 @@
 function irl_result = algorithm3run(episodes, params, verbosity)
 
-    N = 30;
-    M = 80;
-    T = 20;
+    %N = 30;
+    %M = 80;
+
+    N = 10;
+    M = 50;
+    T = 10;
     S = 5;
     W = 5;
 
@@ -13,10 +16,9 @@ function irl_result = algorithm3run(episodes, params, verbosity)
     epsidoe_starts = episode_states(1:episode_length:episode_count*episode_length);
 
     s_1 = @( ) epsidoe_starts{randi(numel(epsidoe_starts))};
-    s_a = @s_act_3;    
-    r_b = @r_basii_3_3;        
+    s_a = @s_act_3;
+    r_b = @r_basii_3_4;
     v_b = @v_basii_3_2;
-
 
     fprintf(1,'Start of Algorithm3 \n');
 
@@ -31,9 +33,9 @@ function irl_result = algorithm3run(episodes, params, verbosity)
     svm_time = 0;
     mdp_time = 0;
     mix_time = 0;
-        
+
     E = 0;
-       
+
     for e = 1:numel(episodes)
         for t = 1:size(episodes{e},2)
             E = E + params.gamma^(t-1) * r_b(episodes{e}(:,t));
@@ -51,8 +53,8 @@ function irl_result = algorithm3run(episodes, params, verbosity)
         s_r = @(s) rand_r'*r_b(s);
 
         Pf = approx_policy_iteration_7(s_1, s_a, s_r, v_b, @huge_trans_post, @huge_trans_pre, params.gamma, N, M, S, W);
-        rand_s = policy_eval_at_states(Pf{N+1}, epsidoe_starts, r_b, params.gamma, T, @huge_trans_pre, S);
-    
+        rand_s = policy_eval_at_states(Pf{N+1}, epsidoe_starts, r_b, params.gamma, T, @huge_trans_pre, 20);
+
     mdp_time = mdp_time + toc;
 
     rs = {rand_r};
@@ -72,23 +74,21 @@ function irl_result = algorithm3run(episodes, params, verbosity)
         rs{i} = (E-sb{i-1});
         rs{i} = rs{i}./sum(abs(rs{i}));
         s_r   = @(s) rs{i}'*r_b(s);
-        
+
         Pf = approx_policy_iteration_7(s_1, s_a, s_r, v_b, @huge_trans_post, @huge_trans_pre, params.gamma, N, M, S, W);
-        ss{i} = policy_eval_at_states(Pf{N+1}, epsidoe_starts, r_b, params.gamma, T, @huge_trans_pre, S);                
-        
-        ss{i} = sum(cell2mat(ss{i}),2)./S;
-        
+        ss{i} = policy_eval_at_states(Pf{N+1}, epsidoe_starts, r_b, params.gamma, T, @huge_trans_pre, 2);
+
         mdp_time = mdp_time + toc;
 
         ts{i} = sqrt(E'*E + sb{i-1}'*sb{i-1} - 2*E'*sb{i-1});
 
         if verbosity ~= 0
             fprintf(1,'Completed IRL iteration, i=%d, t=%f\n',i,ts{i});
-        end;
+        end
 
         if  (abs(ts{i}-ts{i-1}) <= params.epsilon) || (ts{i} <= params.epsilon)
             break;
-        end;
+        end
 
         i = i + 1;
 
@@ -98,7 +98,7 @@ function irl_result = algorithm3run(episodes, params, verbosity)
         sc       = sn/sd;
         sb{i-1}  = sb{i-2} + sc*(ss{i-1}-sb{i-2});
         svm_time = svm_time + toc;
-    end;
+    end
 
     tic;
     %[~,idx] = max(mixPolicies(E, ss));

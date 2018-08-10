@@ -1,8 +1,8 @@
-function V = policy_eval_at_state(Pf, state, eval_statistic, gamma, T, transition_pre, sample_size)
+function V = policy_eval_at_state(Pf, state, eval_statistic, gamma, T, transition_pre, sample_count)
 
-    V = cell(1, sample_size);
+    V = cell(1, sample_count);
     
-    for n = 1:sample_size
+    for n = 1:sample_count
 
         v = zeros(size(eval_statistic(state),1), T);
         s = state;
