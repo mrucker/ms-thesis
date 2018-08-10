@@ -187,7 +187,7 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_polic
         b_time = b_time + toc(t_start);
         
         t_start = tic;
-            model = fitrsvm(X',Y','KernelFunction','polynomial', 'Solver', 'SMO', 'Standardize',true);
+            model = fitrsvm(X',Y','KernelFunction','gaussian', 'Solver', 'SMO', 'Standardize',true);
             
             Vf{n+1} = @(ss) predict(model, value_basii(ss)');
             Pf{n+1} = policy_function(actions, Vf{n+1}, trans_post);

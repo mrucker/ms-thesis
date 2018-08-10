@@ -1,4 +1,3 @@
-cd '.'
 close all
 fprintf('\n');
 run('../../paths.m');
@@ -61,7 +60,7 @@ for a = 1:size(algos,1)
         Pv(:,i) = policy_eval_at_states(Pf{N+1}, states_r{i}, reward_r{i}            , gamma, T, trans_pre, 10);
         Pt(:,i) = policy_eval_at_states(Pf{N+1}, states_r{i}, @target_new_touch_count, 1    , T, trans_pre, 10);
         Pb      = policy_eval_at_states(Pf{N+1}, states_r{i}, @reward_basii          , 1    , T, trans_pre, 20);
-        %Pd(i)  = evaluate_policy_at_states(Pf{N+1}, states_r{i}, @target_dist   , 1    , T, trans_pre, 100);        
+        %Pd(i)  = policy_eval_at_states(Pf{N+1}, states_r{i}, @target_dist           , 1    , T, trans_pre, 20);        
 
         if samples < 3
             d_results(algos{a,2}, Ks, As);
