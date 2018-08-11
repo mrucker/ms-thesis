@@ -1,0 +1,11 @@
+SAMPLE SIZE 20, N = 30, M = 40
+(S=2, W=3, l=1.0) algorithm_8  -- f_time =   96.58; b_time =    4.18; v_time =    4.56; a_time =  105.47; VAL = 504.435; TCH = 0.006618; 
+(S=2, W=3, l=1.0) algorithm_12 -- f_time =  103.02; b_time =    4.31; v_time =    4.77; a_time =  178.21; VAL = 531.640; TCH = 0.007175; 
+
+SAMPLE SIZE 20, N = 30, M = 80
+(S=2, W=3, l=1.0) algorithm_8  -- f_time =  135.01; b_time =    9.01; v_time =    5.15; a_time =  149.46; VAL = 502.851; TCH = 0.007428; 
+(S=2, W=3, l=1.0) algorithm_12 -- f_time =  249.10; b_time =   15.62; v_time =    8.60; a_time =  273.71; VAL = 463.402; TCH = 0.004560; 
+
+SAMPLE SIZE 20, N = 30, M = 20
+(S=2, W=3, l=1.0) algorithm_8  -- f_time =   76.44; b_time =    1.87; v_time =    4.18; a_time =   82.59; VAL = 425.007; TCH = 0.005826; 
+(S=2, W=3, l=1.0) algorithm_12 -- f_time =   78.85; b_time =    1.93; v_time =    4.16; a_time =   85.04; VAL = 455.177; TCH = 0.005741; 

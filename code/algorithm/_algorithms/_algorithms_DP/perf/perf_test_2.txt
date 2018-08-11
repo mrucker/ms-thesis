@@ -1,0 +1,17 @@
+SAMPLE SIZE 5, N = 30, M = 40
+(S=2, W=3, l=0.1) algorithm_11 -- f_time =   24.51; b_time =    1.07; v_time =    1.29; a_time =   26.92; VAL = 1021.868; TCH = 0.005212; 
+(S=2, W=3, l=0.2) algorithm_11 -- f_time =   23.27; b_time =    0.98; v_time =    1.11; a_time =   25.40; VAL = 917.340; TCH = 0.015159; 
+(S=2, W=3, l=0.3) algorithm_11 -- f_time =   23.35; b_time =    0.98; v_time =    1.11; a_time =   25.48; VAL = 903.300; TCH = 0.009879; 
+(S=2, W=3, l=0.4) algorithm_11 -- f_time =   22.97; b_time =    0.98; v_time =    1.10; a_time =   25.08; VAL = 1183.173; TCH = 0.007666; 
+(S=2, W=3, l=0.5) algorithm_11 -- f_time =   23.09; b_time =    0.97; v_time =    1.09; a_time =   25.18; VAL = 845.158; TCH = 0.013805; 
+(S=2, W=3, l=0.6) algorithm_11 -- f_time =   23.41; b_time =    0.97; v_time =    1.12; a_time =   25.54; VAL = 929.710; TCH = 0.006053; 
+(S=2, W=3, l=0.7) algorithm_11 -- f_time =   23.71; b_time =    1.00; v_time =    1.10; a_time =   25.85; VAL = 875.850; TCH = 0.010514; 
+(S=2, W=3, l=0.8) algorithm_11 -- f_time =   23.45; b_time =    0.97; v_time =    1.09; a_time =   25.55; VAL = 895.514; TCH = 0.010299; 
+(S=2, W=3, l=0.9) algorithm_11 -- f_time =   26.94; b_time =    1.21; v_time =    4.85; a_time =   33.04; VAL = 1033.330; TCH = 0.005002; 
+(S=2, W=3, l=1.0) algorithm_11 -- f_time =   23.07; b_time =    0.95; v_time =    1.05; a_time =   25.11; VAL = 830.280; TCH = 0.010684;
+
+SAMPLE SIZE 20, N = 30, M = 40
+(S=2, W=3, l=0.1) algorithm_11 -- f_time =   94.56; b_time =    4.17; v_time =    4.52; a_time =  103.40; VAL = 520.607; TCH = 0.006676; 
+(S=2, W=3, l=0.4) algorithm_11 -- f_time =  154.70; b_time =    6.59; v_time =    6.97; a_time =  168.46; VAL = 560.022; TCH = 0.004389; 
+(S=2, W=3, l=0.9) algorithm_11 -- f_time =  144.67; b_time =    5.98; v_time =    6.65; a_time =  157.50; VAL = 517.525; TCH = 0.008266; 
+(S=2, W=3, l=1.0) algorithm_11 -- f_time =  112.70; b_time =    4.78; v_time =    5.23; a_time =  122.88; VAL = 559.544; TCH = 0.011394; 

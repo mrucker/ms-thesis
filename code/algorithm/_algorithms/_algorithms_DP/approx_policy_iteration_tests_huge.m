@@ -1,101 +1,66 @@
-%close all
+close all
 fprintf('\n');
 try run('../../paths.m'); catch; end
 
-samples = 20;
-gamma = .9;
-
-% N = 30;
-% M = 80;
-% T = 20;
-% S = 5;
-% W = 5;
-
-N = 30;
-M = 20;
-T = 10;
-S = 2;
-W = 3;
-
-SW = [ [2;3] ];
-
-algos = {
-    %@approx_policy_iteration_2 , 'algorithm_2 '; %(lin ols   regression)
-    %@approx_policy_iteration_5, 'algorithm_5 '; %(gau ridge regression)
-    %@approx_policy_iteration_6, 'algorithm_6 '; %(gau svm   regression)
-    %@approx_policy_iteration_7 , 'algorithm_7 '; %(gau svm   regression with BAKF)
-    @approx_policy_iteration_8 , 'algorithm_8 '; %(gau svm   regression with BAKF with ONPOLICY sampling)
-    %@approx_policy_iteration_9 , 'algorithm_9 '; %(gau svm   regression with BAKF with interval estimation)
-    %@approx_policy_iteration_10, 'algorithm_10'; %(gau svm   regression with BAKF with ONPOLICY sampling and interval estimation)
-    %@approx_policy_iteration_11, 'algorithm_11'; %(algorithm_8 but with TD(lambda) discounting option)
-    @approx_policy_iteration_12, 'algorithm_12'; %(algorithm_8 but with bootstrapping after n-step)
-};
-
-s_1 = @( ) state_rand();
-v_b = @(s) value_basii_cells(s, @value_basii_2);
-
-states_r = cell(1, samples);
-reward_r = cell(1, samples);
-
-for i = 1:samples
-    reward_basii_n = size(reward_basii(s_1()),1);
-    reward_theta_r = reward_theta(reward_basii_n);
-    
-    reward_r{i} = @(s) reward_theta_r'*reward_basii(s);
-    states_r{i} = {s_1(),s_1(),s_1(),s_1(),s_1()};
-end
-
-s_a = @(s) actions(s);
-s_r = @(i) reward_r{i}; 
+rewd_count = 20;
+eval_steps = 10;
 
 trans_pre = @(s,a) huge_trans_pre (s,a);
 trans_pst = @(s,a) huge_trans_post(s,a);
 
-for a = 1:size(algos,1)
+s_1 = @( ) state_rand();
+v_b = @(s) value_basii_cells(s, @value_basii_2);
+s_a = @(s) actions(s);
+
+%algorithm_2  == (lin ols regression with n-step Monte Carlo                             )
+%algorithm_5  == (gau ridge regression                                                   )
+%algorithm_8  == (gau svm regression with n-step Monte Carlo, BAKF, and ONPOLICY sampling)
+%algorithm_12 == (algorithm_8 but with bootstrapping after n-step Monte Carlo            )
+
+algo_a = @(s_r) approx_policy_iteration_2 (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 40, 2, 3); %no-opt
+algo_b = @(s_r) approx_policy_iteration_8 (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 40, 2, 3); %WS-opt
+algo_c = @(s_r) approx_policy_iteration_8 (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*0.4, 30, 40, 2, 3); % L-opt
+algo_d = @(s_r) approx_policy_iteration_12(s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 40, 2, 3); %no-opt
+
+algos = {
+    algo_a, 'algorithm_2 (G=0.9, L=1.0, N=30, W=40, S=2, W=3)';
+    algo_b, 'algorithm_8 (G=0.9, L=1.0, N=30, W=40, S=2, W=3)';
+    algo_c, 'algorithm_8 (G=0.9, L=0.4, N=30, W=40, S=2, W=3)';
+    algo_d, 'algorithm_12(G=0.9, L=1.0, N=30, W=40, S=2, W=3)';     
+};
+
+states_c = cell(1, rewd_count);
+reward_f = cell(1, rewd_count);
+
+for r_i = 1:rewd_count
+    reward_basii_n = size(reward_basii(s_1()),1);
+    reward_theta_r = reward_theta(reward_basii_n);
     
-    %figure('NumberTitle', 'off', 'Name', algos{a,2});
-    
-    for S = 1:10
-        for W = 1:10
-            
-            if ~isempty(SW) && ~any(all([S;W] == SW))
-                continue
-            end
-            
-            for l = 1%[.1, .4, .9, 1]
-                Ts = zeros(4,samples);
-                Pe = zeros(3,samples);
+    reward_f{r_i} = @(s) reward_theta_r'*reward_basii(s);
+    states_c{r_i} = {s_1(),s_1(),s_1(),s_1(),s_1()};
+end
 
-                for i = 1:samples
-                    [Pf, Vf, Xs, Ys, Ks, As, Ts(1,i), Ts(2,i), Ts(3,i), Ts(4,i)] = algos{a,1}(s_1, s_a, s_r(i), v_b, trans_pst, trans_pre, gamma, N, M, S, W);
+for a_i = 1:size(algos,1)
 
-                    eval_stats = @(s) [reward_r{i}(s); target_new_touch_count(s)];
+    fT = zeros(1,rewd_count);
+    bT = zeros(1,rewd_count);
+    vT = zeros(1,rewd_count);
+    aT = zeros(1,rewd_count);
+    Pe = zeros(3,rewd_count);
 
-                    Pe(:,i) = policy_eval_at_states(Pf{N+1}, states_r{i}, eval_stats, gamma, T, trans_pre, 20);        
+    for r_i = 1:rewd_count
+        [Pf, Vf, Xs, Ys, Ks, As, fT(r_i), bT(r_i), vT(r_i), aT(r_i)] = algos{a_i,1}(reward_f{r_i});
 
-                    if samples < 3
-                        %d_results(algos{a,2}, Ks, As);
-                    end
-                end
-            
-                %hold on
-                %xlim([0 11]);
-                %ylim([0 11]);
-                %zlim([0 2000]);
-                %scatter3(S,W, mean(Pe(1,:)), '.', 'b');
+        eval_stats = @(s) [reward_f{r_i}(s); target_new_touch_count(s)];
 
-                %xlabel('S')
-                %ylabel('W')
-                %zlabel('V')
+        Pe(:,r_i) = policy_eval_at_states(Pf{N+1}, states_c{r_i}, eval_stats, gamma, eval_steps, trans_pre, 20);        
 
-                fprintf('(S=%i, W=%i, l=%.1f) ', [S,W,1]);
-                p_results(algos{a,2}, Ts(1,:), Ts(2,:), Ts(3,:), Ts(4,:), Pe(1,:), Pe(2,:));
-            end
+        if rewd_count < 3
+            %d_results_1(algos{a,2}, Ks, As);
         end
     end
-    hold off
 
-    
+    p_results(algos{a_i,2}, fT, bT, vT, aT, Pe(1,:), Pe(2,:));    
 end
 
 function s = state_rand()
@@ -239,17 +204,17 @@ function tc = target_count(state)
 end
 
 function p_results(test_algo_name, f_time, b_time, v_time, a_time, P_val, P_tch)
-    fprintf('%s -- ', test_algo_name);
-    fprintf('f_time = % 7.2f; ', sum(f_time));
-    fprintf('b_time = % 7.2f; ', sum(b_time));
-    fprintf('v_time = % 7.2f; ', sum(v_time));
-    fprintf('a_time = % 7.2f; ', sum(a_time));
-    fprintf('VAL = %.3f; '     , mean(P_val));
+    fprintf('%s ', test_algo_name);
+    fprintf('f_time = % 5.2f; ', mean(f_time));
+    fprintf('b_time = % 5.2f; ', mean(b_time));
+    fprintf('v_time = % 5.2f; ', mean(v_time));
+    fprintf('a_time = % 5.2f; ', mean(a_time));
+    fprintf('VAL = % 7.3f; '     , mean(P_val));
     fprintf('TCH = %f; '       , mean(P_tch));
     fprintf('\n');
 end
 
-function d_results(test_algo_name, Ks, As)
+function d_results_1(test_algo_name, Ks, As)
 
     flat_ns = cell2mat(arrayfun(@(ni) ni*ones(size(Ks{ni})), 1:numel(Ks), 'UniformOutput', false));
     flat_ks = cell2mat(Ks);
@@ -296,6 +261,17 @@ function d_results(test_algo_name, Ks, As)
     title('alpha by visits')
     xlabel('vb visitation count')
     legend('a min', 'a avg', 'a max', 'a var')
+end
+
+function d_results_2(test_algo_name, Ss, Ws, Vs)
+
+    figure('NumberTitle', 'off', 'Name', test_algo_name);
+    
+    scatter3(Ss, Ws, Vs, '.', 'b');
+    xlabel('S')
+    ylabel('W')
+    zlabel('V')
+    
 end
 
 function a = actions(s)
