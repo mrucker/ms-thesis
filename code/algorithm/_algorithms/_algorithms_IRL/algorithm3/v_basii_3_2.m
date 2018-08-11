@@ -52,9 +52,9 @@ function tc = target_new_touch_count(states)
 
     %not perfect, if a target simply appears on top 
     %of you then it won't count as an actual touch for us
-    tc = [
-        sum(ct&~pt, 1);
+    tc = [        
         sum(~ct&pt, 1);
+        sum(ct&~pt, 1);
     ];
 end
 

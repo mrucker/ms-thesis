@@ -3,7 +3,7 @@ function irl_result = algorithm3run(episodes, params, verbosity)
     %N = 30;
     %M = 80;
 
-    N = 10;
+    N = 20;
     M = 50;
     T = 10;
     S = 5;

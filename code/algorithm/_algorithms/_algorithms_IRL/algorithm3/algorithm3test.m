@@ -1,6 +1,6 @@
 try run '../../../paths'; catch; end
 
-N = 40;
+N = 50;
 M = 80;
 
 %N = 10;

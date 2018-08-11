@@ -1,8 +1,8 @@
-close all
+%close all
 fprintf('\n');
-run('../../paths.m');
+try run('../../paths.m'); catch; end
 
-samples = 5;
+samples = 20;
 gamma = .9;
 
 % N = 30;
@@ -12,19 +12,23 @@ gamma = .9;
 % W = 5;
 
 N = 30;
-M = 80;
-T = 20;
-S = 5;
-W = 5;
+M = 20;
+T = 10;
+S = 2;
+W = 3;
+
+SW = [ [2;3] ];
 
 algos = {
-    @approx_policy_iteration_2 , 'algorithm_2 '; %(lin ols   regression)
+    %@approx_policy_iteration_2 , 'algorithm_2 '; %(lin ols   regression)
     %@approx_policy_iteration_5, 'algorithm_5 '; %(gau ridge regression)
     %@approx_policy_iteration_6, 'algorithm_6 '; %(gau svm   regression)
     %@approx_policy_iteration_7 , 'algorithm_7 '; %(gau svm   regression with BAKF)
     @approx_policy_iteration_8 , 'algorithm_8 '; %(gau svm   regression with BAKF with ONPOLICY sampling)
     %@approx_policy_iteration_9 , 'algorithm_9 '; %(gau svm   regression with BAKF with interval estimation)
     %@approx_policy_iteration_10, 'algorithm_10'; %(gau svm   regression with BAKF with ONPOLICY sampling and interval estimation)
+    %@approx_policy_iteration_11, 'algorithm_11'; %(algorithm_8 but with TD(lambda) discounting option)
+    @approx_policy_iteration_12, 'algorithm_12'; %(algorithm_8 but with bootstrapping after n-step)
 };
 
 s_1 = @( ) state_rand();
@@ -38,7 +42,7 @@ for i = 1:samples
     reward_theta_r = reward_theta(reward_basii_n);
     
     reward_r{i} = @(s) reward_theta_r'*reward_basii(s);
-    states_r{i} = {s_1(),s_1(),s_1(),s_1(),s_1(),s_1(),s_1(),s_1(),s_1(),s_1()};
+    states_r{i} = {s_1(),s_1(),s_1(),s_1(),s_1()};
 end
 
 s_a = @(s) actions(s);
@@ -49,32 +53,56 @@ trans_pst = @(s,a) huge_trans_post(s,a);
 
 for a = 1:size(algos,1)
     
-    Ts = zeros(4,samples);    
-    Pv = zeros(1,samples);
-    Pt = zeros(2,samples);
+    %figure('NumberTitle', 'off', 'Name', algos{a,2});
     
-    for i = 1:samples
+    for S = 1:10
+        for W = 1:10
+            
+            if ~isempty(SW) && ~any(all([S;W] == SW))
+                continue
+            end
+            
+            for l = 1%[.1, .4, .9, 1]
+                Ts = zeros(4,samples);
+                Pe = zeros(3,samples);
 
-        [Pf, Vf, Xs, Ys, Ks, As, Ts(1,i), Ts(2,i), Ts(3,i), Ts(4,i)] = algos{a,1}(s_1, s_a, s_r(i), v_b, trans_pst, trans_pre, gamma, N, M, S, W);
+                for i = 1:samples
+                    [Pf, Vf, Xs, Ys, Ks, As, Ts(1,i), Ts(2,i), Ts(3,i), Ts(4,i)] = algos{a,1}(s_1, s_a, s_r(i), v_b, trans_pst, trans_pre, gamma, N, M, S, W);
 
-        Pv(:,i) = policy_eval_at_states(Pf{N+1}, states_r{i}, reward_r{i}            , gamma, T, trans_pre, 10);
-        Pt(:,i) = policy_eval_at_states(Pf{N+1}, states_r{i}, @target_new_touch_count, 1    , T, trans_pre, 10);
-        Pb      = policy_eval_at_states(Pf{N+1}, states_r{i}, @reward_basii          , 1    , T, trans_pre, 20);
-        %Pd(i)  = policy_eval_at_states(Pf{N+1}, states_r{i}, @target_dist           , 1    , T, trans_pre, 20);        
+                    eval_stats = @(s) [reward_r{i}(s); target_new_touch_count(s)];
 
-        if samples < 3
-            d_results(algos{a,2}, Ks, As);
+                    Pe(:,i) = policy_eval_at_states(Pf{N+1}, states_r{i}, eval_stats, gamma, T, trans_pre, 20);        
+
+                    if samples < 3
+                        %d_results(algos{a,2}, Ks, As);
+                    end
+                end
+            
+                %hold on
+                %xlim([0 11]);
+                %ylim([0 11]);
+                %zlim([0 2000]);
+                %scatter3(S,W, mean(Pe(1,:)), '.', 'b');
+
+                %xlabel('S')
+                %ylabel('W')
+                %zlabel('V')
+
+                fprintf('(S=%i, W=%i, l=%.1f) ', [S,W,1]);
+                p_results(algos{a,2}, Ts(1,:), Ts(2,:), Ts(3,:), Ts(4,:), Pe(1,:), Pe(2,:));
+            end
         end
     end
+    hold off
 
-    p_results(algos{a,2}, Ts(1,:), Ts(2,:), Ts(3,:), Ts(4,:), Pv, Pt(1,:));
+    
 end
 
 function s = state_rand()
     population = {
-       [1145;673;-8;-2;-1;6;-7;4;3175;1535;156];
+       [1145;673;-8;-2;-1;6;-7;4;3175;1535;156;626;555;155;2249;305;60];
        [1158;673;15;0;10;0;5;0;3175;1535;156;626;555;155;2249;305;60];
-       [2358;345;203;-153;-79;-68;87;5;3175;1535;156;626;555;953;2249;305;857;1895;1165;536;2847;278;369;2941;1297;225;2701;465;80]
+       [1588;768;0;0;0;0;0;0;3175;1535;156;626;555;155;2249;305;60];
    };
 
     s = population{randi(numel(population))};
@@ -153,8 +181,8 @@ function rb = reward_basii(states)
 end
 
 function rt = reward_theta(basii_count)
-    rt = [zeros(basii_count-1,1);1];
-    %rt = 2*rand(basii_count,1) - 1;
+    %rt = [zeros(basii_count-1,1);1];
+    rt = 2*rand(basii_count,1) - 1;
     %rt = [-.25*rand(basii_count-1,1);100];
 end
 
