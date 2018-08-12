@@ -47,7 +47,7 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_polic
         if n == 1
             init_states = arrayfun(@(m) s_1(), 1:M, 'UniformOutput', false);
         else
-            init_states = all_states(randi(numel(init_states),1,M));
+            init_states = all_states(randi(numel(all_states),1,M));
         end
         
         t_start = tic;

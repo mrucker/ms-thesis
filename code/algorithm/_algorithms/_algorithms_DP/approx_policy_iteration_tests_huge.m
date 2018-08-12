@@ -1,3 +1,4 @@
+clear
 close all
 fprintf('\n');
 try run('../../paths.m'); catch; end
@@ -15,18 +16,25 @@ s_a = @(s) actions(s);
 %algorithm_2  == (lin ols regression with n-step Monte Carlo                             )
 %algorithm_5  == (gau ridge regression                                                   )
 %algorithm_8  == (gau svm regression with n-step Monte Carlo, BAKF, and ONPOLICY sampling)
+%algorithm_8b == (algorithm_8 except I've reintroduced an old bug that makes it better   )
 %algorithm_12 == (algorithm_8 but with bootstrapping after n-step Monte Carlo            )
+%algorithm_13 == (algorithm_8 but with interval estimation to choose the first action    )
 
-algo_a = @(s_r) approx_policy_iteration_2 (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 40, 2, 3); %no-opt
-algo_b = @(s_r) approx_policy_iteration_8 (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 40, 2, 3); %WS-opt
-algo_c = @(s_r) approx_policy_iteration_8 (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*0.4, 30, 40, 2, 3); % L-opt
-algo_d = @(s_r) approx_policy_iteration_12(s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 40, 2, 3); %no-opt
+algo_a = @(s_r) approx_policy_iteration_2 (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 40, 2, 3); %  no-opt
+algo_b = @(s_r) approx_policy_iteration_8b(s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 40, 2, 3); % WSL-opt
+algo_c = @(s_r) approx_policy_iteration_8 (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 40, 2, 3); % WSL-opt
+algo_d = @(s_r) approx_policy_iteration_8 (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*0.4, 30, 40, 2, 3); %   L-opt
+algo_e = @(s_r) approx_policy_iteration_12(s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 40, 2, 3); %LWSM-opt
+algo_f = @(s_r) approx_policy_iteration_13(s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 40, 2, 3); % WSL-opt
+
 
 algos = {
     algo_a, 'algorithm_2 (G=0.9, L=1.0, N=30, W=40, S=2, W=3)';
-    algo_b, 'algorithm_8 (G=0.9, L=1.0, N=30, W=40, S=2, W=3)';
-    algo_c, 'algorithm_8 (G=0.9, L=0.4, N=30, W=40, S=2, W=3)';
-    algo_d, 'algorithm_12(G=0.9, L=1.0, N=30, W=40, S=2, W=3)';     
+    algo_b, 'algorithm_8b(G=0.9, L=1.0, N=30, W=40, S=2, W=3)';
+%   algo_c, 'algorithm_8 (G=0.9, L=1.0, N=30, W=40, S=2, W=3)';
+%   algo_d, 'algorithm_8 (G=0.9, L=0.4, N=30, W=40, S=2, W=3)';
+%   algo_e, 'algorithm_12(G=0.9, L=1.0, N=30, W=40, S=2, W=3)';
+    algo_f, 'algorithm_13(G=0.9, L=1.0, N=30, W=40, S=2, W=3)';
 };
 
 states_c = cell(1, rewd_count);
@@ -46,21 +54,33 @@ for a_i = 1:size(algos,1)
     bT = zeros(1,rewd_count);
     vT = zeros(1,rewd_count);
     aT = zeros(1,rewd_count);
-    Pe = zeros(3,rewd_count);
+    Pv = zeros(1,rewd_count);
 
     for r_i = 1:rewd_count
         [Pf, Vf, Xs, Ys, Ks, As, fT(r_i), bT(r_i), vT(r_i), aT(r_i)] = algos{a_i,1}(reward_f{r_i});
 
-        eval_stats = @(s) [reward_f{r_i}(s); target_new_touch_count(s)];
+       %eval_stats = @(s) [reward_f{r_i}(s); target_new_touch_count(s)];
+        eval_stats = @(s) reward_f{r_i}(s);
 
-        Pe(:,r_i) = policy_eval_at_states(Pf{N+1}, states_c{r_i}, eval_stats, gamma, eval_steps, trans_pre, 20);        
-
-        if rewd_count < 3
-            %d_results_1(algos{a,2}, Ks, As);
-        end
+        Pv(r_i) = policy_eval_at_states(Pf{end}, states_c{r_i}, eval_stats, 0.9, eval_steps, trans_pre, 20);
     end
 
-    p_results(algos{a_i,2}, fT, bT, vT, aT, Pe(1,:), Pe(2,:));    
+    if rewd_count == 1
+        d_results_1(algos{a_i,2}, Ks, As);
+        
+        Vs = zeros(1,numel(Pf)-1);
+    
+        eval_states = states_c{r_i};
+        eval_reward = reward_f{r_i};
+        
+        parfor Pf_i = 1:(numel(Pf)-1)
+            Vs(Pf_i) = policy_eval_at_states(Pf{Pf_i+1}, eval_states, eval_reward, 0.9, eval_steps, trans_pre, 40);
+        end
+
+        d_results_3(algos{a_i,2}, Vs);
+    end    
+    
+    p_results(algos{a_i,2}, fT, bT, vT, aT, Pv);
 end
 
 function s = state_rand()
@@ -151,7 +171,6 @@ function rt = reward_theta(basii_count)
     %rt = [-.25*rand(basii_count-1,1);100];
 end
 
-
 function tc = target_new_touch_count(states)
     r2 = states(11, 1).^2;
     cp = states(1:2,:);
@@ -203,14 +222,14 @@ function tc = target_count(state)
     tc = (numel(state) - 11)/3;
 end
 
-function p_results(test_algo_name, f_time, b_time, v_time, a_time, P_val, P_tch)
+function p_results(test_algo_name, f_time, b_time, v_time, a_time, P_val)
     fprintf('%s ', test_algo_name);
     fprintf('f_time = % 5.2f; ', mean(f_time));
     fprintf('b_time = % 5.2f; ', mean(b_time));
     fprintf('v_time = % 5.2f; ', mean(v_time));
     fprintf('a_time = % 5.2f; ', mean(a_time));
-    fprintf('VAL = % 7.3f; '     , mean(P_val));
-    fprintf('TCH = %f; '       , mean(P_tch));
+    fprintf('VAL = % 7.3f; '   , mean(P_val));
+    %fprintf('TCH = %f; '       , mean(P_tch));
     fprintf('\n');
 end
 
@@ -270,8 +289,17 @@ function d_results_2(test_algo_name, Ss, Ws, Vs)
     scatter3(Ss, Ws, Vs, '.', 'b');
     xlabel('S')
     ylabel('W')
-    zlabel('V')
+    zlabel('V')    
+end
+
+function d_results_3(test_algo_name, Vs)
+
+    figure('NumberTitle', 'off', 'Name', test_algo_name);
     
+    scatter(1:numel(Vs), Vs, '.');
+    title('Convergence of value function');
+    xlabel('N')
+    ylabel('V')
 end
 
 function a = actions(s)
