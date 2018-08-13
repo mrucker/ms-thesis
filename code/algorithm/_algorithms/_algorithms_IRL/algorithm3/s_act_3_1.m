@@ -1,4 +1,4 @@
-function a = s_act_3(states)
+function a = s_act_3_1(states)
 
     huge_states_assert(states);
 

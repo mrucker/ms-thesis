@@ -57,7 +57,7 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_polic
         init_states = all_states(randi(numel(all_states),1,M));
         
         t_start = tic;
-        for m = 1:M 
+        parfor m = 1:M 
 
             post_states = trans_post(init_states{m}, actions(init_states{m}));
             post_values = Vf{n}(post_states);

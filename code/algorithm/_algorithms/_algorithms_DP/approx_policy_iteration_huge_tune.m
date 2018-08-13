@@ -266,17 +266,17 @@ end
 
 function p_results(algo_name, tuning, max_vs, avg_vs, lst_vs, var_vs, f_time, b_time, v_time, a_time)
     fprintf('%s', algo_name);
-    fprintf('(G=0.9, L=%03.1f, N=%i, M=%i, S=%i, W=%i) ',tuning);
+    fprintf('(G=0.9, L=%03.1f, N=%3i, M=%3i, S=%2i, W=%2i) ',tuning);
 
-    fprintf('AVG_MAX_V = % 8.3f; '  , mean(max_vs));
-    fprintf('AVG_AVG_V = % 8.3f; '  , mean(avg_vs));
-    fprintf('AVG_LST_V = % 8.3f; '  , mean(lst_vs));
-    fprintf('AVG_VAR_V = % 10.3f; ' , mean(var_vs));
+    fprintf('AVG_MAX_V = %8.3f; '  , mean(max_vs));
+    fprintf('AVG_AVG_V = %8.3f; '  , mean(avg_vs));
+    fprintf('AVG_LST_V = %8.3f; '  , mean(lst_vs));
+    fprintf('AVG_VAR_V = %10.3f; ' , mean(var_vs));
     
-    fprintf('fT = % 5.2f; '        , mean(f_time));
-    fprintf('bT = % 5.2f; '        , mean(b_time));
-    fprintf('vT = % 5.2f; '        , mean(v_time));
-    fprintf('aT = % 5.2f; '        , mean(a_time));
+    fprintf('fT = %5.2f; '        , mean(f_time));
+    fprintf('bT = %5.2f; '        , mean(b_time));
+    fprintf('vT = %5.2f; '        , mean(v_time));
+    fprintf('aT = %5.2f; '        , mean(a_time));
     fprintf('\n');
 end
 

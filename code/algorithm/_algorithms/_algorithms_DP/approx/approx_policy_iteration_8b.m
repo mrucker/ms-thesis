@@ -52,7 +52,7 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_polic
         end
         
         t_start = tic;
-        for m = 1:M 
+        parfor m = 1:M 
 
             s_a = init_states{m};
             s_t = trans_pre(s_a, []);

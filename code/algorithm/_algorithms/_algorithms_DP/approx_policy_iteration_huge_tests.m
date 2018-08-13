@@ -27,26 +27,28 @@ s_a = @(s) actions(s);
 %#3 14
 %#4 08b
 
-algo_a = @(s_r) approx_policy_iteration_2  (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 40, 2, 3); %  no-opt
-algo_b = @(s_r) approx_policy_iteration_8b (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 40, 2, 3); % WSL-opt
-algo_c = @(s_r) approx_policy_iteration_8  (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 40, 2, 3); % WSL-opt
-algo_d = @(s_r) approx_policy_iteration_8  (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*0.4, 30, 40, 2, 3); %   L-opt
-algo_e = @(s_r) approx_policy_iteration_12 (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 40, 2, 3); %LWSM-opt
-algo_f = @(s_r) approx_policy_iteration_13 (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 40, 2, 3); % no-opt
-algo_g = @(s_r) approx_policy_iteration_13b(s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 10, 400, 2, 3); % no-opt
-algo_h = @(s_r) approx_policy_iteration_13c(s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 10, 400, 2, 3); % no-opt
-algo_i = @(s_r) approx_policy_iteration_14 (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*0.6, 10, 400, 5, 0); % no-opt
+algo_a = @(s_r) approx_policy_iteration_2  (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 40, 2, 3);  %  no-opt
+algo_b = @(s_r) approx_policy_iteration_8b (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 50, 2, 3);  % WSL-opt
+algo_c = @(s_r) approx_policy_iteration_8  (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 40, 2, 3);  % WSL-opt
+algo_d = @(s_r) approx_policy_iteration_8  (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*0.4, 30, 40, 2, 3);  %   L-opt
+algo_e = @(s_r) approx_policy_iteration_12 (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 40, 2, 3);  %LWSM-opt
+algo_f = @(s_r) approx_policy_iteration_13 (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 40, 2, 3);  %  no-opt
+algo_g = @(s_r) approx_policy_iteration_13b(s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 50, 2, 3); %  no-opt
+algo_h = @(s_r) approx_policy_iteration_13c(s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 50, 2, 3); %  no-opt
+algo_i = @(s_r) approx_policy_iteration_14 (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*0.7, 30, 50, 5, 0); %  no-opt
+algo_j = @(s_r) approx_policy_iteration_13b(s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 50, 5, 3); %  no-opt
 
 algos = {
 %   algo_a, 'algorithm_2  (G=0.9, L=1.0, N=30, M=40, S=2, W=3)';
-%   algo_b, 'algorithm_8b (G=0.9, L=1.0, N=30, M=40, S=2, W=3)';
+   algo_b, 'algorithm_8b (G=0.9, L=1.0, N=30, M=50, S=2, W=3)';
 %   algo_c, 'algorithm_8  (G=0.9, L=1.0, N=30, M=40, S=2, W=3)';
 %   algo_d, 'algorithm_8  (G=0.9, L=0.4, N=30, M=40, S=2, W=3)';
 %   algo_e, 'algorithm_12 (G=0.9, L=1.0, N=30, M=40, S=2, W=3)';
-   algo_f, 'algorithm_13 (G=0.9, L=1.0, N=10, M=400, S=2, W=3)';
-   algo_g, 'algorithm_13b(G=0.9, L=1.0, N=10, M=400, S=2, W=3)';
+%   algo_f, 'algorithm_13 (G=0.9, L=1.0, N=10, M=400, S=2, W=3)';
+   algo_g, 'algorithm_13b(G=0.9, L=1.0, N=30, M=50, S=2, W=3)';
 %   algo_h, 'algorithm_13c(G=0.9, L=1.0, N=10, M=400, S=2, W=3)';
-%   algo_i, 'algorithm_14 (G=0.9, L=0.6, N=10, M=400, S=5, W=0)';
+   algo_i, 'algorithm_14 (G=0.9, L=0.6, N=30, M=50, S=5, W=0)';
+   algo_j, 'algorithm_13b(G=0.9, L=1.0, N=30, M=50, S=5, W=3)';
 };
 
 states_c = cell(1, rewd_count);
@@ -182,8 +184,8 @@ function rb = reward_basii(states)
 end
 
 function rt = reward_theta(basii_count)
-    %rt = [zeros(basii_count-1,1);1];
-    rt = 2*rand(basii_count,1) - 1;
+    rt = [zeros(basii_count-1,1);1];
+    %rt = 2*rand(basii_count,1) - 1;
     %rt = [-.25*rand(basii_count-1,1);100];
 end
 

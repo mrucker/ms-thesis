@@ -14,10 +14,12 @@ g = .9;
 trans_pre = @huge_trans_pre;
 trans_pst = @huge_trans_post;
 
+[state2rbindex, ~, ~, a_f] = r_basii_4_1();
+
 s_1 = @( ) state_rand();
-s_a = @s_act_3_1;
-r_b = @r_basii_3_4;
-v_b = @v_basii_3_2;
+s_a = @s_act_4_1;
+r_b = @(s) a_f(:, state2rbindex(s));
+v_b = @v_basii_4_1;
 
 r_b_count = size(r_b(s_1()),1);
 

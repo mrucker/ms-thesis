@@ -1,4 +1,4 @@
-function irl_result = algorithm3run(episodes, params, verbosity)
+function irl_result = algorithm4run(episodes, params, verbosity)
 
     %N = 30;
     %M = 80;
@@ -15,12 +15,14 @@ function irl_result = algorithm3run(episodes, params, verbosity)
     episode_states = horzcat(episodes{:});
     epsidoe_starts = episode_states(1:episode_length:episode_count*episode_length);
 
+    [state2rbindex, ~, ~, a_f] = r_basii_4_1();
+    
     s_1 = @( ) epsidoe_starts{randi(numel(epsidoe_starts))};
-    s_a = @s_act_3_1;
-    r_b = @r_basii_3_4;
-    v_b = @v_basii_3_2;
+    s_a = @s_act_4_1;
+    r_b = @(s) a_f(:, state2rbindex(s));
+    v_b = @v_basii_4_1;
 
-    fprintf(1,'Start of Algorithm3 \n');
+    fprintf(1,'Start of Algorithm4 \n');
 
     params = setDefaults(params);
 
