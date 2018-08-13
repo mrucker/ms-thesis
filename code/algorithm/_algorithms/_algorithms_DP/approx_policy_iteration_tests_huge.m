@@ -13,28 +13,40 @@ s_1 = @( ) state_rand();
 v_b = @(s) value_basii_cells(s, @value_basii_2);
 s_a = @(s) actions(s);
 
-%algorithm_2  == (lin ols regression with n-step Monte Carlo                             )
-%algorithm_5  == (gau ridge regression                                                   )
-%algorithm_8  == (gau svm regression with n-step Monte Carlo, BAKF, and ONPOLICY sampling)
-%algorithm_8b == (algorithm_8 except I've reintroduced an old bug that makes it better   )
-%algorithm_12 == (algorithm_8 but with bootstrapping after n-step Monte Carlo            )
-%algorithm_13 == (algorithm_8 but with interval estimation to choose the first action    )
+%algorithm_2   == (lin ols regression with n-step Monte Carlo                             )
+%algorithm_5   == (gau ridge regression                                                   )
+%algorithm_8   == (gau svm regression with n-step Monte Carlo, BAKF, and ONPOLICY sampling)
+%algorithm_8b  == (algorithm_8 except I've reintroduced an old bug that made it run better)
+%algorithm_12  == (algorithm_8 but with bootstrapping after n-step Monte Carlo            )
+%algorithm_13  == (algorithm_8 but with interval estimation to choose the first action    )
+%algorithm_13b == (algorithm_13 but with a small bug fix around the on-policy distribution)
+%algorithm_14  == ()
 
-algo_a = @(s_r) approx_policy_iteration_2 (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 40, 2, 3); %  no-opt
-algo_b = @(s_r) approx_policy_iteration_8b(s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 40, 2, 3); % WSL-opt
-algo_c = @(s_r) approx_policy_iteration_8 (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 40, 2, 3); % WSL-opt
-algo_d = @(s_r) approx_policy_iteration_8 (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*0.4, 30, 40, 2, 3); %   L-opt
-algo_e = @(s_r) approx_policy_iteration_12(s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 40, 2, 3); %LWSM-opt
-algo_f = @(s_r) approx_policy_iteration_13(s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 40, 2, 3); % WSL-opt
+%#1 13b
+%#2 13
+%#3 14
+%#4 08b
 
+algo_a = @(s_r) approx_policy_iteration_2  (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 40, 2, 3); %  no-opt
+algo_b = @(s_r) approx_policy_iteration_8b (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 40, 2, 3); % WSL-opt
+algo_c = @(s_r) approx_policy_iteration_8  (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 40, 2, 3); % WSL-opt
+algo_d = @(s_r) approx_policy_iteration_8  (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*0.4, 30, 40, 2, 3); %   L-opt
+algo_e = @(s_r) approx_policy_iteration_12 (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 40, 2, 3); %LWSM-opt
+algo_f = @(s_r) approx_policy_iteration_13 (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 40, 2, 3); % no-opt
+algo_g = @(s_r) approx_policy_iteration_13b(s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 10, 400, 2, 3); % no-opt
+algo_h = @(s_r) approx_policy_iteration_13c(s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 10, 400, 2, 3); % no-opt
+algo_i = @(s_r) approx_policy_iteration_14 (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*0.6, 10, 400, 5, 0); % no-opt
 
 algos = {
-    algo_a, 'algorithm_2 (G=0.9, L=1.0, N=30, W=40, S=2, W=3)';
-    algo_b, 'algorithm_8b(G=0.9, L=1.0, N=30, W=40, S=2, W=3)';
-%   algo_c, 'algorithm_8 (G=0.9, L=1.0, N=30, W=40, S=2, W=3)';
-%   algo_d, 'algorithm_8 (G=0.9, L=0.4, N=30, W=40, S=2, W=3)';
-%   algo_e, 'algorithm_12(G=0.9, L=1.0, N=30, W=40, S=2, W=3)';
-    algo_f, 'algorithm_13(G=0.9, L=1.0, N=30, W=40, S=2, W=3)';
+%   algo_a, 'algorithm_2  (G=0.9, L=1.0, N=30, M=40, S=2, W=3)';
+%   algo_b, 'algorithm_8b (G=0.9, L=1.0, N=30, M=40, S=2, W=3)';
+%   algo_c, 'algorithm_8  (G=0.9, L=1.0, N=30, M=40, S=2, W=3)';
+%   algo_d, 'algorithm_8  (G=0.9, L=0.4, N=30, M=40, S=2, W=3)';
+%   algo_e, 'algorithm_12 (G=0.9, L=1.0, N=30, M=40, S=2, W=3)';
+   algo_f, 'algorithm_13 (G=0.9, L=1.0, N=10, M=400, S=2, W=3)';
+   algo_g, 'algorithm_13b(G=0.9, L=1.0, N=10, M=400, S=2, W=3)';
+%   algo_h, 'algorithm_13c(G=0.9, L=1.0, N=10, M=400, S=2, W=3)';
+%   algo_i, 'algorithm_14 (G=0.9, L=0.6, N=10, M=400, S=5, W=0)';
 };
 
 states_c = cell(1, rewd_count);
@@ -45,7 +57,7 @@ for r_i = 1:rewd_count
     reward_theta_r = reward_theta(reward_basii_n);
     
     reward_f{r_i} = @(s) reward_theta_r'*reward_basii(s);
-    states_c{r_i} = {s_1(),s_1(),s_1(),s_1(),s_1()};
+    states_c{r_i} = state_init();
 end
 
 for a_i = 1:size(algos,1)
@@ -74,7 +86,7 @@ for a_i = 1:size(algos,1)
         eval_reward = reward_f{r_i};
         
         parfor Pf_i = 1:(numel(Pf)-1)
-            Vs(Pf_i) = policy_eval_at_states(Pf{Pf_i+1}, eval_states, eval_reward, 0.9, eval_steps, trans_pre, 40);
+            Vs(Pf_i) = policy_eval_at_states(Pf{Pf_i+1}, eval_states, eval_reward, 0.9, eval_steps, trans_pre, 20);
         end
 
         d_results_3(algos{a_i,2}, Vs);
@@ -83,12 +95,16 @@ for a_i = 1:size(algos,1)
     p_results(algos{a_i,2}, fT, bT, vT, aT, Pv);
 end
 
-function s = state_rand()
-    population = {
+function s = state_init()
+    s = {
        [1145;673;-8;-2;-1;6;-7;4;3175;1535;156;626;555;155;2249;305;60];
        [1158;673;15;0;10;0;5;0;3175;1535;156;626;555;155;2249;305;60];
        [1588;768;0;0;0;0;0;0;3175;1535;156;626;555;155;2249;305;60];
    };
+end
+
+function s = state_rand()
+    population = state_init();
 
     s = population{randi(numel(population))};
 end
