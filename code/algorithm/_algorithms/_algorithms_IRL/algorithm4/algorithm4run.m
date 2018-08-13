@@ -17,9 +17,12 @@ function irl_result = algorithm4run(episodes, params, verbosity)
 
     [state2rbindex, ~, ~, a_f] = r_basii_4_1();
     
+    a_n  = size(a_f,2);
+    
+    e_n = @(rows,row) [zeros(row-1,1);1;zeros(rows-row,1)];    
     s_1 = @( ) epsidoe_starts{randi(numel(epsidoe_starts))};
     s_a = @s_act_4_1;
-    r_b = @(s) a_f(:, state2rbindex(s));
+    r_b = @(s) e_n(a_n,state2rbindex(s));
     v_b = @v_basii_4_1;
 
     fprintf(1,'Start of Algorithm4 \n');
@@ -29,12 +32,11 @@ function irl_result = algorithm4run(episodes, params, verbosity)
     if params.seed ~= 0
         rng(params.seed);
     end
-
+    
     exp_time = 0;
     krn_time = 0;
     svm_time = 0;
     mdp_time = 0;
-    mix_time = 0;
 
     E = 0;
 
@@ -44,13 +46,15 @@ function irl_result = algorithm4run(episodes, params, verbosity)
         end
     end
 
-    E = E./numel(episodes);    
+    E = E./numel(episodes);
 
+    ff = a_f'*a_f;
+    
     % Generate random policy.
     tic;
 
         rand_r = rand(size(E,1),1);
-        rand_r = rand_r/sum(abs(rand_r));
+        %rand_r = rand_r/sum(abs(rand_r));
 
         s_r = @(s) rand_r'*r_b(s);
 
@@ -73,8 +77,9 @@ function irl_result = algorithm4run(episodes, params, verbosity)
     while 1
 
         tic;
-        rs{i} = (E-sb{i-1});
-        rs{i} = rs{i}./sum(abs(rs{i}));
+        rs{i} = ff*(E-sb{i-1});
+        %rs{i} = rs{i}./sum(abs(rs{i}));
+        
         s_r   = @(s) rs{i}'*r_b(s);
 
         Pf = approx_policy_iteration_13b(s_1, s_a, s_r, v_b, @huge_trans_post, @huge_trans_pre, params.gamma, N, M, S, W);
@@ -82,7 +87,7 @@ function irl_result = algorithm4run(episodes, params, verbosity)
 
         mdp_time = mdp_time + toc;
 
-        ts{i} = sqrt(E'*E + sb{i-1}'*sb{i-1} - 2*E'*sb{i-1});
+        ts{i} = sqrt(E'*ff*E + sb{i-1}'*ff*sb{i-1} - 2*E'*ff*sb{i-1});
 
         if verbosity ~= 0
             fprintf(1,'Completed IRL iteration, i=%d, t=%f\n',i,ts{i});
@@ -95,8 +100,8 @@ function irl_result = algorithm4run(episodes, params, verbosity)
         i = i + 1;
 
         tic;
-        sn       = (ss{i-1}-sb{i-2})'*(E-sb{i-2});
-        sd       = (ss{i-1}-sb{i-2})'*(ss{i-1}-sb{i-2});
+        sn       = (ss{i-1}-sb{i-2})'*ff*(E-sb{i-2});
+        sd       = (ss{i-1}-sb{i-2})'*ff*(ss{i-1}-sb{i-2});
         sc       = sn/sd;
         sb{i-1}  = sb{i-2} + sc*(ss{i-1}-sb{i-2});
         svm_time = svm_time + toc;
