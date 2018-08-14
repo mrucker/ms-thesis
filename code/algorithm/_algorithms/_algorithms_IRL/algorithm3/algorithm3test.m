@@ -38,7 +38,6 @@ episodes = horzcat(episodes{:});
 params = struct ('epsilon',.0001, 'gamma',.9, 'seed',1);
 
 result = algorithm3run(episodes, params, 1);
-result = algorithm4run(episodes, params, 1);
 
 function s = state_init()
     s = {

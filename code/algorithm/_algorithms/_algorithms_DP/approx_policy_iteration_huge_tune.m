@@ -23,7 +23,6 @@ s_a = @(s) actions(s);
 %algorithm_14  == (full tabular TD lambda with interval estimation and on-policy sampling )
 
 algos = {
-    
     @approx_policy_iteration_13b, 'algorithm_13b';
     @approx_policy_iteration_14 , 'algorithm_14 ';
     @approx_policy_iteration_8b , 'algorithm_8b ';
@@ -282,11 +281,11 @@ end
 
 function params = tunings()
 
-    L = .1:.3:1;
-    N = 10:20:100;
-    M = 10:40:210;
-    S = 2:10;
-    W = 3:5;
+    L = 1:-.2:.6;
+    N = 10:20:50;
+    M = 10:20:90;
+    S = 3:2:9;
+    W = 2:4;
 
     [cw, cs, cm, cn, cl] = ndgrid(W, S, M, N, L);
 

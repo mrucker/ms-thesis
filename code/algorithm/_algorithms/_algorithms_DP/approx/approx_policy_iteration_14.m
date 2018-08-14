@@ -57,7 +57,7 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_polic
         init_states = all_states(randi(numel(all_states),1,M));
         
         t_start = tic;
-        parfor m = 1:M 
+        for m = 1:M 
 
             post_states = trans_post(init_states{m}, actions(init_states{m}));
             post_values = Vf{n}(post_states);
@@ -170,7 +170,7 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_polic
 
                         %while it seems incorrect... I think it is ok for
                         %alpha to be less than one... I think... any([a,e] < 0)
-                        assert(~( any(1 < [a,e]) || any(isnan([a, e, l])) || any(isinf([a, e, l]))));
+                        assert(~( any(1.0001 < [a,e]) || any(isnan([a, e, l])) || any(isinf([a, e, l]))));
 
                         alpha(i)  = a;
                         eta(i)    = e;
