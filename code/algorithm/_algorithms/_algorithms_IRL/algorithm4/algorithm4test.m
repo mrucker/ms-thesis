@@ -40,6 +40,11 @@ episodes = horzcat(episodes{:});
 params = struct ('epsilon',.0001, 'gamma',.9, 'seed',0);
 result = algorithm4run(episodes, params, 1);
 
+t_reward_per_basii = r_t * a_f;
+i_reward_per_basii = result'*eye(size(a_f,2));
+
+abs(t_r - i_r)
+
 function s = state_init()
     s = {
        [1145;673;-8;-2;-1;6;-7;4;3175;1535;156;626;555;155;2249;305;60];

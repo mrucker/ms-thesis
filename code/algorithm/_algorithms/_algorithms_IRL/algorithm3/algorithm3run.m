@@ -13,9 +13,9 @@ function irl_result = algorithm3run(episodes, params, verbosity)
     episode_length = size(episodes{1},2);
     
     episode_states = horzcat(episodes{:});
-    epsidoe_starts = episode_states(1:episode_length:episode_count*episode_length);
+    episode_starts = episode_states(1:episode_length:episode_count*episode_length);
 
-    s_1 = @( ) epsidoe_starts{randi(numel(epsidoe_starts))};
+    s_1 = @() episode_starts{randi(numel(episode_starts))};
     s_a = @s_act_3_1;
     r_b = @r_basii_3_4;
     v_b = @v_basii_3_2;
@@ -32,7 +32,6 @@ function irl_result = algorithm3run(episodes, params, verbosity)
     krn_time = 0;
     svm_time = 0;
     mdp_time = 0;
-    mix_time = 0;
 
     E = 0;
 
@@ -52,8 +51,8 @@ function irl_result = algorithm3run(episodes, params, verbosity)
 
         s_r = @(s) rand_r'*r_b(s);
 
-        Pf = approx_policy_iteration_13b(s_1, s_a, s_r, v_b, @huge_trans_post, @huge_trans_pre, params.gamma, N, M, S, W);
-        rand_s = policy_eval_at_states(Pf{N+1}, epsidoe_starts, r_b, params.gamma, T, @huge_trans_pre, 20);
+        Pf     = approx_policy_iteration_13b(s_1, s_a, s_r, v_b, @huge_trans_post, @huge_trans_pre, params.gamma, N, M, S, W);
+        rand_s = policy_eval_at_states(Pf{N+1}, episode_starts, r_b, params.gamma, T, @huge_trans_pre, ceil(150/numel(episode_starts)));
 
     mdp_time = mdp_time + toc;
 
@@ -71,13 +70,11 @@ function irl_result = algorithm3run(episodes, params, verbosity)
     while 1
 
         tic;
-        rs{i} = (E-sb{i-1});
-        rs{i} = rs{i}./sum(abs(rs{i}));
-        s_r   = @(s) rs{i}'*r_b(s);
+            rs{i} = (E-sb{i-1});
+            s_r   = @(s) rs{i}'*r_b(s);
 
-        Pf = approx_policy_iteration_13b(s_1, s_a, s_r, v_b, @huge_trans_post, @huge_trans_pre, params.gamma, N, M, S, W);
-        ss{i} = policy_eval_at_states(Pf{N+1}, epsidoe_starts, r_b, params.gamma, T, @huge_trans_pre, 2);
-
+            Pf    = approx_policy_iteration_13b(s_1, s_a, s_r, v_b, @huge_trans_post, @huge_trans_pre, params.gamma, N, M, S, W);
+            ss{i} = policy_eval_at_states(Pf{N+1}, episode_starts, r_b, params.gamma, T, @huge_trans_pre, ceil(150/numel(episode_starts)));
         mdp_time = mdp_time + toc;
 
         ts{i} = sqrt(E'*E + sb{i-1}'*sb{i-1} - 2*E'*sb{i-1});

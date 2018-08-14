@@ -4,8 +4,9 @@ end
 
 function rb = r_basii_features(states)
 
-    ds = abs(states(3:8,:));
-    tc = target_new_touch_count(states);
+    ds   = abs(states(3:6,:));
+    tc   = target_new_touch_count(states);
+    ds_i = 1:4:12;
 
     rb = [
         double(0  <= ds & ds < 15 );
@@ -13,13 +14,15 @@ function rb = r_basii_features(states)
         double(50 <= ds & ds < inf);
         double(0  <  tc(1)        );
     ];
+
+    rb = rb([0+ds_i,1+ds_i,2+ds_i,3+ds_i,13],:);
 end
 
 function rb = r_basii_cells(states, RBf)
     rb = [];
     
     if iscell(states)
-        for i = numel(states)
+        for i = 1:numel(states)
             rb(:,i) = RBf(states{i});
         end
         

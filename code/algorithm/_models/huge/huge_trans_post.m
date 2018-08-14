@@ -4,6 +4,10 @@ function s2 = huge_trans_post(s1, a, should_update_targets)
         should_update_targets = true;
     end
 
+    if iscell(s1)
+        s1 = cell2mat(s1);
+    end
+
     huge_states_assert(s1);
 
     s2 = s1;

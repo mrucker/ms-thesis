@@ -1,6 +1,12 @@
-function a = s_act_4_1(states)
+function a = s_act_4_1(state)
+    
+    assert(size(state,2) == 1 || (iscell(state) && numel(state)==1), 'This function wasn`t designed for multiple states');
 
-    huge_states_assert(states);
+    if iscell(state)
+        state = state{1};
+    end
+    
+    huge_states_assert(state);
 
     % The actions matrix should be 2 x |number of actions| where the first row is dx and the second row is dy.
     % This means each column in the matrix represents a dx/dy pair that is the action taken. 
@@ -13,24 +19,24 @@ function a = s_act_4_1(states)
 
     dx = dx*100;
     dy = dy*100;
-    
+
     dx = [100,50,10,2,0];
     dy = [100,50,10,2,0];
-    
+
     dx = horzcat(dx,0,-dx);
     dy = horzcat(dy,0,-dy);
-        
+
     %dx = 1:2;
     %dy = [1,1];
-    
+
     a = vertcat(reshape(repmat(dx,numel(dx),1), [1,numel(dx)^2]), reshape(repmat(dy',1,numel(dy)), [1,numel(dy)^2]));
-    
-    np = states(1:2) + a;
-        
+
+    np = state(1:2) + a;
+
     np_too_small_x = np(1,:) < 0;
     np_too_small_y = np(2,:) < 0;
-    np_too_large_x = np(1,:) > states(9);
-    np_too_large_y = np(2,:) > states(10);
+    np_too_large_x = np(1,:) > state(9);
+    np_too_large_y = np(2,:) > state(10);
     
     valid_actions = ~(np_too_small_x|np_too_small_y|np_too_large_x|np_too_large_y);
     

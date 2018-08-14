@@ -13,14 +13,14 @@ function irl_result = algorithm4run(episodes, params, verbosity)
     episode_length = size(episodes{1},2);
     
     episode_states = horzcat(episodes{:});
-    epsidoe_starts = episode_states(1:episode_length:episode_count*episode_length);
+    episode_starts = episode_states(1:episode_length:episode_count*episode_length);
 
     [state2rbindex, ~, ~, a_f] = r_basii_4_1();
     
     a_n  = size(a_f,2);
     
-    e_n = @(rows,row) [zeros(row-1,1);1;zeros(rows-row,1)];    
-    s_1 = @( ) epsidoe_starts{randi(numel(epsidoe_starts))};
+    e_n = @(row_n,rows) cell2mat(arrayfun(@(row) [zeros(row-1,1);1;zeros(row_n-row,1)], rows, 'UniformOutput', false)');
+    s_1 = @() episode_starts{randi(numel(episode_starts))};
     s_a = @s_act_4_1;
     r_b = @(s) e_n(a_n,state2rbindex(s));
     v_b = @v_basii_4_1;
@@ -53,13 +53,13 @@ function irl_result = algorithm4run(episodes, params, verbosity)
     % Generate random policy.
     tic;
 
-        rand_r = rand(size(E,1),1);
-        %rand_r = rand_r/sum(abs(rand_r));
+        rand_r = rand(size(a_f,1),1);
+        rand_r = rand_r/sum(abs(rand_r));
 
-        s_r = @(s) rand_r'*r_b(s);
-
-        Pf = approx_policy_iteration_13b(s_1, s_a, s_r, v_b, @huge_trans_post, @huge_trans_pre, params.gamma, N, M, S, W);
-        rand_s = policy_eval_at_states(Pf{N+1}, epsidoe_starts, r_b, params.gamma, T, @huge_trans_pre, 20);
+        s_r = @(s) rand_r'*a_f*r_b(s);        
+        
+        Pf     = approx_policy_iteration_13b(s_1, s_a, s_r, v_b, @huge_trans_post, @huge_trans_pre, params.gamma, N, M, S, W);
+        rand_s = policy_eval_at_states(Pf{N+1}, episode_starts, r_b, params.gamma, T, @huge_trans_pre, ceil(150/numel(episode_starts)));
 
     mdp_time = mdp_time + toc;
 
@@ -77,14 +77,11 @@ function irl_result = algorithm4run(episodes, params, verbosity)
     while 1
 
         tic;
-        rs{i} = ff*(E-sb{i-1});
-        %rs{i} = rs{i}./sum(abs(rs{i}));
-        
-        s_r   = @(s) rs{i}'*r_b(s);
+            rs{i} = ff*(E-sb{i-1});
+            s_r   = @(s) rs{i}'*r_b(s);
 
-        Pf = approx_policy_iteration_13b(s_1, s_a, s_r, v_b, @huge_trans_post, @huge_trans_pre, params.gamma, N, M, S, W);
-        ss{i} = policy_eval_at_states(Pf{N+1}, epsidoe_starts, r_b, params.gamma, T, @huge_trans_pre, 2);
-
+            Pf    = approx_policy_iteration_13b(s_1, s_a, s_r, v_b, @huge_trans_post, @huge_trans_pre, params.gamma, N, M, S, W);
+            ss{i} = policy_eval_at_states(Pf{N+1}, episode_starts, r_b, params.gamma, T, @huge_trans_pre, ceil(150/numel(episode_starts)));
         mdp_time = mdp_time + toc;
 
         ts{i} = sqrt(E'*ff*E + sb{i-1}'*ff*sb{i-1} - 2*E'*ff*sb{i-1});
@@ -107,10 +104,7 @@ function irl_result = algorithm4run(episodes, params, verbosity)
         svm_time = svm_time + toc;
     end
 
-    x1 = E;
-    x2 = cell2mat(ss);
-
-    [~,i] = min((dot(x1,x1,1)+dot(x2,x2,1)'-2*(x2'*x1)));
+    [~,i] = min(diag((E-cell2mat(ss))'*ff*(E-cell2mat(ss))));
 
     if verbosity ~= 0
         fprintf('\n');
@@ -118,7 +112,7 @@ function irl_result = algorithm4run(episodes, params, verbosity)
         fprintf(1,'exp_time=%.2f;  krn_time=%.2f; svm_time=%.2f; mdp_time=%.2f; \n',[exp_time, krn_time, svm_time, mdp_time]);
     end
 
-    [E,ss{i},rs{i}]
+    [a_f*E, a_f*ss{i},a_f*(E-sb{i-1})]
 
     irl_result = rs{i};
 end

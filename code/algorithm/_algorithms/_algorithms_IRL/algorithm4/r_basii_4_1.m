@@ -7,7 +7,7 @@ function [state2index, m_f, t_f, a_f] = r_basii_4_1()
     
     a_f = vertcat(m_f(:,m_c(:)), t_f(:,t_c(:)));
             
-    state2index = @(states) ib_intersect(r_basii_cells(states)', a_f');
+    state2index = @(states) locb_ismember(r_basii_cells(states)', a_f');
 end
 
 function m_features = move_features()
@@ -39,10 +39,10 @@ end
 
 function rb = r_basii_features(states)
 
-    ds = abs(states(3:6,:));       
+    ds   = abs(states(3:6,:));           
+    tc   = target_new_touch_count(states);
+    ds_i = 1:4:12;
     
-    tc = target_new_touch_count(states);
-
     rb = [
         double(0  <= ds & ds < 15 );
         double(15 <= ds & ds < 50 );
@@ -50,7 +50,7 @@ function rb = r_basii_features(states)
         double(0  <  tc(1)        );
     ];
 
-    ds_i = 1:4:12;
+    
 
     rb = rb([0+ds_i,1+ds_i,2+ds_i,3+ds_i,13],:);
 end
@@ -59,7 +59,7 @@ function rb = r_basii_cells(states)
     rb = [];
     
     if iscell(states)
-        for i = numel(states)
+        for i = 1:numel(states)
             rb(:,i) = r_basii_features(states{i});
         end
         
@@ -89,6 +89,8 @@ function td = target_distance(states)
     td = dot(cp,cp,1)+dot(tp,tp,1)'-2*(tp'*cp);
 end
 
-function ib = ib_intersect(A,B)
-    [~, ~, ib] = intersect(A, B, 'rows');
+function locB = locb_ismember(A,B)
+    [Lia, locB] = ismember(A, B, 'rows');
+    
+    assert(all(Lia), 'there is a mismatch between the feature matrix and our state features');
 end
