@@ -1,5 +1,5 @@
 var _renderer  = new TargetRenderer(0, .5, .5, 1000);
-var _prerender = _renderer.prerender();
+var _prerender = _renderer.prerender2();
 
 function Targets(mouse, featureWeights) {
     var radius  = 150;
@@ -262,8 +262,7 @@ function TargetRenderer(fadeInTime, fadeOffTime, fadeOutTime, lifespan) {
         return color.join(',');
 }
 
-    this.prerender = function() {
-        
+    this.prerender1 = function() {
 
         var colorStepCount = (2/colorStepSize)+1;
         var alphaStepCount = (1/alphaStepSize)+1;
@@ -297,6 +296,54 @@ function TargetRenderer(fadeInTime, fadeOffTime, fadeOutTime, lifespan) {
         //window.location.href=image2; // it will save locally
     }
 
+	this.prerender2 = function() {
+
+        var colorStepCount = (2/colorStepSize)+1;
+        var alphaStepCount = (1/alphaStepSize)+1;
+
+        var canvas = document.createElement("canvas");
+            canvas.width  = 200*colorStepCount;
+            canvas.height = 200*alphaStepCount;
+
+        for(var r = -1; r <= 1; r+=colorStepSize) {
+            
+            var xOffset = Math.round(200*(r+1)/colorStepSize,0);
+            
+            for(var a = 1; a >= 0; a-=alphaStepSize) {
+            
+                var yOffset = Math.round(200*(1-a)/alphaStepSize,0);
+
+                var context = canvas.getContext("2d");
+                
+				var radius = 100;
+				var stroke = 10;
+				var filler = (r+1)/2 * radius;
+				
+				var circRadiu = 100;
+				var lineWidth = 15;
+				var fillWidth = (r+1)/2 * circRadiu;
+				
+				context.lineWidth   = stroke;
+                context.strokeStyle = "rgba(" + self.rgb(r) + "," + a + ")";				
+                context.beginPath();
+                context.arc(radius + xOffset, radius + yOffset, radius-stroke, 0, 2 * Math.PI);
+                context.stroke();
+				
+				context.beginPath();
+				context.fillStyle   = "rgba(" + self.rgb(r) + "," + a + ")";
+				context.arc(radius + xOffset, radius + yOffset, filler, 0, 2 * Math.PI);
+				context.fill();
+            }
+        }
+        
+        return canvas;
+        
+        //var _image = new Image();
+        //    _image.src = _canvas.toDataURL("image/png");  
+        //var image2 = _canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");  // here is the most important part because if you dont replace you will get a DOM 18 exception.
+        //window.location.href=image2; // it will save locally
+    }
+	
     this.xOffset = function (reward) {
         return 200*Math.round((reward+1)/colorStepSize,0);
     }
