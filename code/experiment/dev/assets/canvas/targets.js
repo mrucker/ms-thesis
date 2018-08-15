@@ -209,7 +209,7 @@ function TargetRenderer(fadeInTime, fadeOffTime, fadeOutTime, lifespan) {
 
     var self           = this;
     var alphaStepSize  = .1;
-    var colorStepSize  = .1;
+    var colorStepSize  = .05;
 
     fadeInTime  *= lifespan;
     fadeOffTime *= lifespan;
