@@ -1,4 +1,4 @@
-function [state2index, m_f, t_f, a_f] = r_basii_4_1()
+function [state2vindex, m_f, t_f, a_f] = r_basii_4_2()
 
     m_f = move_features();
     t_f = targ_features();
@@ -7,7 +7,10 @@ function [state2index, m_f, t_f, a_f] = r_basii_4_1()
 
     a_f = vertcat(m_f(:,m_c(:)), t_f(:,t_c(:)));
 
-    state2index = @(states) locb_ismember(r_basii_cells(states)', a_f');
+    a_n = size(a_f,2);
+    e_n = @(row_n,rows) cell2mat(arrayfun(@(row) [zeros(row-1,1);1;zeros(row_n-row,1)], rows, 'UniformOutput', false)');
+    
+    state2vindex = @(states) e_n(a_n, locb_ismember(r_basii_cells(states)', a_f'));
 end
 
 function m_features = move_features()

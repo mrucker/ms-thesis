@@ -34,7 +34,7 @@ reward_f = cell(1, rewd_count);
 for r_i = 1:rewd_count
     reward_basii_n = size(reward_basii(s_1()),1);
     reward_theta_r = reward_theta(reward_basii_n);
-    
+
     reward_f{r_i} = @(s) reward_theta_r'*reward_basii(s);
     states_c{r_i} = state_init();
 end
@@ -42,6 +42,10 @@ end
 for a_i = 1:size(algos,1)
 
     ts = tunings();
+
+    if a_i == 1
+        ts = ts(:,144:end);
+    end
     
     for tuning = ts
 
@@ -49,7 +53,7 @@ for a_i = 1:size(algos,1)
         bT = zeros(1,rewd_count);
         mT = zeros(1,rewd_count);
         aT = zeros(1,rewd_count);
-        
+
         max_vs = zeros(1,rewd_count);
         avg_vs = zeros(1,rewd_count);
         lst_vs = zeros(1,rewd_count);
@@ -71,7 +75,7 @@ for a_i = 1:size(algos,1)
 
             vs = zeros(1, numel(Pf)-1);
 
-            for Pf_i = 1:(numel(Pf)-1)
+            parfor Pf_i = 1:(numel(Pf)-1)
                 vs(Pf_i) = policy_eval_at_states(Pf{Pf_i+1}, eval_states, eval_reward, 0.9, eval_steps, trans_pre, 20);
             end
 
@@ -83,7 +87,7 @@ for a_i = 1:size(algos,1)
 
         p_results(algos{a_i,2}, tuning, max_vs, avg_vs, lst_vs, var_vs, fT, bT, mT, aT);
     end
-    
+
 end
 
 function a = actions(s)
@@ -140,10 +144,9 @@ function vb = value_basii_cells(states, VBf)
     vb = [];
     
     if iscell(states)
-        for i = numel(states)
+        for i = 1:numel(states)
             vb(:,i) = VBf(states{i});
         end
-        
     else
         vb = VBf(states);
     end
@@ -263,7 +266,7 @@ function tc = target_count(state)
     tc = (numel(state) - 11)/3;
 end
 
-function p_results(algo_name, tuning, max_vs, avg_vs, lst_vs, var_vs, f_time, b_time, v_time, a_time)
+function p_results(algo_name, tuning, max_vs, avg_vs, lst_vs, var_vs, f_time, b_time, m_time, a_time)
     fprintf('%s', algo_name);
     fprintf('(G=0.9, L=%03.1f, N=%3i, M=%3i, S=%2i, W=%2i) ',tuning);
 
@@ -271,10 +274,10 @@ function p_results(algo_name, tuning, max_vs, avg_vs, lst_vs, var_vs, f_time, b_
     fprintf('AVG_AVG_V = %8.3f; '  , mean(avg_vs));
     fprintf('AVG_LST_V = %8.3f; '  , mean(lst_vs));
     fprintf('AVG_VAR_V = %10.3f; ' , mean(var_vs));
-    
+
     fprintf('fT = %5.2f; '        , mean(f_time));
     fprintf('bT = %5.2f; '        , mean(b_time));
-    fprintf('vT = %5.2f; '        , mean(v_time));
+    fprintf('mT = %5.2f; '        , mean(m_time));
     fprintf('aT = %5.2f; '        , mean(a_time));
     fprintf('\n');
 end

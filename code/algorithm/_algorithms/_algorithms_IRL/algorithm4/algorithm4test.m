@@ -38,12 +38,28 @@ episodes{5} = generate_episodes_from_state(Pf{N+1}, s_1(), trans_pre, T, 15);
 episodes = horzcat(episodes{:});
 
 params = struct ('epsilon',.0001, 'gamma',.9, 'seed',0);
-result = algorithm4run(episodes, params, 1);
 
-t_reward_per_basii = r_t * a_f;
-i_reward_per_basii = result'*eye(size(a_f,2));
+result_1 = algorithm4run(episodes, params, 1, 1);
+result_2 = algorithm4run(episodes, params, 1, 5);
 
-abs(t_r - i_r)
+tru_reward_for_each_unique_basii_set   = r_t * a_f;
+irl_reward_for_each_unique_basii_set_1 = result_1'*eye(size(a_f,2));
+irl_reward_for_each_unique_basii_set_2 = result_2'*eye(size(a_f,2));
+
+tru_reward_for_each_unique_basii_set   = tru_reward_for_each_unique_basii_set   - min(tru_reward_for_each_unique_basii_set);
+irl_reward_for_each_unique_basii_set_1 = irl_reward_for_each_unique_basii_set_1 - min(irl_reward_for_each_unique_basii_set_1);
+irl_reward_for_each_unique_basii_set_2 = irl_reward_for_each_unique_basii_set_2 - min(irl_reward_for_each_unique_basii_set_2);
+
+tru_reward_for_each_unique_basii_set   = tru_reward_for_each_unique_basii_set/max(tru_reward_for_each_unique_basii_set);
+irl_reward_for_each_unique_basii_set_1 = irl_reward_for_each_unique_basii_set_1/max(irl_reward_for_each_unique_basii_set_1);
+irl_reward_for_each_unique_basii_set_2 = irl_reward_for_each_unique_basii_set_2/max(irl_reward_for_each_unique_basii_set_2);
+
+[
+    norm(tru_reward_for_each_unique_basii_set - irl_reward_for_each_unique_basii_set_1, 2), ...
+    norm(tru_reward_for_each_unique_basii_set - irl_reward_for_each_unique_basii_set_2, 2);
+    norm(tru_reward_for_each_unique_basii_set - irl_reward_for_each_unique_basii_set_1, 1), ...
+    norm(tru_reward_for_each_unique_basii_set - irl_reward_for_each_unique_basii_set_2, 1);
+]
 
 function s = state_init()
     s = {

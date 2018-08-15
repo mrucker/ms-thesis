@@ -1,10 +1,10 @@
-function irl_result = algorithm4run(episodes, params, verbosity)
+function irl_result = algorithm4run(episodes, params, verbosity, kernel)
 
     %N = 30;
     %M = 80;
 
     N = 20;
-    M = 50;
+    M = 30;
     T = 10;
     S = 5;
     W = 3;
@@ -45,7 +45,7 @@ function irl_result = algorithm4run(episodes, params, verbosity)
 
     E = E./numel(episodes);
 
-    ff = k(a_f,a_f,1);
+    ff = k(a_f,a_f,kernel);
     
     % Generate random policy.
     tic;
@@ -101,7 +101,7 @@ function irl_result = algorithm4run(episodes, params, verbosity)
         svm_time = svm_time + toc;
     end
 
-    [~,i] = min(diag((E-cell2mat(ss))'*ff*(E-cell2mat(ss))));
+    [m,i] = min(diag((E-cell2mat(ss))'*ff*(E-cell2mat(ss))));
 
     if verbosity ~= 0
         fprintf('\n');
@@ -109,7 +109,8 @@ function irl_result = algorithm4run(episodes, params, verbosity)
         fprintf(1,'exp_time=%.2f;  krn_time=%.2f; svm_time=%.2f; mdp_time=%.2f; \n',[exp_time, krn_time, svm_time, mdp_time]);
     end
 
-    [a_f*E, a_f*ss{i},a_f*(E-sb{i-1})]
+    m
+    [a_f*E, a_f*ss{i}]'
 
     irl_result = rs{i};
 end
@@ -142,7 +143,7 @@ end
 function k = k(x1, x2, kernel)
     p = 2;
     c = 1;
-    s = 1;
+    s = .01;
 
     switch kernel
         case 1

@@ -3,8 +3,6 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_polic
     %because we backup for every state
     %the value of W can fold into our T
     T = T + W - 1;
-
-    stabalize = 4;
     
     a_start = tic;
 
@@ -57,7 +55,7 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_polic
         init_states = all_states(randi(numel(all_states),1,M));
         
         t_start = tic;
-        for m = 1:M 
+        parfor m = 1:M 
 
             post_states = trans_post(init_states{m}, actions(init_states{m}));
             post_values = Vf{n}(post_states);
@@ -107,6 +105,10 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_polic
 
         all_states = horzcat(all_states, X_s_m{:});
 
+        if numel(all_states) > 2000
+           all_states = all_states(end-1999:end); 
+        end
+        
         t_start = tic;
         for m = 1:M
             X_base = X_b_m{m};
@@ -195,10 +197,10 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_polic
                     end
                 end
 
-                Xs{(n-1)*M + m} = X;
-                Ys{(n-1)*M + m} = Y;
-                Ks{(n-1)*M + m} = K;
-                As{(n-1)*M + m} = A;
+                %Xs{(n-1)*M + m} = X;
+                %Ys{(n-1)*M + m} = Y;
+                %Ks{(n-1)*M + m} = K;
+                %As{(n-1)*M + m} = A;
         end
         b_time = b_time + toc(t_start);
 

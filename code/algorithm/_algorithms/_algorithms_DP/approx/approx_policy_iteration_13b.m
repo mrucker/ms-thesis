@@ -51,7 +51,7 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_polic
         init_states = all_states(randi(numel(all_states),1,M));
         
         t_start = tic;
-        for m = 1:M
+        parfor m = 1:M
 
             post_states = trans_post(init_states{m}, actions(init_states{m}));
             post_values = Vf{n}(post_states);
@@ -100,6 +100,10 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_polic
         f_time = f_time + toc(t_start);
 
         all_states = horzcat(all_states, X_s_m{:});
+        
+        if numel(all_states) > 2000
+           all_states = all_states(end-1999:end); 
+        end
 
         t_start = tic;
         for m = 1:M
@@ -189,10 +193,10 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_polic
                     end
                 end
 
-                Xs{(n-1)*M + m} = X;
-                Ys{(n-1)*M + m} = Y;
-                Ks{(n-1)*M + m} = K;
-                As{(n-1)*M + m} = A;
+                %Xs{(n-1)*M + m} = X;
+                %Ys{(n-1)*M + m} = Y;
+                %Ks{(n-1)*M + m} = K;
+                %As{(n-1)*M + m} = A;
         end
         b_time = b_time + toc(t_start);
 

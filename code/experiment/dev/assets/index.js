@@ -10,11 +10,15 @@ $(document).ready( function () {
     }
 
     if(querystring.exists("test")) {
+		
+		var experiment1 = new Experiment("testOnly");
+		
         $.Deferred().resolve()
-            .then(showModalContent("dialog1", false))
-            .then(new Experiment("testOnly").run    )
-            .then(showModalContent("dialog7", false))
-            .then(showThanks                        );
+            .then(showModalContent("demo"      , true ))
+			.then(showModalContent("begin1"    , false))
+            .then(experiment1.run                      )
+            .then(showModalContent("finished"  , false))
+            .then(showThanks                           );
     } else {
 
         var participant = new Participant();
