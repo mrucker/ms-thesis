@@ -168,7 +168,7 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, v_time, a_time] = approx_polic
 
                         alpha(i)  = a;
                         eta(i)    = e;
-                        lambda(i)x = l;
+                        lambda(i) = l;
 
                     else
                         Y = [Y, y];

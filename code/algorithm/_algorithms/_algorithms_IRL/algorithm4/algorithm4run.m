@@ -15,14 +15,11 @@ function irl_result = algorithm4run(episodes, params, verbosity)
     episode_states = horzcat(episodes{:});
     episode_starts = episode_states(1:episode_length:episode_count*episode_length);
 
-    [state2rbindex, ~, ~, a_f] = r_basii_4_1();
-    
-    a_n  = size(a_f,2);
-    
-    e_n = @(row_n,rows) cell2mat(arrayfun(@(row) [zeros(row-1,1);1;zeros(row_n-row,1)], rows, 'UniformOutput', false)');
+    [state2vindex, ~, ~, a_f] = r_basii_4_1();
+
     s_1 = @() episode_starts{randi(numel(episode_starts))};
     s_a = @s_act_4_1;
-    r_b = @(s) e_n(a_n,state2rbindex(s));
+    r_b = state2vindex;
     v_b = @v_basii_4_1;
 
     fprintf(1,'Start of Algorithm4 \n');
@@ -32,7 +29,7 @@ function irl_result = algorithm4run(episodes, params, verbosity)
     if params.seed ~= 0
         rng(params.seed);
     end
-    
+
     exp_time = 0;
     krn_time = 0;
     svm_time = 0;
@@ -48,7 +45,7 @@ function irl_result = algorithm4run(episodes, params, verbosity)
 
     E = E./numel(episodes);
 
-    ff = a_f'*a_f;
+    ff = k(a_f,a_f,1);
     
     % Generate random policy.
     tic;
@@ -57,7 +54,7 @@ function irl_result = algorithm4run(episodes, params, verbosity)
         rand_r = rand_r/sum(abs(rand_r));
 
         s_r = @(s) rand_r'*a_f*r_b(s);        
-        
+
         Pf     = approx_policy_iteration_13b(s_1, s_a, s_r, v_b, @huge_trans_post, @huge_trans_pre, params.gamma, N, M, S, W);
         rand_s = policy_eval_at_states(Pf{N+1}, episode_starts, r_b, params.gamma, T, @huge_trans_pre, ceil(150/numel(episode_starts)));
 
@@ -142,28 +139,28 @@ function p = setDefaults(params)
     p = params;
 end
 
-function k = k(x1, x2, params)
-    %p = params.p;
-    %c = params.c;
-    sigma = params.sigma;
+function k = k(x1, x2, kernel)
+    p = 2;
+    c = 1;
+    s = 1;
 
-    switch params.kernel
+    switch kernel
         case 1
             b = k_dot();
         case 2
-            %b = k_polynomial(k_hamming(1),p,c);
+            b = k_polynomial(k_hamming(1),p,c);
         case 3
             b = k_hamming(0);
         case 4
             b = k_equal(k_norm());
         case 5
-            b = k_gaussian(k_norm(),sigma);
+            b = k_gaussian(k_norm(),s);
         case 6
-            b = k_exponential(k_norm(),sigma);
+            b = k_exponential(k_norm(),s);
         case 7
             b = k_anova(size(x1,1));
         case 8
-            b = k_exponential_compact(k_norm(),sigma);
+            b = k_exponential_compact(k_norm(),s);
     end
 
     k = b(x1,x2);
