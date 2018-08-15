@@ -41,7 +41,7 @@ function Experiment(participantId)
             return JSON.parse(querystring.value("reward"));
         }
         else {
-            return [0, 0, 0, 0, 1]; 
+            return [-0.1921,-0.0462,-0.0107,-0.0009,0.0790]; 
         }
     }
     
