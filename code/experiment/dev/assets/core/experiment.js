@@ -1,4 +1,4 @@
-function Experiment(participantId)
+function Experiment(participantId, featureWeights)
 {
     var id     = Id.generate();
     var self   = this;
@@ -7,7 +7,7 @@ function Experiment(participantId)
 
     var canvas  = new Canvas(document.querySelector('#c'));
     var mouse   = new Mouse(canvas);
-    var targets = new Targets(mouse, getFeatureWeights());
+    var targets = new Targets(mouse, featureWeights);
     var counter = new Counter(3, 3000, true);
     var timer   = new Timer(15000, true);
     
@@ -33,16 +33,6 @@ function Experiment(participantId)
 
     this.draw = function(canvas) {
         fps.cycle();
-    }
-
-    function getFeatureWeights() {
-        
-        if(querystring.exists("reward")) {
-            return JSON.parse(querystring.value("reward"));
-        }
-        else {
-            return [-0.1921,-0.0462,-0.0107,-0.0009,0.0790]; 
-        }
     }
     
     function startExperiment() {

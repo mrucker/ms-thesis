@@ -11,19 +11,19 @@ $(document).ready( function () {
 
     if(querystring.exists("test")) {
 		
-		var experiment1 = new Experiment("testOnly");
+		var experiment1 = new Experiment("testOnly", getFeatureWeights());
 		
         $.Deferred().resolve()
             .then(showModalContent("demo"      , true ))
-			.then(showModalContent("begin1"    , false))
+			.then(showModalContent("begin2"    , false))
             .then(experiment1.run                      )
             .then(showModalContent("finished"  , false))
             .then(showThanks                           );
     } else {
 
         var participant = new Participant();
-        var experiment1 = new Experiment(participant.getId());
-        var experiment2 = new Experiment(participant.getId());
+        var experiment1 = new Experiment(participant.getId(),[0      ,0      ,0      ,0      ,1     ]);
+        var experiment2 = new Experiment(participant.getId(),[-0.1921,-0.0462,-0.0107,-0.0009,0.0790]);
 
         if(querystring.exists("id")) {
             alert(participant.getId());
@@ -129,5 +129,12 @@ $(document).ready( function () {
             $("#modalButton").html($content.data('btnTxt'));
     }
 
-
+	function getFeatureWeights() {
+        if(querystring.exists("reward")) {
+            return JSON.parse(querystring.value("reward"));
+        }
+        else {
+            return [-0.1921,-0.0462,-0.0107,-0.0009,0.0790]; 
+        }
+    }
 });

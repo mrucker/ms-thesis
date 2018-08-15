@@ -7,7 +7,7 @@ function Targets(mouse, featureWeights) {
     var effectiveA = 0;
     var effectiveR = 0;
     
-    //if you change this 200 value be sure to remember and change the matlab exogonous_info function as well
+    //if you change this 200 value be sure to remember to also change the matlab huge_trans_pre function as well
     var process = poissonProcess.create(200, function () { targets.push(new Target(mouse, featureWeights))} );
 
     this.startAppearing = function() {
@@ -19,12 +19,14 @@ function Targets(mouse, featureWeights) {
     }
 
     this.draw = function(canvas){
-        
+
         effectiveA = (canvas.getResolution(0)/3000) * (canvas.getResolution(1)/1500) * (Math.PI * radius * radius);
         effectiveR = Math.round(Math.sqrt(effectiveA/Math.PI),0);
-        
+
+		//_renderer.sample(canvas,0,0);
+		
         targets.forEach(function(target){ target.setR(effectiveR); target.draw(canvas); });
-        
+
         targets = targets.filter(function(target) {return !target.isDead();} );
     }
 
@@ -193,7 +195,7 @@ function Target(mouse, featureWeights) {
         var xOffset = _renderer.xOffset(self.getReward());
         var yOffset = _renderer.yOffset(self.getAge());
 
-        context.drawImage(_prerender,xOffset,yOffset, 200, 200, effectiveX-effectiveR, effectiveY-effectiveR, 2*effectiveR, 2*effectiveR);        
+        context.drawImage(_prerender,xOffset,yOffset, 200, 200, effectiveX-effectiveR, effectiveY-effectiveR, 2*effectiveR, 2*effectiveR);
     }
 
     function dist(x1,y1,x2,y2) {
@@ -208,7 +210,7 @@ function Target(mouse, featureWeights) {
 function TargetRenderer(fadeInTime, fadeOffTime, fadeOutTime, lifespan) {
 
     var self           = this;
-    var alphaStepSize  = .1;
+    var alphaStepSize  = .05;
     var colorStepSize  = .05;
 
     fadeInTime  *= lifespan;
@@ -324,7 +326,7 @@ function TargetRenderer(fadeInTime, fadeOffTime, fadeOutTime, lifespan) {
 				var fillWidth = (r+1)/2 * circRadiu;
 				
 				context.lineWidth   = stroke;
-                context.strokeStyle = "rgba(" + self.rgb(r) + "," + a + ")";				
+                context.strokeStyle = "rgba(" + self.rgb(r) + "," + a + ")";
                 context.beginPath();
                 context.arc(radius + xOffset, radius + yOffset, radius-stroke, 0, 2 * Math.PI);
                 context.stroke();
@@ -345,10 +347,45 @@ function TargetRenderer(fadeInTime, fadeOffTime, fadeOutTime, lifespan) {
     }
 	
     this.xOffset = function (reward) {
-        return 200*Math.round((reward+1)/colorStepSize,0);
+        
+		//lazy fix
+		if(reward == 1) {
+			reward -= .05;
+		}
+		
+		return 200*Math.round((reward+1)/colorStepSize,0);
     }
     
     this.yOffset = function(aliveTime) {
         return 200*Math.round((1-self.opacity(aliveTime))/alphaStepSize, 0)
     }
+
+	this.sample = function(canvas, x,y) {
+		
+		var context     = canvas.getContext2d();
+		var x_step_size = 125;
+		var radius      = 50;
+		
+		for(var r = -1; r <= 1; r+=.05) {
+			
+			var yOffset = _renderer.yOffset(985);
+			var xOffset = _renderer.xOffset(r);
+			
+			context.drawImage(_prerender, xOffset, yOffset, 200, 200, (r+1)*x_step_size, 0, 2*radius, 2*radius);
+		}
+
+		var highlight = function(r) {
+			context.beginPath();
+			context.fillStyle = "rgba(256,256,256,1)";
+			context.arc((r+1)*x_step_size + radius, 0 + radius, radius - 4, 0, 2 * Math.PI);
+			context.fill();
+			context.drawImage(_prerender, _renderer.xOffset(r), _renderer.yOffset(0), 200, 200, (r+1)*x_step_size, 0, 2*radius, 2*radius);
+		}
+		
+		highlight(-1.0);
+		highlight(-0.5);
+		highlight( 0.0);
+		highlight( 0.5);
+		highlight( 1.0);
+	}
 }
