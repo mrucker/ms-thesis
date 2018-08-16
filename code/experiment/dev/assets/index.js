@@ -15,6 +15,8 @@ $(document).ready( function () {
 		
         $.Deferred().resolve()
             .then(showModalContent("demo"      , true ))
+			.then(showModalContent("directions", true ))
+			.then(showModalContent("begin1"    , true ))
 			.then(showModalContent("begin2"    , false))
             .then(experiment1.run                      )
             .then(showModalContent("finished"  , false))
