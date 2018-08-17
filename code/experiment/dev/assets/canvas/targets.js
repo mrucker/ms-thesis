@@ -1,9 +1,11 @@
 var _renderer  = new TargetRenderer(0, .5, .5, 1000);
-var _prerender = _renderer.prerender2();
+
+var _prerender_n_touch = _renderer.prerender(_renderer.gradientRGB, _renderer.evenOpacity, _renderer.evenFill, _renderer.mediumStroke);
+var _prerender_y_touch = _renderer.prerender(_renderer.allBlack   , _renderer.evenOpacity, _renderer.evenFill, _renderer.mediumStroke);
 
 function Targets(mouse, featureWeights) {
-    var radius  = 150;
-    var targets = [];
+    var radius     = 150;
+    var targets    = [];
     var effectiveA = 0;
     var effectiveR = 0;
     
@@ -24,6 +26,8 @@ function Targets(mouse, featureWeights) {
         effectiveR = Math.round(Math.sqrt(effectiveA/Math.PI),0);
 
 		//_renderer.sample(canvas,0,0);
+		
+		var context = canvas.getContext2d();
 		
         targets.forEach(function(target){ target.setR(effectiveR); target.draw(canvas); });
 
@@ -68,7 +72,7 @@ function Target(mouse, featureWeights) {
     this.getX   = function() { return effectiveX; };
     this.getY   = function() { return effectiveY; };
     this.getAge = function() { return Date.now() - createTime; };    
-    this.isDead = function() { return _renderer.opacity(self.getAge()) <= .01 };
+    this.isDead = function() { return self.getAge() >= 100 && _renderer.yOffset(self.getAge()) == 0;};
     
     this.getData     = function() { 
         return [
@@ -195,7 +199,13 @@ function Target(mouse, featureWeights) {
         var xOffset = _renderer.xOffset(self.getReward());
         var yOffset = _renderer.yOffset(self.getAge());
 
-        context.drawImage(_prerender,xOffset,yOffset, 200, 200, effectiveX-effectiveR, effectiveY-effectiveR, 2*effectiveR, 2*effectiveR);
+		if(self.isTouched()) {
+			context.drawImage(_prerender_y_touch,xOffset,yOffset, 200, 200, effectiveX-effectiveR, effectiveY-effectiveR, 2*effectiveR, 2*effectiveR);
+		}
+		else {
+			context.drawImage(_prerender_n_touch,xOffset,yOffset, 200, 200, effectiveX-effectiveR, effectiveY-effectiveR, 2*effectiveR, 2*effectiveR);
+		}
+			
     }
 
     function dist(x1,y1,x2,y2) {
@@ -209,16 +219,123 @@ function Target(mouse, featureWeights) {
 
 function TargetRenderer(fadeInTime, fadeOffTime, fadeOutTime, lifespan) {
 
-    var self           = this;
-    var alphaStepSize  = .05;
-    var colorStepSize  = .05;
+	var target_radius = 100;
+
+	var rewSteps = 40;
+	var ageSteps = 20;
+
+	var width  = 200;
+	var height = 200;
 
     fadeInTime  *= lifespan;
     fadeOffTime *= lifespan;
     fadeOutTime *= lifespan;
 
-    this.opacity = function(age) {
-        var o_value   = 0;
+    this.evenOpacity = function(ageStep) {
+		return ageStep / ageSteps;
+    }
+
+    this.gradientRGB = function(rewStep) {
+	
+        var c_stop0 = [200, 0  ,  0 ];
+        var c_stop1 = [ 0 , 200,  0 ];
+        var c_stop2 = [ 0 , 0  , 200];
+		
+        var c_val0 = 0.0 * rewSteps; 
+        var c_val1 = 0.5 * rewSteps;
+        var c_val2 = 1.0 * rewSteps;
+		
+		var c_wgt0 = 0;
+		var c_wgt1 = 0;
+		var c_wgt2 = 0;
+		
+		if(c_val0 <= rewStep && rewStep < c_val1) {
+			c_wgt0 = Math.max(0, Math.min((1       ),(c_val1 - rewStep)/(c_val1-c_val0)));
+			c_wgt1 = Math.max(0, Math.min((1-c_wgt0),(c_val2 - rewStep)/(c_val2-c_val1))); 
+		} 
+		if(c_val1 <= rewStep && rewStep <= c_val2) {
+			c_wgt1 = Math.max(0, Math.min((1-c_wgt0),(c_val2 - rewStep)/(c_val2-c_val1))); 
+		    c_wgt2 = Math.max(0, Math.min((1-c_wgt1),(1                               ))); 
+		}			
+
+        var color = [
+            c_wgt0*c_stop0[0]+c_wgt1*c_stop1[0]+c_wgt2*c_stop2[0],
+            c_wgt0*c_stop0[1]+c_wgt1*c_stop1[1]+c_wgt2*c_stop2[1],
+            c_wgt0*c_stop0[2]+c_wgt1*c_stop1[2]+c_wgt2*c_stop2[2]
+        ];
+
+        color = color.map(function(c) { return Math.round(c,0); });
+        
+        return color.join(',');
+	}
+
+	this.allBlack = function(rewStep) {
+		return "0,0,0";
+	}
+
+	this.allGray = function(rewStep) {
+		return "150,150,150";
+	}
+
+	this.mediumStroke = function(rewStep) {
+		return 10;
+	}
+	
+	this.evenFill = function(rewStep) {
+		return rewStep/rewSteps * target_radius;
+	}
+	
+	this.prerender = function(color, opacity, fill, stroke) {
+
+        var canvas = document.createElement("canvas");
+
+		canvas.width  = rewSteps * width;
+		canvas.height = ageSteps * height;
+
+		var context = canvas.getContext("2d");
+
+        for(var rewStep = 0; rewStep < rewSteps; rewStep++) {
+            for(var ageStep = 0; ageStep < ageSteps; ageStep++) {
+				
+				var xOffset = rewStep * width  + target_radius;
+                var yOffset = ageStep * height + target_radius;
+                			
+				var center_radius = fill(rewStep);
+				var stroke_weight = stroke(rewStep);
+				var stroke_begins = target_radius - stroke_weight;
+				
+				var style = "rgba(" + color(rewStep) + "," + opacity(ageStep) + ")";
+				
+				if ( center_radius < stroke_begins ) {
+					context.beginPath();
+					context.lineWidth = stroke_weight;
+					context.strokeStyle = style;
+					context.arc(xOffset, yOffset, stroke_begins, 0, 2 * Math.PI);
+					context.stroke();
+
+					context.beginPath();
+					context.fillStyle = style;
+					context.arc(xOffset, yOffset, center_radius, 0, 2 * Math.PI);
+					context.fill();
+				}
+				else {
+					context.beginPath();
+					context.fillStyle = style;
+					context.arc(xOffset, yOffset, target_radius, 0, 2 * Math.PI);
+					context.fill();
+				}
+			}
+        }
+        
+        return canvas;
+    }
+	
+    this.xOffset = function (reward) {
+		return 200 * Math.round((reward+1)/2 * (rewSteps-1));
+    }
+    
+    this.yOffset = function(age) {
+		var o_value   = 0;
 
         if (age <= fadeInTime){
             o_value = age/fadeInTime;
@@ -234,130 +351,9 @@ function TargetRenderer(fadeInTime, fadeOffTime, fadeOutTime, lifespan) {
 
         if (age >= fadeInTime+fadeOffTime+fadeOutTime) {
             o_value = 0;
-        }
-
-        return o_value;
-    }
-    
-    this.rgb = function(reward) {
-
-        var c_stop0 = [200, 0  ,  0 ];
-        var c_stop1 = [ 0 , 200,  0 ];
-        var c_stop2 = [ 0 , 0  , 200];
-
-        var c_val0 = -1;
-        var c_val1 =  0;
-        var c_val2 =  1;
-
-        var c_wgt0 = Math.max(0,1-Math.abs(reward - c_val0));
-        var c_wgt1 = Math.max(0,1-Math.abs(reward - c_val1));
-        var c_wgt2 = Math.max(0,1-Math.abs(reward - c_val2));
-
-        var color = [
-            c_wgt0*c_stop0[0]+c_wgt1*c_stop1[0]+c_wgt2*c_stop2[0],
-            c_wgt0*c_stop0[1]+c_wgt1*c_stop1[1]+c_wgt2*c_stop2[1],
-            c_wgt0*c_stop0[2]+c_wgt1*c_stop1[2]+c_wgt2*c_stop2[2]
-        ];
-
-        color = color.map(function(c) { return Math.round(c,0); });
-        
-        return color.join(',');
-}
-
-    this.prerender1 = function() {
-
-        var colorStepCount = (2/colorStepSize)+1;
-        var alphaStepCount = (1/alphaStepSize)+1;
-
-        var canvas = document.createElement("canvas");
-            canvas.width  = 200*colorStepCount;
-            canvas.height = 200*alphaStepCount;
-
-        for(var r = -1; r <= 1; r+=colorStepSize) {
-            
-            var xOffset = Math.round(200*(r+1)/colorStepSize,0);
-            
-            for(var a = 1; a >= 0; a-=alphaStepSize) {
-            
-                var yOffset = Math.round(200*(1-a)/alphaStepSize,0);
-
-                var context = canvas.getContext("2d");
-                
-                context.fillStyle = "rgba(" + self.rgb(r) + "," + a + ")";
-                context.beginPath();
-                context.arc(100 + xOffset, 100 + yOffset, 100, 0, 2 * Math.PI);    
-                context.fill();
-            }
-        }
-        
-        return canvas;
-        
-        //var _image = new Image();
-        //    _image.src = _canvas.toDataURL("image/png");  
-        //var image2 = _canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");  // here is the most important part because if you dont replace you will get a DOM 18 exception.
-        //window.location.href=image2; // it will save locally
-    }
-
-	this.prerender2 = function() {
-
-        var colorStepCount = (2/colorStepSize)+1;
-        var alphaStepCount = (1/alphaStepSize)+1;
-
-        var canvas = document.createElement("canvas");
-            canvas.width  = 200*colorStepCount;
-            canvas.height = 200*alphaStepCount;
-
-        for(var r = -1; r <= 1; r+=colorStepSize) {
-            
-            var xOffset = Math.round(200*(r+1)/colorStepSize,0);
-            
-            for(var a = 1; a >= 0; a-=alphaStepSize) {
-            
-                var yOffset = Math.round(200*(1-a)/alphaStepSize,0);
-
-                var context = canvas.getContext("2d");
-                
-				var radius = 100;
-				var stroke = 10;
-				var filler = (r+1)/2 * radius;
-				
-				var circRadiu = 100;
-				var lineWidth = 15;
-				var fillWidth = (r+1)/2 * circRadiu;
-				
-				context.lineWidth   = stroke;
-                context.strokeStyle = "rgba(" + self.rgb(r) + "," + a + ")";
-                context.beginPath();
-                context.arc(radius + xOffset, radius + yOffset, radius-stroke, 0, 2 * Math.PI);
-                context.stroke();
-				
-				context.beginPath();
-				context.fillStyle   = "rgba(" + self.rgb(r) + "," + a + ")";
-				context.arc(radius + xOffset, radius + yOffset, filler, 0, 2 * Math.PI);
-				context.fill();
-            }
-        }
-        
-        return canvas;
-        
-        //var _image = new Image();
-        //    _image.src = _canvas.toDataURL("image/png");  
-        //var image2 = _canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");  // here is the most important part because if you dont replace you will get a DOM 18 exception.
-        //window.location.href=image2; // it will save locally
-    }
-	
-    this.xOffset = function (reward) {
-        
-		//lazy fix
-		if(reward == 1) {
-			reward -= .05;
-		}
+        }		
 		
-		return 200*Math.round((reward+1)/colorStepSize,0);
-    }
-    
-    this.yOffset = function(aliveTime) {
-        return 200*Math.round((1-self.opacity(aliveTime))/alphaStepSize, 0)
+        return 200 * Math.round(o_value * (ageSteps-1));
     }
 
 	this.sample = function(canvas, x,y) {
