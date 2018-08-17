@@ -52,7 +52,7 @@ function Counter(countFrom, countFor, isCountdown)
     }
     
     function drawGo(canvas) {
-        drawText(canvas, "GO!", 1-elapsedBy()/goTime);
+        drawText(canvas, "GO!", Math.min(1, 1.25-elapsedBy()/goTime));
     }
     
     function drawText(canvas, text, alpha) {

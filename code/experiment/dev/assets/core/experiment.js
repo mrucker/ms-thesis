@@ -61,7 +61,7 @@ function Experiment(participantId, featureWeights)
         canvas .startAnimating();
         counter.startCounting();
         
-        mouse  .startTracking();
+        mouse.startTracking();
 
         counter.onElapsed(function() { deferred.resolve(); });
 
@@ -74,8 +74,8 @@ function Experiment(participantId, featureWeights)
         startExperiment();
         
         targets.startAppearing();
-        timer.startTiming();
-        timer.onElapsed(function() { deferred.resolve(); });
+        timer  .startTiming();
+        timer  .onElapsed(function() { deferred.resolve(); });
         
         return deferred;
     }
