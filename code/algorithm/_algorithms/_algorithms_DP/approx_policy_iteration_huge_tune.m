@@ -23,9 +23,7 @@ s_a = @(s) actions(s);
 %algorithm_14  == (full tabular TD lambda with interval estimation and on-policy sampling )
 
 algos = {
-    @approx_policy_iteration_13b, 'algorithm_13b';
-    @approx_policy_iteration_14 , 'algorithm_14 ';
-    @approx_policy_iteration_8b , 'algorithm_8b ';
+    @approx_policy_iteration_13e, 'algorithm_13e';
 };
 
 states_c = cell(1, rewd_count);
@@ -42,10 +40,6 @@ end
 for a_i = 1:size(algos,1)
 
     ts = tunings();
-
-    if a_i == 1
-        ts = ts(:,144:end);
-    end
     
     for tuning = ts
 
@@ -140,58 +134,6 @@ function s = state_rand()
     s = population{randi(numel(population))};
 end
 
-function vb = value_basii_cells(states, VBf)
-    vb = [];
-    
-    if iscell(states)
-        for i = 1:numel(states)
-            vb(:,i) = VBf(states{i});
-        end
-    else
-        vb = VBf(states);
-    end
-end
-
-function vb = value_basii_1(states)
-
-    vb = zeros(14,size(states,2));
-    
-    vb(1    , :) = 1;
-    vb(2:7  , :) = states(3:8,:);
-    vb(8    , :) = target_count(states(:,1));
-    vb(9    , :) = target_new_touch_count(states);
-    vb(10:12, :) = target_relative_movement(states);
-    vb(13:14, :) = states(9:10,1)/2 - states(1:2,:);
-end
-
-function vb = value_basii_2(states)
-
-    xs = states(1,:);
-    ys = states(2,:);
-    ds = abs(states(3:8,:));
-    
-    screen_w  = states(9,1);
-    screen_h = states(10,1);
-    
-    grid = [3 3];
-    
-    cell_w = screen_w/grid(1);
-    cell_h = screen_h/grid(2);
-    
-    b_w = horzcat((1:grid(1))'-1, (1:grid(1))'-0) * cell_w;
-    b_h = horzcat((1:grid(2))'-1, (1:grid(2))'-0) * cell_h;
-    
-    vb = [
-        double(0  <= ds & ds < 15 );
-        double(15 <= ds & ds < 50 );
-        double(50 <= ds & ds < inf);
-        target_new_touch_count(states);
-        target_relative_movement(states);
-        double(b_w(:,1) <= xs & xs < b_w(:,2));
-        double(b_h(:,1) <= ys & ys < b_h(:,2));
-    ];
-end
-
 function rb = reward_basii(states)
 
     rb = zeros(7,size(states,2));
@@ -203,8 +145,8 @@ function rb = reward_basii(states)
             state = states(:,i);
         end
 
-        tc = target_new_touch_count(state);
-        
+        tc = target_touch_features(state);
+
         %[dx, dy, ddx, ddy, dddx, dddy, touch_count]
         rb(1:6, i) = (abs(state(3:8)) > 50).*abs(state(3:8));
         rb(  7, i) = tc(1,:);
@@ -212,16 +154,110 @@ function rb = reward_basii(states)
 end
 
 function rt = reward_theta(basii_count)
+    %rt = [zeros(basii_count-1,1);1];
     rt = 2*rand(basii_count,1) - 1;
+    %rt = [-.25*rand(basii_count-1,1);100];
 end
 
-function tc = target_new_touch_count(states)
-    r2 = states(11, 1).^2;
-    cp = states(1:2,:);
-    pp = states(1:2,:) - states(3:4,:);
+function [vb,t] = value_basii_cells(states, VBf)
+    t = 0;
+    if iscell(states)
+        vb = [];
+        for i = 1:numel(states)
+            [vb(:,i),ti] = VBf(states{i});
+            t = t+ti;
+        end
+    else
+        [vb,t] = VBf(states);
+    end
+end
 
-    pt = target_distance([pp;states(3:end,:)]) <= r2;
-    ct = target_distance([cp;states(3:end,:)]) <= r2;
+function [vb,time] = value_basii_2(states)
+    %t_start = tic;
+    %time = toc(t_start);
+    time = 0;
+
+    xs = states(1,:);
+    ys = states(2,:);
+    ds = abs(states(3:6,:));
+
+    %screen_w = states(9,1);
+    %screen_h = states(10,1);
+    %grid = [3 3];
+    %cell_w = screen_w/grid(1);
+    %cell_h = screen_h/grid(2);
+    %b_w = horzcat((1:grid(1))'-1, (1:grid(1))'-0) * (cell_w+1);
+    %b_h = horzcat((1:grid(2))'-1, (1:grid(2))'-0) * (cell_h+1);
+    
+    b_w = [
+       0     , 1059.3
+       1059.3, 2118.7
+       2118.7, inf
+    ];
+    
+    b_h = [
+       0     , 512.7
+       512.7 , 1025.3
+       1025.3, inf
+    ];
+    
+    %deriv_deg = 1:4:12;
+    %deriv_ind = 0:size(ds,1)-1;
+    %deriv_ord = reshape(deriv_deg' + deriv_ind,1,[]);
+    deriv_ord = [1 5 9 2 6 10 3 7 11 4 8 12];
+    
+    %appr_axs = 1:3:9;
+    %appr_ind = 0:2;
+    %appr_ord = reshape(appr_axs' + appr_ind,1,[]);
+    appr_ord = [1 4 7 2 5 8 3 6 9];
+    
+    %touch_dir = 1:2:4;
+    %touch_ind = 0:1;
+    %touch_ord = reshape(touch_dir' + touch_ind,1,[]); 
+    touch_ord = [1 3 2 4];
+    
+    %.6
+    tf = target_touch_features(states);
+    tm = target_approach_features(states);
+
+    deriv_features = [
+        double(0  <= ds & ds < 15 );
+        double(15 <= ds & ds < 50 );
+        double(50 <= ds & ds < inf);
+    ];
+
+    touch_features = [
+        tf == 0;
+        tf >= 1;
+    ];
+
+    approach_features = [
+        tm == 0;
+        tm >= 1 & tm <= 2;
+        tm >= 3;
+    ];
+
+    location_features = [
+        double(b_w(:,1) <= xs & xs < b_w(:,2));
+        double(b_h(:,1) <= ys & ys < b_h(:,2));
+    ];
+
+    vb = [
+        deriv_features(deriv_ord,:);
+        touch_features(touch_ord,:);
+        approach_features(appr_ord,:);
+        location_features;
+    ];
+
+end
+
+function tc = target_touch_features(states)
+    r2 = states(11, 1).^2;
+
+    [cd, pd] = target_distance(states);
+    
+    ct = cd <= r2;
+    pt = pd <= r2;
 
     %not perfect, if a target simply appears on top 
     %of you then it won't count as an actual touch for us
@@ -231,39 +267,47 @@ function tc = target_new_touch_count(states)
     ];
 end
 
-function td = target_distance(states)
-    cp = states(1:2,:);
-    tp = [states(12:3:end, 1)';states(13:3:end, 1)'];
-    
-    td = dot(cp,cp,1)+dot(tp,tp,1)'-2*(tp'*cp);
-end
+function ta = target_approach_features(states)
 
-function tm = target_relative_movement(states)
-    
     cp = states(1:2, :);
     pp = states(1:2, :) - states(3:4, :);
 
-    tp = [states(12:3:end, 1)';states(13:3:end, 1)'];
+    %.04
+    tp = reshape([states(12:3:end, 1)';states(13:3:end, 1)'], [], 1);
+    tn = numel(tp)/2;
 
-    curr_targ_xy_dist = abs(reshape(tp, [], 1) - repmat(cp, [size(tp,2), 1]));
-    prev_targ_xy_dist = abs(reshape(tp, [], 1) - repmat(pp, [size(tp,2), 1]));
-
+    %.1
+    curr_targ_xy_dist = abs(tp - repmat(cp, [tn, 1]));
+    prev_targ_xy_dist = abs(tp - repmat(pp, [tn, 1]));
+    
+    %.1
     targs_with_decrease_x = curr_targ_xy_dist(1:2:end,:) < prev_targ_xy_dist(1:2:end,:);
     targs_with_decrease_y = curr_targ_xy_dist(2:2:end,:) < prev_targ_xy_dist(2:2:end,:);
     
+    %.04
     targs_with_decrease_x_count  = sum(targs_with_decrease_x,1);
     targs_with_decrease_y_count  = sum(targs_with_decrease_y,1);
     targs_with_decrease_xy_count = sum(targs_with_decrease_x&targs_with_decrease_y,1);
-    
-    tm = [
+
+    %.02
+    ta = [
         targs_with_decrease_x_count;
         targs_with_decrease_y_count;
         targs_with_decrease_xy_count;
     ];
 end
 
-function tc = target_count(state)
-    tc = (numel(state) - 11)/3;
+function [cd, pd] = target_distance(states)
+    cp = states(1:2,:);
+    pp = states(1:2,:) - states(3:4,:);   
+    tp = [states(12:3:end, 1)';states(13:3:end, 1)'];
+    
+    dtp = dot(tp,tp,1)';
+    dcp = dot(cp,cp,1);
+    dpp = dot(pp,pp,1);
+    
+    cd = dcp+dtp-2*(tp'*cp);
+    pd = dpp+dtp-2*(tp'*pp);
 end
 
 function p_results(algo_name, tuning, max_vs, avg_vs, lst_vs, var_vs, f_time, b_time, m_time, a_time)

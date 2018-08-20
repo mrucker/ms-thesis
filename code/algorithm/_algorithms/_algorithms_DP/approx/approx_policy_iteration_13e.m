@@ -12,22 +12,21 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
     for w = 1:W
         g_mat(w, :) = circshift(g_row,w-1);
     end
-    
+
     f_time = 0;
     v_time = 0;
     b_time = 0;
     m_time = 0;
 
-    if ~production
-        Vf = cell(1, N+1);
-        Pf = cell(1, N+1);
+    Vf = cell(1, N+1);
+    Pf = cell(1, N+1);
+    
+    if ~production    
         Xs = cell(1, N*M);
         Ys = cell(1, N*M);
         Ks = cell(1, N*M);
         As = cell(1, N*M);
     else
-        Vf = {};
-        Pf = {};
         Xs = {};
         Ys = {};
         Ks = {};
@@ -232,14 +231,10 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
             model = fitrsvm(X',Y','KernelFunction','rbf', 'Solver', 'SMO', 'Standardize',true);
 
             avb_v(basii2indexes(avb_p)) = predict(model, avb_p');
+            
+            Vf{n+1} = @(ss) predict(model, value_basii(ss)');
+            Pf{n+1} = policy_function(actions, Vf{n+1}, trans_post);
 
-            if ~production
-                Vf{n+1} = @(ss) predict(model, value_basii(ss)');
-                Pf{n+1} = policy_function(actions, Vf{n+1}, trans_post);
-            else
-                Vf = {[], @(ss) predict(model, value_basii(ss)')};
-                Pf = {[], policy_function(actions, Vf{2}, trans_post);};
-            end
         m_time = m_time + toc(t_start);
     end
 
@@ -293,7 +288,7 @@ end
 function alp = all_location_perms()
     lox_f = eye(3);
     loy_f = eye(3);
-    
+
     [lox_c, loy_c] = ndgrid(1:size(lox_f,2), 1:size(loy_f,2));
 
     alp = vertcat(lox_f(:,lox_c(:)), loy_f(:,loy_c(:)));

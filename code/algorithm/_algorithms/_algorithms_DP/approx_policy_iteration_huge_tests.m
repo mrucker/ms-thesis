@@ -130,6 +130,31 @@ function s = state_rand()
     s = population{randi(numel(population))};
 end
 
+function rb = reward_basii(states)
+
+    rb = zeros(7,size(states,2));
+
+    for i = 1:size(states,2)
+        if iscell(states)
+            state = states{i};
+        else
+            state = states(:,i);
+        end
+
+        tc = target_touch_features(state);
+
+        %[dx, dy, ddx, ddy, dddx, dddy, touch_count]
+        rb(1:6, i) = (abs(state(3:8)) > 50).*abs(state(3:8));
+        rb(  7, i) = tc(1,:);
+    end
+end
+
+function rt = reward_theta(basii_count)
+    %rt = [zeros(basii_count-1,1);1];
+    rt = 2*rand(basii_count,1) - 1;
+    %rt = [-.25*rand(basii_count-1,1);100];
+end
+
 function [vb,t] = value_basii_cells(states, VBf)
     t = 0;
     if iscell(states)
@@ -222,31 +247,6 @@ function [vb,time] = value_basii_2(states)
 
 end
 
-function rb = reward_basii(states)
-
-    rb = zeros(7,size(states,2));
-
-    for i = 1:size(states,2)
-        if iscell(states)
-            state = states{i};
-        else
-            state = states(:,i);
-        end
-
-        tc = target_touch_features(state);
-
-        %[dx, dy, ddx, ddy, dddx, dddy, touch_count]
-        rb(1:6, i) = (abs(state(3:8)) > 50).*abs(state(3:8));
-        rb(  7, i) = tc(1,:);
-    end
-end
-
-function rt = reward_theta(basii_count)
-    %rt = [zeros(basii_count-1,1);1];
-    rt = 2*rand(basii_count,1) - 1;
-    %rt = [-.25*rand(basii_count-1,1);100];
-end
-
 function tc = target_touch_features(states)
     r2 = states(11, 1).^2;
 
@@ -261,19 +261,6 @@ function tc = target_touch_features(states)
         sum(ct&~pt, 1);
         sum(~ct&pt, 1);
     ];
-end
-
-function [cd, pd] = target_distance(states)
-    cp = states(1:2,:);
-    pp = states(1:2,:) - states(3:4,:);   
-    tp = [states(12:3:end, 1)';states(13:3:end, 1)'];
-    
-    dtp = dot(tp,tp,1)';
-    dcp = dot(cp,cp,1);
-    dpp = dot(pp,pp,1);
-    
-    cd = dcp+dtp-2*(tp'*cp);
-    pd = dpp+dtp-2*(tp'*pp);
 end
 
 function ta = target_approach_features(states)
@@ -304,6 +291,19 @@ function ta = target_approach_features(states)
         targs_with_decrease_y_count;
         targs_with_decrease_xy_count;
     ];
+end
+
+function [cd, pd] = target_distance(states)
+    cp = states(1:2,:);
+    pp = states(1:2,:) - states(3:4,:);   
+    tp = [states(12:3:end, 1)';states(13:3:end, 1)'];
+    
+    dtp = dot(tp,tp,1)';
+    dcp = dot(cp,cp,1);
+    dpp = dot(pp,pp,1);
+    
+    cd = dcp+dtp-2*(tp'*cp);
+    pd = dpp+dtp-2*(tp'*pp);
 end
 
 function p_results(test_algo_name, f_time, b_time, v_time, a_time, P_val)
