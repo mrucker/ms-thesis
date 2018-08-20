@@ -10,14 +10,17 @@ g = .9;
 trans_pre = @huge_trans_pre;
 trans_pst = @huge_trans_post;
 
-[state2vindex, ~, ~, a_f] = r_basii_4_1();
+[state2vindex, ~, ~, a_f] = r_basii_4_2();
+
+r_r = rand(1, size(a_f,2));
+r_r = 500*r_r/max(r_r);
 
 s_1 = @() state_rand();
 s_a = @s_act_4_1;
 r_b = @(s) a_f * state2vindex(s);
 v_b = @v_basii_4_1;
-r_t = [zeros(1,size(r_b(s_1()),1)-1),1];
-s_r = @(s) r_t * r_b(s);
+r_t = rand(size(r_b(s_1()),1), 1);
+s_r = @(s) r_r * state2vindex(s);
 
 tic
 Pf = approx_policy_iteration_13b(s_1, s_a, s_r, v_b, trans_pst, trans_pre, g, N, M, S, W);
@@ -37,12 +40,14 @@ episodes{5} = generate_episodes_from_state(Pf{N+1}, s_1(), trans_pre, T, 15);
 
 episodes = horzcat(episodes{:});
 
-params = struct ('epsilon',.0001, 'gamma',.9, 'seed',0);
+params1 = struct ('epsilon',.0001, 'gamma',.9, 'seed',0, 'kernel', 1);
+params2 = struct ('epsilon',.0001, 'gamma',.9, 'seed',0, 'kernel', 5);
 
-result_1 = algorithm4run(episodes, params, 1, 1);
-result_2 = algorithm4run(episodes, params, 1, 5);
+result_1 = algorithm4run(episodes, params1, 1);
+result_2 = algorithm4run(episodes, params2, 1);
 
-tru_reward_for_each_unique_basii_set   = r_t * a_f;
+%tru_reward_for_each_unique_basii_set  = r_t' * a_f;
+tru_reward_for_each_unique_basii_set   = r_r;
 irl_reward_for_each_unique_basii_set_1 = result_1'*eye(size(a_f,2));
 irl_reward_for_each_unique_basii_set_2 = result_2'*eye(size(a_f,2));
 

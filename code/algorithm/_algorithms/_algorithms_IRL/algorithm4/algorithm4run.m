@@ -1,4 +1,4 @@
-function irl_result = algorithm4run(episodes, params, verbosity, kernel)
+function irl_result = algorithm4run(episodes, params, verbosity)
 
     %N = 30;
     %M = 80;
@@ -15,7 +15,7 @@ function irl_result = algorithm4run(episodes, params, verbosity, kernel)
     episode_states = horzcat(episodes{:});
     episode_starts = episode_states(1:episode_length:episode_count*episode_length);
 
-    [state2vindex, ~, ~, a_f] = r_basii_4_1();
+    [state2vindex, ~, ~, a_f] = r_basii_4_2();
 
     s_1 = @() episode_starts{randi(numel(episode_starts))};
     s_a = @s_act_4_1;
@@ -45,7 +45,7 @@ function irl_result = algorithm4run(episodes, params, verbosity, kernel)
 
     E = E./numel(episodes);
 
-    ff = k(a_f,a_f,kernel);
+    ff = k(a_f,a_f,params.kernel);
     
     % Generate random policy.
     tic;
@@ -135,6 +135,10 @@ function p = setDefaults(params)
 
     if ~isfield(params,'epsilon')
         params.('epsilon') = .01;
+    end
+    
+    if ~isfield(params,'kernel')
+        params.('kernel') = 1;
     end
 
     p = params;
