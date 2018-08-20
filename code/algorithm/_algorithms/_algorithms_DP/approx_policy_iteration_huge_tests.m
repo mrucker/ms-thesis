@@ -9,11 +9,11 @@ eval_steps = 10;
 trans_pre = @(s,a) huge_trans_pre (s,a);
 trans_pst = @(s,a) huge_trans_post(s,a);
 
-temp = @value_basii_2;
+as = actions_matrix();
 
 s_1 = @( ) state_rand();
-v_b = @(s) value_basii_cells(s, temp);
-s_a = @(s) actions(s);
+v_b = @(s) value_basii_cells(s, @value_basii_2);
+s_a = @(s) actions_valid(s, as);
 
 %algorithm_2   == (lin ols regression with n-step Monte Carlo                             )
 %algorithm_5   == (gau ridge regression                                                   )
@@ -33,7 +33,6 @@ s_a = @(s) actions(s);
 %#2 13
 %#3 14
 %#4 08b
-
 
 algo_a = @(s_r) approx_policy_iteration_2  (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 10, 150, 2, 3);  %  no-opt
 
@@ -77,7 +76,7 @@ reward_f = cell(1, rewd_count);
 for r_i = 1:rewd_count
     reward_basii_n = size(reward_basii(s_1()),1);
     reward_theta_r = reward_theta(reward_basii_n);
-    
+
     reward_f{r_i} = @(s) reward_theta_r'*reward_basii(s);
     states_c{r_i} = state_init();
 end
@@ -148,7 +147,7 @@ function [vb,time] = value_basii_2(states)
     %t_start = tic;
     %time = toc(t_start);
     time = 0;
-    
+
     xs = states(1,:);
     ys = states(2,:);
     ds = abs(states(3:6,:));
@@ -213,7 +212,6 @@ function [vb,time] = value_basii_2(states)
         double(b_w(:,1) <= xs & xs < b_w(:,2));
         double(b_h(:,1) <= ys & ys < b_h(:,2));
     ];
-    
 
     vb = [
         deriv_features(deriv_ord,:);
@@ -388,30 +386,17 @@ function d_results_3(test_algo_name, Vs)
     ylabel('V')
 end
 
-function a = actions(s)
-    % The actions matrix should be 2 x |number of actions| where the first row is dx and the second row is dy.
-    % This means each column in the matrix represents a dx/dy pair that is the action taken.
-    % The small model assumes an action is the location on the grid so be careful when going between the two.
-
-    %all combinations of (dx,dy) for dx,dy \in [-10,10]
-
-    dx = -1:1:1;
-    dy = -1:1:1;
-
-    dx = dx*100;
-    dy = dy*100;
-
+function a = actions_matrix()
     dx = [100,50,10,2,0];
     dy = [100,50,10,2,0];
 
     dx = horzcat(dx,0,-dx);
     dy = horzcat(dy,0,-dy);
 
-    %dx = 1:2;
-    %dy = [1,1];
-
     a = vertcat(reshape(repmat(dx,numel(dx),1), [1,numel(dx)^2]), reshape(repmat(dy',1,numel(dy)), [1,numel(dy)^2]));
+end
 
+function a = actions_valid(s, a)
     np = s(1:2) + a;
 
     np_too_small_x = np(1,:) < 0;

@@ -1,4 +1,8 @@
-function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_policy_iteration_13e(s_1, actions, reward, value_basii, trans_post, trans_pre, gamma, N, M, T, W)
+function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_policy_iteration_13e(s_1, actions, reward, value_basii, trans_post, trans_pre, gamma, N, M, T, W, production)
+
+    if(nargin < 12)
+        production = true;
+    end
 
     a_start = tic;
 
@@ -14,13 +18,21 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
     b_time = 0;
     m_time = 0;
 
-    If = cell(1, N+1);
-    Vf = cell(1, N+1);
-    Pf = cell(1, N+1);
-    Xs = cell(1, N*M);
-    Ys = cell(1, N*M);
-    Ks = cell(1, N*M);
-    As = cell(1, N*M);
+    if ~production
+        Vf = cell(1, N+1);
+        Pf = cell(1, N+1);
+        Xs = cell(1, N*M);
+        Ys = cell(1, N*M);
+        Ks = cell(1, N*M);
+        As = cell(1, N*M);
+    else
+        Vf = {};
+        Pf = {};
+        Xs = {};
+        Ys = {};
+        Ks = {};
+        As = {};
+    end
 
     X = [];
     Y = [];
@@ -38,11 +50,8 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
     eta     = [];
     lambda  = [];
 
-    If{1} = @(vb) 3*ones(size(vb,2),1);
-    Vf{1} = @(xi) 3*ones(size(xi,2),1);
-
     avb_p = all_value_basii_perms();
-    avb_v(basii2indexes(avb_p)) = If{1}(avb_p);
+    avb_v(basii2indexes(avb_p)) = 3*ones(1,size(avb_p,2));
 
     for n = 1:N
 
@@ -57,14 +66,14 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
         init_states = all_states(randi(numel(all_states),1,M));
  
         t_start = tic;
-        for m = 1:M
+        parfor m = 1:M
 
-            %0.43
+            %0.28
             post_states = trans_post(init_states{m}, actions(init_states{m}));
             post_basii  = value_basii(post_states);
             post_values = avb_v(basii2indexes(post_basii));
 
-            %.17
+            %.11
             a_m = max(post_values);
             a_i = find(post_values == a_m);
             a_i = a_i(randi(length(a_i)));
@@ -79,10 +88,11 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
             for t = 1:((T-1)+(W-1))
 
                 %2.25
-                    %.21
+                %1.68
+                    %.09
                     action_matrix = actions(s_t);
 
-                    %0.75
+                    %0.29
                     post_states = trans_post(s_t, action_matrix);
 
                     %1.26
@@ -99,10 +109,11 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
                 s_a = post_states(:,a_i);
 
                 %.47
+                %.22
                 s_t = trans_pre(s_a, []);
 
                 %.15
-                X_s_m{m}        = horzcat(X_s_m{m}, s_t);                
+                X_s_m{m}        = horzcat(X_s_m{m}, s_t);
 
                 %.06
                 X_b_m{m}(:,t+1) = post_basii(:,a_i);
@@ -112,12 +123,12 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
             end
         end
         f_time = f_time + toc(t_start);
-        
 
-        all_states = horzcat(all_states, X_s_m{:});
-        
+        new_states = horzcat(X_s_m{:});
+        all_states = horzcat(all_states, new_states);
+
         if numel(all_states) > 2000
-           all_states = all_states(end-1999:end); 
+           all_states = all_states(randi(size(all_states,2),2000)); 
         end
 
         t_start = tic;
@@ -208,10 +219,12 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
                     end
                 end
 
-                %Xs{(n-1)*M + m} = X;
-                %Ys{(n-1)*M + m} = Y;
-                %Ks{(n-1)*M + m} = K;
-                %As{(n-1)*M + m} = A;
+                if ~production
+                    Xs{(n-1)*M + m} = X;
+                    Ys{(n-1)*M + m} = Y;
+                    Ks{(n-1)*M + m} = K;
+                    As{(n-1)*M + m} = A;
+                end
         end
         b_time = b_time + toc(t_start);
 
@@ -219,10 +232,14 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
             model = fitrsvm(X',Y','KernelFunction','rbf', 'Solver', 'SMO', 'Standardize',true);
 
             avb_v(basii2indexes(avb_p)) = predict(model, avb_p');
-            
-            If{n+1} = @(vb) predict(model, vb');
-            Vf{n+1} = @(ss) predict(model, value_basii(ss)');
-            Pf{n+1} = policy_function(actions, Vf{n+1}, trans_post);            
+
+            if ~production
+                Vf{n+1} = @(ss) predict(model, value_basii(ss)');
+                Pf{n+1} = policy_function(actions, Vf{n+1}, trans_post);
+            else
+                Vf = {[], @(ss) predict(model, value_basii(ss)')};
+                Pf = {[], policy_function(actions, Vf{2}, trans_post);};
+            end
         m_time = m_time + toc(t_start);
     end
 
@@ -267,9 +284,9 @@ function aap = all_approach_perms()
     xap_f = eye(3);
     yap_f = eye(3);
     bap_f = eye(3);
-    
+
     [xap_c, yap_c, bap_c] = ndgrid(1:size(xap_f,2), 1:size(yap_f,2), 1:size(bap_f,2));
-    
+
     aap = vertcat(xap_f(:,xap_c(:)), yap_f(:,yap_c(:)), bap_f(:,bap_c(:)));
 end
 
