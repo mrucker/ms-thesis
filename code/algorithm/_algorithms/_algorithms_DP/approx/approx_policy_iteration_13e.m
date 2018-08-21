@@ -127,7 +127,8 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
         all_states = horzcat(all_states, new_states);
 
         if numel(all_states) > 2000
-           all_states = all_states(randi(size(all_states,2),2000)); 
+            rng_indexs = randi(numel(all_states), 1, 2000);
+            all_states = all_states(rng_indexs); 
         end
 
         t_start = tic;
