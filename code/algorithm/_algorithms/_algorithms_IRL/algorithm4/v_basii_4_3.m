@@ -1,4 +1,4 @@
-function [state2identity, v_p, v_b] = v_basii_4_3()
+function [basii2index, v_p, v_b] = v_basii_4_3()
     d_p = all_deriv_perms();
     t_p = all_touch_perms();
     a_p = all_approach_perms();
@@ -8,10 +8,9 @@ function [state2identity, v_p, v_b] = v_basii_4_3()
 
     v_p = vertcat(d_p(:,d_p_c(:)), t_p(:,t_p_c(:)), a_p(:,a_p_c(:)), l_p(:,l_p_c(:)));
     
-    a_n = size(v_p,2);
     a_T = basii2indexes_T([3 3 3 3 2 2 3 3 3 3 3]);
     
-    state2identity = @(states) double(1:a_n == (a_T*v_basii_cells(states))' )';
+    basii2index = @(basii) a_T*basii;
     
     v_b = @v_basii_cells;
 end

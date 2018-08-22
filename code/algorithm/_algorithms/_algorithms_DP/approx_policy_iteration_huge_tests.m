@@ -10,10 +10,10 @@ trans_pre = @(s,a) huge_trans_pre (s,a);
 trans_pst = @(s,a) huge_trans_post(s,a);
 
 [state2rew_ident, r_p, r_b] = r_basii_4_2();
-[state2val_ident, v_p, v_b] = v_basii_4_3();
 
 s_1 = @( ) state_rand();
 s_a = s_act_4_1();
+v_b = @v_basii_4_3;
 
 %algorithm_2   == (lin ols regression with n-step Monte Carlo                             )
 %algorithm_5   == (gau ridge regression                                                   )
@@ -52,11 +52,11 @@ algo_q = @(s_r) approx_policy_iteration_13h(s_1, s_a, s_r, v_b, trans_pst, trans
 algos = {
 %   algo_a, 'algorithm_2  (G=0.9, L=1.0, N=30, M=50 , S=2, W=3)';
 %   algo_j, 'algorithm_13b(G=0.9, L=1.0, N=30, M=50 , S=5, W=3)';
-%   algo_l, 'algorithm_13e(G=0.9, L=1.0, N=30, M=50 , S=5, W=3)';
+   algo_l, 'algorithm_13e(G=0.9, L=1.0, N=30, M=50 , S=5, W=3)';
 %   algo_m, 'algorithm_13e(G=0.9, L=1.0, N=10, M=50 , S=7, W=3)';
-%   algo_n, 'algorithm_13f(G=0.9, L=1.0, N=30, M=50 , S=5, W=3)';
+   algo_n, 'algorithm_13f(G=0.9, L=1.0, N=30, M=50 , S=5, W=3)';
 %   algo_o, 'algorithm_13f(G=0.9, L=1.0, N=10, M=200, S=7, W=3)';
-%   algo_p, 'algorithm_13g(G=0.9, L=1.0, N=30, M=50 , S=5, W=3)';
+   algo_p, 'algorithm_13g(G=0.9, L=1.0, N=30, M=50 , S=5, W=3)';
    algo_q, 'algorithm_13h(G=0.9, L=1.0, N=30, M=70 , S=3, W=3)';
 };
 

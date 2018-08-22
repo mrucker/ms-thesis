@@ -10,8 +10,8 @@ trans_pre = @(s,a) huge_trans_pre (s,a);
 trans_pst = @(s,a) huge_trans_post(s,a);
 
 [state2rew_ident, r_p, r_b] = r_basii_4_2();
-[state2val_ident, v_p, v_b] = v_basii_4_3();
 
+v_b = @v_basii_4_3;
 s_1 = @() state_rand();
 s_a = s_act_4_1();
 

@@ -2,10 +2,14 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
 
     if(nargin < 12)
         production = true;
-    end
+    end    
 
     a_start = tic;
 
+    [v_i, v_p, v_b] = value_basii();
+    
+    v_v = 3*ones(1,size(v_p,2));
+    
     g_row = [gamma.^(0:T-1), zeros(1,W-1)];
     g_mat = zeros(W,size(g_row,2));
 
@@ -47,10 +51,7 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
     sig_sq  = [];
     alpha   = [];
     eta     = [];
-    lambda  = [];
-
-    avb_p = all_value_basii_perms();
-    avb_v(basii2indexes(avb_p)) = 3*ones(1,size(avb_p,2));
+    lambda  = [];    
 
     for n = 1:N
 
@@ -69,8 +70,8 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
 
             %0.28
             post_states = trans_post(init_states{m}, actions(init_states{m}));
-            post_basii  = value_basii(post_states);
-            post_values = avb_v(basii2indexes(post_basii));
+            post_basii  = v_b(post_states);
+            post_values = v_v(v_i(post_basii));
 
             %.11
             a_m = max(post_values);
@@ -95,11 +96,10 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
                     post_states = trans_post(s_t, action_matrix);
 
                     %1.26
-                    [post_basii, time]  = value_basii(post_states);
-                    v_time = v_time + time;
+                    [post_basii]  = v_b(post_states);
 
                     %.05
-                    post_values = avb_v(basii2indexes(post_basii));
+                    post_values = v_v(v_i(post_basii));
 
                 %.04
                 a_m = max(post_values);
@@ -231,9 +231,9 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
         t_start = tic;
             model = fitrsvm(X',Y','KernelFunction','rbf', 'Solver', 'SMO', 'Standardize',true);
 
-            avb_v(basii2indexes(avb_p)) = predict(model, avb_p');
+            v_v(v_i(v_p)) = predict(model, v_p');
             
-            Vf{n+1} = @(ss) predict(model, value_basii(ss)');
+            Vf{n+1} = @(ss) predict(model, v_b(ss)');
             Pf{n+1} = policy_function(actions, Vf{n+1}, trans_post);
 
         m_time = m_time + toc(t_start);

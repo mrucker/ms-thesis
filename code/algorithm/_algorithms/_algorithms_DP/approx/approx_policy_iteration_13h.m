@@ -5,7 +5,11 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
     end
 
     a_start = tic;
+    
+    [v_i, v_p, v_b] = value_basii();
 
+    v_v = 3*ones(1,size(v_p,2));
+    
     g_row = [gamma.^(0:T-1), zeros(1,W-1)];
     g_mat = zeros(W,size(g_row,2));
 
@@ -50,9 +54,6 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
     eta     = [];
     lambda  = [];
 
-    avb_p = all_value_basii_perms();
-    avb_v(basii2indexes(avb_p)) = 3*ones(1,size(avb_p,2));
-
     for n = 1:N
 
         X_s_m = cell(1, M);
@@ -71,8 +72,8 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
 
             %0.28
             post_states = trans_post(init_states{m}, actions(init_states{m}));
-            post_basii  = value_basii(post_states);
-            post_values = avb_v(basii2indexes(post_basii));
+            post_basii  = v_b(post_states);
+            post_values = v_v(v_i(post_basii));
 
             if ~isempty(X)
                %post_val_se      = mean(S) * ones(1, size(post_states,2));
@@ -106,10 +107,10 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
                     post_states = trans_post(s_t, action_matrix);
 
                     %1.26
-                    [post_basii]  = value_basii(post_states);                    
+                    [post_basii]  = v_b(post_states);                    
 
                     %.05
-                    post_values = avb_v(basii2indexes(post_basii));
+                    post_values = v_v(v_i(post_basii));
 
                 %.04
                 a_m = max(post_values);
@@ -243,9 +244,9 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
         t_start = tic;
             model = fitrsvm(vertcat(X, J)',Y','KernelFunction','rbf', 'Solver', 'SMO', 'Standardize',true);
 
-            avb_v(basii2indexes(avb_p)) = predict(model, vertcat(avb_p, n*ones(1,size(avb_p,2)))');
+            v_v(v_i(v_p)) = predict(model, vertcat(v_p, n*ones(1,size(v_p,2)))');
             
-            Vf{n+1} = @(ss) predict(model, vertcat(value_basii(ss), n*ones(1,size(ss,2)))');
+            Vf{n+1} = @(ss) predict(model, vertcat(v_b(ss), n*ones(1,size(ss,2)))');
             Pf{n+1} = policy_function(actions, Vf{n+1}, trans_post);
 
         m_time = m_time + toc(t_start);
@@ -255,60 +256,4 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
         fprintf('v_time(%f)\n',v_time);
     end
     a_time = toc(a_start);
-end
-
-function avp = all_value_basii_perms()
-    adp = all_deriv_perms();
-    atp = all_touch_perms();
-    aap = all_approach_perms();
-    alp = all_location_perms();
-    
-    [adp_c, atp_c, aap_c, alp_c] = ndgrid(1:size(adp,2), 1:size(atp,2), 1:size(aap,2), 1:size(alp,2));
-
-    avp = vertcat(adp(:,adp_c(:)), atp(:,atp_c(:)), aap(:,aap_c(:)), alp(:,alp_c(:)));
-end
-
-function adp = all_deriv_perms()
-    d1x_f = eye(3);
-    d1y_f = eye(3);
-    d2x_f = eye(3);
-    d2y_f = eye(3);
-
-    [d2y_c, d2x_c, d1y_c, d1x_c] = ndgrid(1:size(d2y_f,2), 1:size(d2x_f,2), 1:size(d1y_f,2), 1:size(d1x_f,2));
-
-    adp = vertcat(d1x_f(:,d1x_c(:)), d1y_f(:,d1y_c(:)), d2x_f(:,d2x_c(:)), d2y_f(:,d2y_c(:)));
-end
-
-function atp = all_touch_perms()
-    atp = [
-        1 1 0 0;
-        0 0 1 1;
-        1 0 1 0;
-        0 1 0 1;
-    ];
-end
-
-function aap = all_approach_perms()
-    xap_f = eye(3);
-    yap_f = eye(3);
-    bap_f = eye(3);
-
-    [xap_c, yap_c, bap_c] = ndgrid(1:size(xap_f,2), 1:size(yap_f,2), 1:size(bap_f,2));
-
-    aap = vertcat(xap_f(:,xap_c(:)), yap_f(:,yap_c(:)), bap_f(:,bap_c(:)));
-end
-
-function alp = all_location_perms()
-    lox_f = eye(3);
-    loy_f = eye(3);
-
-    [lox_c, loy_c] = ndgrid(1:size(lox_f,2), 1:size(loy_f,2));
-
-    alp = vertcat(lox_f(:,lox_c(:)), loy_f(:,loy_c(:)));
-end
-
-function b2k = basii2indexes(basii)
-    %shape = [3 3 3 3 2 2 3 3 3 3 3 1];
-    %arrayfun(@(i) prod(shape((i+1):end)) .* ((1:shape(i))-1), 1:(numel(shape)-1), 'uniformoutput',false)
-    b2k = [0 26244 52488 0 8748 17496 0 2916 5832 0 972 1944 0 486 0 243 0 81 162 0 27 54 0 9 18 0 3 6 1 2 3] * basii;
 end
