@@ -1,25 +1,30 @@
-function [vb,t] = v_basii_4_2(states)
-    [vb,t] = v_basii_cells(states, @v_basii);
+function [state2identity, v_p, v_b] = v_basii_4_3()
+    d_p = all_deriv_perms();
+    t_p = all_touch_perms();
+    a_p = all_approach_perms();
+    l_p = all_location_perms();
+    
+    [l_p_c, a_p_c, t_p_c, d_p_c] = ndgrid(1:size(l_p,2), 1:size(a_p,2), 1:size(t_p,2), 1:size(d_p,2));
+
+    v_p = vertcat(d_p(:,d_p_c(:)), t_p(:,t_p_c(:)), a_p(:,a_p_c(:)), l_p(:,l_p_c(:)));
+    
+    a_n = size(v_p,2);
+    a_T = basii2indexes_T([3 3 3 3 2 2 3 3 3 3 3]);
+    
+    state2identity = @(states) double(1:a_n == (a_T*v_basii_cells(states))' )';
+    
+    v_b = @v_basii_cells;
 end
 
-function [vb,t] = v_basii_cells(states, VBf)
-    t = 0;
+function [vb] = v_basii_cells(states)
     if iscell(states)
-        vb = [];
-        for i = 1:numel(states)
-            [vb(:,i),tt] = VBf(states{i});
-            t = t+tt;
-        end
+        vb = cell2mat(cellfun(@v_basii_feats, states, 'UniformOutput',false)');
     else
-        [vb,t] = VBf(states);
+        [vb] = v_basii_feats(states);
     end
 end
 
-function [vb,time] = v_basii(states)
-    %t_start = tic;
-    %time = toc(t_start);
-    time = 0;
-
+function [vb] = v_basii_feats(states)
     xs = states(1,:);
     ys = states(2,:);
     ds = abs(states(3:6,:));
@@ -97,7 +102,7 @@ end
 function tc = target_touch_features(states)
     r2 = states(11, 1).^2;
 
-    [cd, pd] = target_distance(states);
+    [cd, pd] = target_distance_features(states);
     
     ct = cd <= r2;
     pt = pd <= r2;
@@ -140,7 +145,7 @@ function ta = target_approach_features(states)
     ];
 end
 
-function [cd, pd] = target_distance(states)
+function [cd, pd] = target_distance_features(states)
     cp = states(1:2,:);
     pp = states(1:2,:) - states(3:4,:);   
     tp = [states(12:3:end, 1)';states(13:3:end, 1)'];
@@ -151,4 +156,54 @@ function [cd, pd] = target_distance(states)
     
     cd = dcp+dtp-2*(tp'*cp);
     pd = dpp+dtp-2*(tp'*pp);
+end
+
+function adp = all_deriv_perms()
+    d1x_f = eye(3);
+    d1y_f = eye(3);
+    d2x_f = eye(3);
+    d2y_f = eye(3);
+
+    [d2y_c, d2x_c, d1y_c, d1x_c] = ndgrid(1:size(d2y_f,2), 1:size(d2x_f,2), 1:size(d1y_f,2), 1:size(d1x_f,2));
+
+    adp = vertcat(d1x_f(:,d1x_c(:)), d1y_f(:,d1y_c(:)), d2x_f(:,d2x_c(:)), d2y_f(:,d2y_c(:)));
+end
+
+function atp = all_touch_perms()
+    atp = [
+        1 1 0 0;
+        0 0 1 1;
+        1 0 1 0;
+        0 1 0 1;
+    ];
+end
+
+function aap = all_approach_perms()
+    xap_f = eye(3);
+    yap_f = eye(3);
+    bap_f = eye(3);
+
+    [bap_c, yap_c, xap_c] = ndgrid(1:size(bap_f,2), 1:size(yap_f,2), 1:size(xap_f,2));
+
+    aap = vertcat(xap_f(:,xap_c(:)), yap_f(:,yap_c(:)), bap_f(:,bap_c(:)));
+end
+
+function alp = all_location_perms()
+    lox_f = eye(3);
+    loy_f = eye(3);
+
+    [loy_c, lox_c] = ndgrid(1:size(loy_f,2), 1:size(lox_f,2));
+
+    alp = vertcat(lox_f(:,lox_c(:)), loy_f(:,loy_c(:)));
+end
+
+function T = basii2indexes_T(shape)
+
+    shape = [shape, 1]; %add one for easier computing
+    
+    value_2_index_T = cell2mat(arrayfun(@(i) prod(shape((i+1):end)) .* ((1:shape(i))-1), 1:(numel(shape)-1), 'UniformOutput',false));
+    
+    value_2_index_T(end-shape(end-1)+1:end) = value_2_index_T(end-shape(end-1)+1:end) + 1;
+    
+    T = value_2_index_T;
 end

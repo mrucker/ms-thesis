@@ -11,17 +11,16 @@ g = .9;
 trans_pre = @huge_trans_pre;
 trans_pst = @huge_trans_post;
 
-[state2vindex, ~, ~, a_f] = r_basii_4_2();
+[state2rew_ident, r_p, r_b] = r_basii_4_2();
+[state2val_ident, v_p, v_b] = v_basii_4_3();
 
-r_r = rand(1, size(a_f,2));
+r_r = rand(1, size(r_p,2));
 r_r = 500*r_r/max(r_r);
+r_t = rand(size(r_b(s_1()),1), 1);
 
 s_1 = @() state_rand();
 s_a = s_act_4_1();
-r_b = @(s) a_f * state2vindex(s);
-v_b = @v_basii_4_2;
-r_t = rand(size(r_b(s_1()),1), 1);
-s_r = @(s) r_t' * a_f * state2vindex(s);
+s_r = @(s) r_t' * r_b(s);
 
 [Pf, ~, ~, ~, ~, ~, f_time, b_time, m_time, a_time] = approx_policy_iteration_13h(s_1, s_a, s_r, v_b, trans_pst, trans_pre, g, N, M, S, W);
 [f_time, b_time, m_time, a_time]

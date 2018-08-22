@@ -108,8 +108,7 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
                     post_states = trans_post(s_t, action_matrix);
 
                     %1.26
-                    [post_basii, time]  = value_basii(post_states);
-                    v_time = v_time + time;
+                    [post_basii]  = value_basii(post_states);                    
 
                     %.05
                     post_values = avb_v(basii2indexes(post_basii));

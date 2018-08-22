@@ -1,80 +1,38 @@
-function [state2identity, m_f, t_f, a_f] = r_basii_4_2()
+function [state2identity, r_p, r_b, m_p, t_p] = r_basii_4_2()
 
-    m_f = move_features();
-    t_f = targ_features();
+    m_p = all_move_perms();
+    t_p = all_targ_perms();
 
-    [t_c, m_c] = ndgrid(1:size(t_f,2),1:size(m_f,2));
+    [t_c, m_c] = ndgrid(1:size(t_p,2),1:size(m_p,2));
 
-    a_f = vertcat(m_f(:,m_c(:)), t_f(:,t_c(:)));
-    a_n = size(a_f,2);
+    r_p = vertcat(m_p(:,m_c(:)), t_p(:,t_c(:)));
+    
+    a_n = size(r_p,2);
     a_T = basii2indexes_T([3 3 3 3],[4 8 4]);
     
+    %we add the "1+" in order to include the 0 target permutation at the start
     state2identity = @(states) double(1:a_n == (1+a_T*r_basii_cells(states))' )';
-end
-
-function m_features = move_features()
-
-    d1x_f = eye(3);
-    d1y_f = eye(3);
-    d2x_f = eye(3);
-    d2y_f = eye(3);
-
-    d1x_i = 1:size(d1x_f,2);
-    d1y_i = 1:size(d1y_f,2);
-    d2x_i = 1:size(d2x_f,2);
-    d2y_i = 1:size(d2y_f,2);
-
-    [d2y_c, d2x_c, d1y_c, d1x_c] = ndgrid(d2y_i, d2x_i, d1y_i, d1x_i);
-
-    m_features = vertcat(d1x_f(:,d1x_c(:)), d1y_f(:,d1y_c(:)), d2x_f(:,d2x_c(:)), d2y_f(:,d2y_c(:)));
-
-end
-
-function t_features = targ_features()
-
-    %lox_f = eye(3);
-    %loy_f = eye(3);
     
-    cnt_f = eye(4);
-    dir_f = eye(8);
-    age_f = eye(4);
-
-    %lox_i = 1:size(lox_f,2);
-    %loy_i = 1:size(loy_f,2);
-    
-    cnt_i = 1:size(cnt_f,2);
-    dir_i = 1:size(dir_f,2);
-    age_i = 1:size(age_f,2);
-
-    [age_c, dir_c, cnt_c] = ndgrid(age_i, dir_i, cnt_i);
-
-    t_features = vertcat(cnt_f(:,cnt_c(:)), dir_f(:,dir_c(:)), age_f(:,age_c(:)));
-    z_features = zeros(size(t_features,1),1);
-    
-    t_features = horzcat(z_features,t_features);
+    r_b = @r_basii_cells;
 end
 
 function rb = r_basii_cells(states)
-    rb = [];
-
     if iscell(states)
-        for i = 1:numel(states)
-            rb(:,i) = r_basii_features(states{i});
-        end
+        rb = cell2mat(cellfun(@r_basii_feats, states, 'UniformOutput',false)');
     else
-        rb = r_basii_features(states);
+        rb = r_basii_feats(states);
     end
 end
 
-function rb = r_basii_features(states)
+function rb = r_basii_feats(states)
 
     sc = size(states,2);
     ds = abs(states(3:6,:));
 
     %loc = target_location(states);
-    tou = target_touch(states);
-    cnt = target_center(states);
-    age = target_age(states);
+    tou = target_touch_features(states);
+    cnt = target_center_features(states);
+    age = target_age_features(states);
 
     target_features = zeros(16,sc);
     
@@ -86,7 +44,7 @@ function rb = r_basii_features(states)
         tou(:  ,s_i) = 0;
         tou(t_i,s_i) = 1;
         
-        dir = target_direction(states(:,s_i));
+        dir = target_direction_features(states(:,s_i));
         target_features(:,s_i) = vertcat(cnt, dir, age) * tou;
     end
 
@@ -106,10 +64,10 @@ function rb = r_basii_features(states)
     ];
 end
 
-function tt = target_touch(states)
+function tt = target_touch_features(states)
     r2 = states(11, 1).^2;
 
-    [cd, pd] = target_distance(states);
+    [cd, pd] = target_distance_features(states);
 
     ct = cd <= r2;
     pt = pd <= r2;
@@ -118,7 +76,7 @@ function tt = target_touch(states)
     tt = ct&(~pt|nt);
 end
 
-function [cd, pd] = target_distance(states)
+function [cd, pd] = target_distance_features(states)
     cp = states(1:2,:);
     pp = states(1:2,:) - states(3:4,:);   
     tp = [states(12:3:end, 1)';states(13:3:end, 1)'];
@@ -131,7 +89,7 @@ function [cd, pd] = target_distance(states)
     pd = dpp+dtp-2*(tp'*pp);
 end
 
-function td = target_direction(states)
+function td = target_direction_features(states)
 
     directions = [
         -1*pi/8, +1*pi/8, 1;
@@ -160,7 +118,7 @@ function td = target_direction(states)
     td     = direction_eye(:,directions(ti,3)');
 end
 
-function ta = target_age(states)
+function ta = target_age_features(states)
 
     age_eye = eye(4);
 
@@ -176,7 +134,7 @@ function ta = target_age(states)
     ta     = age_eye(:,ages(ti,3)');
 end
 
-function tc = target_center(states)
+function tc = target_center_features(states)
 
     center_eye = eye(4);
 
@@ -193,6 +151,48 @@ function tc = target_center(states)
     tv     = vecnorm(tp-sc);
     [~,ti] = max(centers(:,1) <= tv & tv <= centers(:,2), [], 1);
     tc     = center_eye(:,centers(ti,3)');
+end
+
+function m_features = all_move_perms()
+
+    d1x_f = eye(3);
+    d1y_f = eye(3);
+    d2x_f = eye(3);
+    d2y_f = eye(3);
+
+    d1x_i = 1:size(d1x_f,2);
+    d1y_i = 1:size(d1y_f,2);
+    d2x_i = 1:size(d2x_f,2);
+    d2y_i = 1:size(d2y_f,2);
+
+    [d2y_c, d2x_c, d1y_c, d1x_c] = ndgrid(d2y_i, d2x_i, d1y_i, d1x_i);
+
+    m_features = vertcat(d1x_f(:,d1x_c(:)), d1y_f(:,d1y_c(:)), d2x_f(:,d2x_c(:)), d2y_f(:,d2y_c(:)));
+
+end
+
+function t_features = all_targ_perms()
+
+    %lox_f = eye(3);
+    %loy_f = eye(3);
+    
+    cnt_f = eye(4);
+    dir_f = eye(8);
+    age_f = eye(4);
+
+    %lox_i = 1:size(lox_f,2);
+    %loy_i = 1:size(loy_f,2);
+    
+    cnt_i = 1:size(cnt_f,2);
+    dir_i = 1:size(dir_f,2);
+    age_i = 1:size(age_f,2);
+
+    [age_c, dir_c, cnt_c] = ndgrid(age_i, dir_i, cnt_i);
+
+    t_features = vertcat(cnt_f(:,cnt_c(:)), dir_f(:,dir_c(:)), age_f(:,age_c(:)));
+    z_features = zeros(size(t_features,1),1);
+    
+    t_features = horzcat(z_features,t_features);
 end
 
 function T = basii2indexes_T(move_shape, targ_shape)

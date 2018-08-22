@@ -15,11 +15,11 @@ function irl_result = algorithm4run(episodes, params, verbosity)
     episode_states = horzcat(episodes{:});
     episode_starts = episode_states(1:episode_length:episode_count*episode_length);
 
-    [state2vindex, ~, ~, a_f] = r_basii_4_2();
+    [state2identity, a_f, ~, ~] = r_basii_4_2();
 
     s_1 = @() episode_starts{randi(numel(episode_starts))};
     s_a = s_act_4_1();
-    r_b = state2vindex;
+    r_b = state2identity;
     v_b = @v_basii_4_2;
 
     fprintf(1,'Start of Algorithm4 \n');
