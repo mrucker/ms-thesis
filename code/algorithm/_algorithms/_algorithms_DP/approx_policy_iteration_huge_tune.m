@@ -9,9 +9,11 @@ eval_steps = 10;
 trans_pre = @(s,a) huge_trans_pre (s,a);
 trans_pst = @(s,a) huge_trans_post(s,a);
 
+as = actions_matrix();
+
 s_1 = @( ) state_rand();
 v_b = @(s) value_basii_cells(s, @value_basii_2);
-s_a = @(s) actions(s);
+s_a = @(s) actions_valid(s, as);
 
 %algorithm_2   == (lin ols regression with n-step Monte Carlo                             )
 %algorithm_5   == (gau ridge regression                                                   )
@@ -23,7 +25,7 @@ s_a = @(s) actions(s);
 %algorithm_14  == (full tabular TD lambda with interval estimation and on-policy sampling )
 
 algos = {
-    @approx_policy_iteration_13e, 'algorithm_13e';
+    @approx_policy_iteration_13h, 'algorithm_13h';
 };
 
 states_c = cell(1, rewd_count);
@@ -69,8 +71,8 @@ for a_i = 1:size(algos,1)
 
             vs = zeros(1, numel(Pf)-1);
 
-            parfor Pf_i = 1:(numel(Pf)-1)
-                vs(Pf_i) = policy_eval_at_states(Pf{Pf_i+1}, eval_states, eval_reward, 0.9, eval_steps, trans_pre, 20);
+            parfor Pf_i = 2:numel(Pf)
+                vs(Pf_i-1) = policy_eval_at_states(Pf{Pf_i}, eval_states, eval_reward, 0.9, eval_steps, trans_pre, 100);
             end
 
             max_vs(r_i) = max(vs);
@@ -84,39 +86,26 @@ for a_i = 1:size(algos,1)
 
 end
 
-function a = actions(s)
-    % The actions matrix should be 2 x |number of actions| where the first row is dx and the second row is dy.
-    % This means each column in the matrix represents a dx/dy pair that is the action taken. 
-    % The small model assumes an action is the location on the grid so be careful when going between the two.
-
-    %all combinations of (dx,dy) for dx,dy \in [-10,10]
-
-    dx = -1:1:1;
-    dy = -1:1:1;
-
-    dx = dx*100;
-    dy = dy*100;
-    
+function a = actions_matrix()
     dx = [100,50,10,2,0];
     dy = [100,50,10,2,0];
-    
+
     dx = horzcat(dx,0,-dx);
     dy = horzcat(dy,0,-dy);
-        
-    %dx = 1:2;
-    %dy = [1,1];
-    
+
     a = vertcat(reshape(repmat(dx,numel(dx),1), [1,numel(dx)^2]), reshape(repmat(dy',1,numel(dy)), [1,numel(dy)^2]));
-    
+end
+
+function a = actions_valid(s, a)
     np = s(1:2) + a;
-        
+
     np_too_small_x = np(1,:) < 0;
     np_too_small_y = np(2,:) < 0;
     np_too_large_x = np(1,:) > s(9);
     np_too_large_y = np(2,:) > s(10);
-    
+
     valid_actions = ~(np_too_small_x|np_too_small_y|np_too_large_x|np_too_large_y);
-    
+
     a = a(:, valid_actions);
 end
 
@@ -134,9 +123,9 @@ function s = state_rand()
     s = population{randi(numel(population))};
 end
 
-function rb = reward_basii(states)
+function rbs = reward_basii(states)
 
-    rb = zeros(7,size(states,2));
+    rbs = [];
 
     for i = 1:size(states,2)
         if iscell(states)
@@ -145,11 +134,27 @@ function rb = reward_basii(states)
             state = states(:,i);
         end
 
+        ds = abs(states(3:6,:));
+
+        deriv_features = [
+            double(0  <= ds & ds < 15 );
+            double(15 <= ds & ds < 50 );
+            double(50 <= ds & ds < inf);
+        ];
+
+        deriv_deg = 1:4:12;
+        deriv_ind = 0:size(ds,1)-1;
+        deriv_ord = reshape(deriv_deg' + deriv_ind,1,[]);
+
         tc = target_touch_features(state);
 
-        %[dx, dy, ddx, ddy, dddx, dddy, touch_count]
-        rb(1:6, i) = (abs(state(3:8)) > 50).*abs(state(3:8));
-        rb(  7, i) = tc(1,:);
+        rb = [
+            deriv_features(deriv_ord,:);
+            tc > 0;
+        ];
+
+        rbs = horzcat(rbs, rb);
+
     end
 end
 
@@ -181,25 +186,25 @@ function [vb,time] = value_basii_2(states)
     ys = states(2,:);
     ds = abs(states(3:6,:));
 
-    %screen_w = states(9,1);
-    %screen_h = states(10,1);
-    %grid = [3 3];
-    %cell_w = screen_w/grid(1);
-    %cell_h = screen_h/grid(2);
-    %b_w = horzcat((1:grid(1))'-1, (1:grid(1))'-0) * (cell_w+1);
-    %b_h = horzcat((1:grid(2))'-1, (1:grid(2))'-0) * (cell_h+1);
+    grid     = [3 3];
+    screen_w = states(9,1);
+    screen_h = states(10,1);    
+    cell_w   = screen_w/grid(1);
+    cell_h   = screen_h/grid(2);
+    b_w      = horzcat((1:grid(1))'-1, (1:grid(1))'-0) * (cell_w+1);
+    b_h      = horzcat((1:grid(2))'-1, (1:grid(2))'-0) * (cell_h+1);
     
-    b_w = [
-       0     , 1059.3
-       1059.3, 2118.7
-       2118.7, inf
-    ];
-    
-    b_h = [
-       0     , 512.7
-       512.7 , 1025.3
-       1025.3, inf
-    ];
+%     b_w = [
+%        0     , 1059.3
+%        1059.3, 2118.7
+%        2118.7, inf
+%     ];
+%     
+%     b_h = [
+%        0     , 512.7
+%        512.7 , 1025.3
+%        1025.3, inf
+%     ];
     
     %deriv_deg = 1:4:12;
     %deriv_ind = 0:size(ds,1)-1;
@@ -314,10 +319,10 @@ function p_results(algo_name, tuning, max_vs, avg_vs, lst_vs, var_vs, f_time, b_
     fprintf('%s', algo_name);
     fprintf('(G=0.9, L=%03.1f, N=%3i, M=%3i, S=%2i, W=%2i) ',tuning);
 
-    fprintf('AVG_MAX_V = %8.3f; '  , mean(max_vs));
-    fprintf('AVG_AVG_V = %8.3f; '  , mean(avg_vs));
-    fprintf('AVG_LST_V = %8.3f; '  , mean(lst_vs));
-    fprintf('AVG_VAR_V = %10.3f; ' , mean(var_vs));
+    fprintf('AVG_MAX_V = %6.3f; '  , mean(max_vs));
+    fprintf('AVG_AVG_V = %6.3f; '  , mean(avg_vs));
+    fprintf('AVG_LST_V = %6.3f; '  , mean(lst_vs));
+    fprintf('AVG_VAR_V = %6.3f; ' , mean(var_vs));
 
     fprintf('fT = %5.2f; '        , mean(f_time));
     fprintf('bT = %5.2f; '        , mean(b_time));
@@ -328,10 +333,10 @@ end
 
 function params = tunings()
 
-    L = 1:-.2:.6;
+    L = 1;
     N = 10:20:50;
     M = 10:20:90;
-    S = 3:2:9;
+    S = 3:1:9;
     W = 2:4;
 
     [cw, cs, cm, cn, cl] = ndgrid(W, S, M, N, L);

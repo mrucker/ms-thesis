@@ -117,7 +117,7 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
                 %.06
                 X_b_m{m}(:,t+1) = post_basii(:,a_i);
 
-                %.32
+                %.32                
                 X_r_m{m}(:,t+1) = reward(s_t);
             end
         end
@@ -296,5 +296,7 @@ function alp = all_location_perms()
 end
 
 function b2k = basii2indexes(basii)
+    %shape = [3 3 3 3 2 2 3 3 3 3 3 1];
+    %arrayfun(@(i) prod(shape((i+1):end)) .* ((1:shape(i))-1), 1:(numel(shape)-1), 'uniformoutput',false)
     b2k = [0 26244 52488 0 8748 17496 0 2916 5832 0 972 1944 0 486 0 243 0 81 162 0 27 54 0 9 18 0 3 6 1 2 3] * basii;
 end

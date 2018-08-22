@@ -1,4 +1,4 @@
-function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_policy_iteration_13f(s_1, actions, reward, value_basii, trans_post, trans_pre, gamma, N, M, T, W, production)
+function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_policy_iteration_13h(s_1, actions, reward, value_basii, trans_post, trans_pre, gamma, N, M, T, W, production)
 
     if(nargin < 12)
         production = true;
@@ -59,11 +59,12 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
         X_b_m = cell(1, M);
         X_r_m = cell(1, M);
 
-        if n == 1
+        if mod(n-1,4) == 0
             all_states = arrayfun(@(m) s_1(), 1:M, 'UniformOutput', false);
+            init_states = all_states;
+        else
+            init_states = all_states(randi(numel(all_states),1,M));    
         end
-
-        init_states = all_states(randi(numel(all_states),1,M));
  
         t_start = tic;
         parfor m = 1:M
@@ -73,6 +74,15 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
             post_basii  = value_basii(post_states);
             post_values = avb_v(basii2indexes(post_basii));
 
+            if ~isempty(X)
+               %post_val_se      = mean(S) * ones(1, size(post_states,2));
+                post_val_se      = std(Y)  * ones(1, size(post_states,2));
+                [lia, locb]      = ismember(post_basii', X', 'rows');
+                post_val_se(lia) = sqrt(S(locb(lia)));
+
+                post_values = post_values + 1.5*post_val_se;
+            end
+            
             %.11
             a_m = max(post_values);
             a_i = find(post_values == a_m);

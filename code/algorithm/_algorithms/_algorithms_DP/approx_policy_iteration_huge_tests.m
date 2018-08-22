@@ -3,7 +3,7 @@ close all
 fprintf('\n');
 try run('../../paths.m'); catch; end
 
-rewd_count = 2;
+rewd_count = 30;
 eval_steps = 10;
 
 trans_pre = @(s,a) huge_trans_pre (s,a);
@@ -25,6 +25,8 @@ s_a = @(s) actions_valid(s, as);
 %algorithm_13c == (algorithm_13b but with a small bug fix in the confidence interval      )
 %algorithm_13d == (algorithm_13b but with a small change to cache values in iterations    )
 %algorithm_13e == (algorithm_13b but with a change to calculate all values once each N    )
+%algorithm_13f == (algorithm_13e but adding in policy_iter data to the kernel value basii )
+%algorithm_13g == (algorithm_13f but more intelligent explore/exploit logic               )
 %algorithm_14  == (true TD(lambda) with bootstrap, confidence interval and on-policy dist )
 
 %13e is always faster than 13d no matter what I do to the algorithm paramaters
@@ -34,40 +36,28 @@ s_a = @(s) actions_valid(s, as);
 %#3 14
 %#4 08b
 
-algo_a = @(s_r) approx_policy_iteration_2  (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 10, 150, 2, 3);  %  no-opt
+algo_a = @(s_r) approx_policy_iteration_2  (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 50, 2, 3);  %  no-opt
 
-algo_b = @(s_r) approx_policy_iteration_8b (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 50, 2, 3);  % WSL-opt
-algo_c = @(s_r) approx_policy_iteration_8  (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 40, 2, 3);  % WSL-opt
-algo_d = @(s_r) approx_policy_iteration_8  (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*0.4, 30, 40, 2, 3);  %   L-opt
-
-algo_e = @(s_r) approx_policy_iteration_12 (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 40, 2, 3);  %LWSM-opt
-
-algo_f = @(s_r) approx_policy_iteration_13 (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 40, 2, 3);  %  no-opt
-
-algo_g = @(s_r) approx_policy_iteration_13b(s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 50, 5, 3); %  no-opt
-algo_h = @(s_r) approx_policy_iteration_13c(s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 10, 20, 5, 3); %  no-opt
-
-algo_i = @(s_r) approx_policy_iteration_14 (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*0.7, 30, 50, 5, 0); %  no-opt
 algo_j = @(s_r) approx_policy_iteration_13b(s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 50, 5, 3); %  no-opt
 
-algo_k = @(s_r) approx_policy_iteration_13d(s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 50, 5, 3); %  no-opt
 algo_l = @(s_r) approx_policy_iteration_13e(s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 50, 5, 3); %  no-opt
-algo_m = @(s_r) approx_policy_iteration_13f(s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 50, 5, 3); %  no-opt
+algo_m = @(s_r) approx_policy_iteration_13e(s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 10, 50, 7, 3); %  no-opt
+
+algo_n = @(s_r) approx_policy_iteration_13f(s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 50, 5, 3); %  no-opt
+algo_o = @(s_r) approx_policy_iteration_13f(s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 5, 400, 5, 4); %  no-opt
+
+algo_p = @(s_r) approx_policy_iteration_13g(s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 50, 5, 3); %  no-opt
+algo_q = @(s_r) approx_policy_iteration_13h(s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 50, 5, 3); %  no-opt
 
 algos = {
-%   algo_a, 'algorithm_2  (G=0.9, L=1.0, N=30, M=40, S=2, W=3)';
-%   algo_b, 'algorithm_8b (G=0.9, L=1.0, N=30, M=50, S=2, W=3)';
-%   algo_c, 'algorithm_8  (G=0.9, L=1.0, N=30, M=40, S=2, W=3)';
-%   algo_d, 'algorithm_8  (G=0.9, L=0.4, N=30, M=40, S=2, W=3)';
-%   algo_e, 'algorithm_12 (G=0.9, L=1.0, N=30, M=40, S=2, W=3)';
-%   algo_f, 'algorithm_13 (G=0.9, L=1.0, N=10, M=400, S=2, W=3)';
-%   algo_g, 'algorithm_13b(G=0.9, L=1.0, N=30, M=50, S=5, W=3)';
-%   algo_h, 'algorithm_13c(G=0.9, L=1.0, N=30, M=50, S=5, W=3)';
-%   algo_i, 'algorithm_14 (G=0.9, L=0.6, N=30, M=50, S=5, W=0)';
-%   algo_j, 'algorithm_13b(G=0.9, L=1.0, N=30, M=50, S=5, W=3)';
-%   algo_k, 'algorithm_13d(G=0.9, L=1.0, N=30, M=50, S=5, W=3)';
-   algo_l, 'algorithm_13e(G=0.9, L=1.0, N=30, M=50, S=5, W=3)';
-%   algo_m, 'algorithm_13f(G=0.9, L=1.0, N=30, M=50, S=5, W=3)';
+%   algo_a, 'algorithm_2  (G=0.9, L=1.0, N=30, M=50 , S=2, W=3)';
+%   algo_j, 'algorithm_13b(G=0.9, L=1.0, N=30, M=50 , S=5, W=3)';
+   algo_l, 'algorithm_13e(G=0.9, L=1.0, N=30, M=50 , S=5, W=3)';
+%   algo_m, 'algorithm_13e(G=0.9, L=1.0, N=10, M=50 , S=7, W=3)';
+   algo_n, 'algorithm_13f(G=0.9, L=1.0, N=30, M=50 , S=5, W=3)';
+%   algo_o, 'algorithm_13f(G=0.9, L=1.0, N=10, M=200, S=7, W=3)';
+   algo_p, 'algorithm_13g(G=0.9, L=1.0, N=30, M=50 , S=5, W=3)';
+   algo_q, 'algorithm_13h(G=0.9, L=1.0, N=30, M=50 , S=5, W=3)';
 };
 
 states_c = cell(1, rewd_count);
@@ -92,10 +82,10 @@ for a_i = 1:size(algos,1)
     for r_i = 1:rewd_count
         [Pf, Vf, Xs, Ys, Ks, As, fT(r_i), bT(r_i), vT(r_i), aT(r_i)] = algos{a_i,1}(reward_f{r_i});
 
-        %eval_stats = @(s) [reward_f{r_i}(s); target_new_touch_count(s)];
-        eval_stats = @(s) reward_f{r_i}(s);
+        eval_states = states_c{r_i};
+        eval_reward = reward_f{r_i};
 
-        Pv(r_i) = policy_eval_at_states(Pf{end}, states_c{r_i}, eval_stats, 0.9, eval_steps, trans_pre, 20);
+        Pv(r_i) = policy_eval_at_states(Pf{end}, eval_states, eval_reward, 0.9, eval_steps, trans_pre, 400);
     end
 
     if rewd_count == 1
@@ -106,8 +96,8 @@ for a_i = 1:size(algos,1)
         eval_states = states_c{r_i};
         eval_reward = reward_f{r_i};
 
-        parfor Pf_i = 1:(numel(Pf)-1)
-            Vs(Pf_i) = policy_eval_at_states(Pf{Pf_i+1}, eval_states, eval_reward, 0.9, eval_steps, trans_pre, 20);
+        parfor Pf_i = 2:numel(Pf)
+            Vs(Pf_i-1) = policy_eval_at_states(Pf{Pf_i}, eval_states, eval_reward, 0.9, eval_steps, trans_pre, 400);
         end
 
         d_results_3(algos{a_i,2}, Vs);
@@ -130,9 +120,9 @@ function s = state_rand()
     s = population{randi(numel(population))};
 end
 
-function rb = reward_basii(states)
+function rbs = reward_basii(states)
 
-    rb = zeros(7,size(states,2));
+    rbs = [];
 
     for i = 1:size(states,2)
         if iscell(states)
@@ -141,11 +131,27 @@ function rb = reward_basii(states)
             state = states(:,i);
         end
 
+        ds = abs(states(3:6,:));
+
+        deriv_features = [
+            double(0  <= ds & ds < 15 );
+            double(15 <= ds & ds < 50 );
+            double(50 <= ds & ds < inf);
+        ];
+
+        deriv_deg = 1:4:12;
+        deriv_ind = 0:size(ds,1)-1;
+        deriv_ord = reshape(deriv_deg' + deriv_ind,1,[]);
+
         tc = target_touch_features(state);
 
-        %[dx, dy, ddx, ddy, dddx, dddy, touch_count]
-        rb(1:6, i) = (abs(state(3:8)) > 50).*abs(state(3:8));
-        rb(  7, i) = tc(1,:);
+        rb = [
+            deriv_features(deriv_ord,:);
+            tc > 0;
+        ];
+
+        rbs = horzcat(rbs, rb);
+
     end
 end
 

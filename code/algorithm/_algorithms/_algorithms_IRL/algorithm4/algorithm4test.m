@@ -16,55 +16,52 @@ r_r = rand(1, size(a_f,2));
 r_r = 500*r_r/max(r_r);
 
 s_1 = @() state_rand();
-s_a = @s_act_4_1;
+s_a = s_act_4_1();
 r_b = @(s) a_f * state2vindex(s);
-v_b = @v_basii_4_1;
+v_b = @v_basii_4_2;
 r_t = rand(size(r_b(s_1()),1), 1);
-s_r = @(s) r_r * state2vindex(s);
+s_r = @(s) r_t' * a_f * state2vindex(s);
 
-tic
-Pf = approx_policy_iteration_13b(s_1, s_a, s_r, v_b, trans_pst, trans_pre, g, N, M, S, W);
-toc
-
-r_b_E = policy_eval_at_states(Pf{N+1}, state_init(), r_b, 1, T, trans_pre, 20);
-fprintf('touches = %.2f', r_b_E(end));
-fprintf('\n');
+[Pf, ~, ~, ~, ~, ~, f_time, b_time, m_time, a_time] = approx_policy_iteration_13e(s_1, s_a, s_r, v_b, trans_pst, trans_pre, g, N, M, S, W);
+[f_time, b_time, m_time, a_time]
 
 episodes = cell(1,5);
 
-episodes{1} = generate_episodes_from_state(Pf{N+1}, s_1(), trans_pre, T, 15);
-episodes{2} = generate_episodes_from_state(Pf{N+1}, s_1(), trans_pre, T, 15);
-episodes{3} = generate_episodes_from_state(Pf{N+1}, s_1(), trans_pre, T, 15);
-episodes{4} = generate_episodes_from_state(Pf{N+1}, s_1(), trans_pre, T, 15);
-episodes{5} = generate_episodes_from_state(Pf{N+1}, s_1(), trans_pre, T, 15);
+inits = state_init();
+
+episodes{1} = generate_episodes_from_state(Pf{N+1}, inits{1}, trans_pre, T, 100);
+episodes{2} = generate_episodes_from_state(Pf{N+1}, inits{2}, trans_pre, T, 100);
+episodes{3} = generate_episodes_from_state(Pf{N+1}, inits{3}, trans_pre, T, 100);
 
 episodes = horzcat(episodes{:});
 
-params1 = struct ('epsilon',.0001, 'gamma',.9, 'seed',0, 'kernel', 1);
-params2 = struct ('epsilon',.0001, 'gamma',.9, 'seed',0, 'kernel', 5);
+params1 = struct ('epsilon',.00001, 'gamma',.9, 'seed',0, 'kernel', 1);
+params2 = struct ('epsilon',.00001, 'gamma',.9, 'seed',0, 'kernel', 5);
 
 result_1 = algorithm4run(episodes, params1, 1);
-result_2 = algorithm4run(episodes, params2, 1);
 
-%tru_reward_for_each_unique_basii_set  = r_t' * a_f;
-tru_reward_for_each_unique_basii_set   = r_r;
-irl_reward_for_each_unique_basii_set_1 = result_1'*eye(size(a_f,2));
-irl_reward_for_each_unique_basii_set_2 = result_2'*eye(size(a_f,2));
+[(r_t-min(r_t))/max((r_t-min(r_t))),(result_1-min(result_1))/max((result_1-min(result_1)))]
 
-tru_reward_for_each_unique_basii_set   = tru_reward_for_each_unique_basii_set   - min(tru_reward_for_each_unique_basii_set);
-irl_reward_for_each_unique_basii_set_1 = irl_reward_for_each_unique_basii_set_1 - min(irl_reward_for_each_unique_basii_set_1);
-irl_reward_for_each_unique_basii_set_2 = irl_reward_for_each_unique_basii_set_2 - min(irl_reward_for_each_unique_basii_set_2);
+%result_2 = algorithm4run(episodes, params2, 1);
 
-tru_reward_for_each_unique_basii_set   = tru_reward_for_each_unique_basii_set/max(tru_reward_for_each_unique_basii_set);
-irl_reward_for_each_unique_basii_set_1 = irl_reward_for_each_unique_basii_set_1/max(irl_reward_for_each_unique_basii_set_1);
-irl_reward_for_each_unique_basii_set_2 = irl_reward_for_each_unique_basii_set_2/max(irl_reward_for_each_unique_basii_set_2);
+%tru_reward_for_each_unique_basii_set   = r_r;
+%irl_reward_for_each_unique_basii_set_1 = result_1'*eye(size(a_f,2));
+%irl_reward_for_each_unique_basii_set_2 = result_2'*eye(size(a_f,2));
 
-[
-    norm(tru_reward_for_each_unique_basii_set - irl_reward_for_each_unique_basii_set_1, 2), ...
-    norm(tru_reward_for_each_unique_basii_set - irl_reward_for_each_unique_basii_set_2, 2);
-    norm(tru_reward_for_each_unique_basii_set - irl_reward_for_each_unique_basii_set_1, 1), ...
-    norm(tru_reward_for_each_unique_basii_set - irl_reward_for_each_unique_basii_set_2, 1);
-]
+%tru_reward_for_each_unique_basii_set   = tru_reward_for_each_unique_basii_set   - min(tru_reward_for_each_unique_basii_set);
+%irl_reward_for_each_unique_basii_set_1 = irl_reward_for_each_unique_basii_set_1 - min(irl_reward_for_each_unique_basii_set_1);
+%irl_reward_for_each_unique_basii_set_2 = irl_reward_for_each_unique_basii_set_2 - min(irl_reward_for_each_unique_basii_set_2);
+
+%tru_reward_for_each_unique_basii_set   = tru_reward_for_each_unique_basii_set/max(tru_reward_for_each_unique_basii_set);
+%irl_reward_for_each_unique_basii_set_1 = irl_reward_for_each_unique_basii_set_1/max(irl_reward_for_each_unique_basii_set_1);
+%irl_reward_for_each_unique_basii_set_2 = irl_reward_for_each_unique_basii_set_2/max(irl_reward_for_each_unique_basii_set_2);
+
+%[
+%    norm(tru_reward_for_each_unique_basii_set - irl_reward_for_each_unique_basii_set_1, 2), ...
+%    norm(tru_reward_for_each_unique_basii_set - irl_reward_for_each_unique_basii_set_2, 2);
+%    norm(tru_reward_for_each_unique_basii_set - irl_reward_for_each_unique_basii_set_1, 1), ...
+%    norm(tru_reward_for_each_unique_basii_set - irl_reward_for_each_unique_basii_set_2, 1);
+%]
 
 function s = state_init()
     s = {

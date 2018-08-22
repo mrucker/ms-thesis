@@ -1,10 +1,9 @@
 function irl_result = algorithm4run(episodes, params, verbosity)
 
-    %N = 30;
-    %M = 80;
-
-    N = 20;
-    M = 30;
+    EVAL_N = 500;
+    
+    N = 30;
+    M = 50;
     T = 10;
     S = 5;
     W = 3;
@@ -18,9 +17,9 @@ function irl_result = algorithm4run(episodes, params, verbosity)
     [state2vindex, ~, ~, a_f] = r_basii_4_2();
 
     s_1 = @() episode_starts{randi(numel(episode_starts))};
-    s_a = @s_act_4_1;
+    s_a = s_act_4_1();
     r_b = state2vindex;
-    v_b = @v_basii_4_1;
+    v_b = @v_basii_4_2;
 
     fprintf(1,'Start of Algorithm4 \n');
 
@@ -55,8 +54,8 @@ function irl_result = algorithm4run(episodes, params, verbosity)
 
         s_r = @(s) rand_r'*a_f*r_b(s);        
 
-        Pf     = approx_policy_iteration_13b(s_1, s_a, s_r, v_b, @huge_trans_post, @huge_trans_pre, params.gamma, N, M, S, W);
-        rand_s = policy_eval_at_states(Pf{N+1}, episode_starts, r_b, params.gamma, T, @huge_trans_pre, ceil(150/numel(episode_starts)));
+        Pf     = approx_policy_iteration_13e(s_1, s_a, s_r, v_b, @huge_trans_post, @huge_trans_pre, params.gamma, N, M, S, W);
+        rand_s = policy_eval_at_states(Pf{N+1}, episode_starts, r_b, params.gamma, T, @huge_trans_pre, ceil(EVAL_N/numel(episode_starts)));
 
     mdp_time = mdp_time + toc;
 
@@ -77,8 +76,8 @@ function irl_result = algorithm4run(episodes, params, verbosity)
             rs{i} = ff*(E-sb{i-1});
             s_r   = @(s) rs{i}'*r_b(s);
 
-            Pf    = approx_policy_iteration_13b(s_1, s_a, s_r, v_b, @huge_trans_post, @huge_trans_pre, params.gamma, N, M, S, W);
-            ss{i} = policy_eval_at_states(Pf{N+1}, episode_starts, r_b, params.gamma, T, @huge_trans_pre, ceil(150/numel(episode_starts)));
+            Pf    = approx_policy_iteration_13e(s_1, s_a, s_r, v_b, @huge_trans_post, @huge_trans_pre, params.gamma, N, M, S, W);
+            ss{i} = policy_eval_at_states(Pf{N+1}, episode_starts, r_b, params.gamma, T, @huge_trans_pre, ceil(EVAL_N/numel(episode_starts)));
         mdp_time = mdp_time + toc;
 
         ts{i} = sqrt(E'*ff*E + sb{i-1}'*ff*sb{i-1} - 2*E'*ff*sb{i-1});
@@ -112,7 +111,7 @@ function irl_result = algorithm4run(episodes, params, verbosity)
     m
     [a_f*E, a_f*ss{i}]'
 
-    irl_result = rs{i};
+    irl_result = a_f * (E-sb{i-1});
 end
 
 function p = setDefaults(params)

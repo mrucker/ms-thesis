@@ -6,11 +6,12 @@ function [state2vindex, m_f, t_f, a_f] = r_basii_4_2()
     [t_c, m_c] = ndgrid(1:size(t_f,2),1:size(m_f,2));
 
     a_f = vertcat(m_f(:,m_c(:)), t_f(:,t_c(:)));
-
     a_n = size(a_f,2);
-    e_n = @(row_n,rows) cell2mat(arrayfun(@(row) [zeros(row-1,1);1;zeros(row_n-row,1)], rows, 'UniformOutput', false)');
+    a_T = basii2indexes_T([3 3 3 3],[4 8 4]);
     
-    state2vindex = @(states) e_n(a_n, locb_ismember(r_basii_cells(states)', a_f'));
+    e_n = @(n,bs) cell2mat(arrayfun(@(b) [zeros(b-1,1);1;zeros(n-b,1)], bs, 'UniformOutput', false)');
+    
+    state2vindex = @(states) e_n(a_n,1+a_T*r_basii_cells(states));
 end
 
 function m_features = move_features()
@@ -47,12 +48,12 @@ function t_features = targ_features()
     dir_i = 1:size(dir_f,2);
     age_i = 1:size(age_f,2);
 
-    [cnt_c, dir_c, age_c] = ndgrid(cnt_i, dir_i, age_i);
+    [age_c, dir_c, cnt_c] = ndgrid(age_i, dir_i, cnt_i);
 
     t_features = vertcat(cnt_f(:,cnt_c(:)), dir_f(:,dir_c(:)), age_f(:,age_c(:)));
     z_features = zeros(size(t_features,1),1);
     
-    t_features = horzcat(t_features, z_features);
+    t_features = horzcat(z_features,t_features);
 end
 
 function rb = r_basii_cells(states)
@@ -72,12 +73,11 @@ function rb = r_basii_features(states)
     sc = size(states,2);
     ds = abs(states(3:6,:));
 
-    tou = target_is_new_touch(states);
-    
     %loc = target_location(states);
+    tou = target_touch(states);
     cnt = target_center(states);
-    age = target_age(states);    
-    
+    age = target_age(states);
+
     target_features = zeros(16,sc);
     
     for s_i = 1:sc
@@ -90,7 +90,7 @@ function rb = r_basii_features(states)
         
         dir = target_direction(states(:,s_i));
         target_features(:,s_i) = vertcat(cnt, dir, age) * tou;
-    end    
+    end
 
     deriv_features = [
         double(0  <= ds & ds < 15 );
@@ -106,28 +106,31 @@ function rb = r_basii_features(states)
         deriv_features(deriv_ord,:);
         target_features;
     ];
-
-    
-    rb = rb();
 end
 
-function tnt = target_is_new_touch(states)
+function tt = target_touch(states)
     r2 = states(11, 1).^2;
-    cp = states(1:2,:);
-    pp = states(1:2,:) - states(3:4,:);
 
-    pt = target_distance([pp;states(3:end,:)]) <= r2;
-    ct = target_distance([cp;states(3:end,:)]) <= r2;
+    [cd, pd] = target_distance(states);
+
+    ct = cd <= r2;
+    pt = pd <= r2;
     nt = states(14:3:end, 1) == 10; %10 comes from huge_trans_pre
 
-    tnt = ct&(~pt|nt);
+    tt = ct&(~pt|nt);
 end
 
-function td = target_distance(states)
+function [cd, pd] = target_distance(states)
     cp = states(1:2,:);
+    pp = states(1:2,:) - states(3:4,:);   
     tp = [states(12:3:end, 1)';states(13:3:end, 1)'];
-
-    td = dot(cp,cp,1)+dot(tp,tp,1)'-2*(tp'*cp);
+    
+    dtp = dot(tp,tp,1)';
+    dcp = dot(cp,cp,1);
+    dpp = dot(pp,pp,1);
+    
+    cd = dcp+dtp-2*(tp'*cp);
+    pd = dpp+dtp-2*(tp'*pp);
 end
 
 function td = target_direction(states)
@@ -157,27 +160,6 @@ function td = target_direction(states)
     tv     = atan2(tp_with_cp_as_origin(2:2:end,:), tp_with_cp_as_origin(1:2:end,:));
     [~,ti] = max(directions(:,1) <= tv & tv <= directions(:,2), [], 1);
     td     = direction_eye(:,directions(ti,3)');
-end
-
-function tl = target_location(states)
-
-    grid     = [3 3];
-
-    screen_w = states(9,1);
-    screen_h = states(10,1);
-
-    cell_w   = screen_w/grid(1);
-    cell_h   = screen_h/grid(2);
-
-    b_w = horzcat((1:grid(1))'-1, (1:grid(1))'-0) * cell_w;
-    b_h = horzcat((1:grid(2))'-1, (1:grid(2))'-0) * cell_h;
-
-    tp = [states(12:3:end, 1)';states(13:3:end, 1)'];
-
-    xs = tp(1,:);
-    ys = tp(2,:);
-
-    tl = [double(b_w(:,1) <= xs & xs < b_w(:,2));double(b_h(:,1) <= ys & ys < b_h(:,2))];
 end
 
 function ta = target_age(states)
@@ -215,8 +197,16 @@ function tc = target_center(states)
     tc     = center_eye(:,centers(ti,3)');
 end
 
-function locB = locb_ismember(A,B)
-    [Lia, locB] = ismember(A, B, 'rows');
+function T = basii2indexes_T(move_shape, targ_shape)
 
-    assert(all(Lia), 'The state reward features (A) were not found anywhere in the complete feature matrix (B)');
+    move_shape = [move_shape, 1]; %add one for easier computing
+    targ_shape = [targ_shape, 1]; %add one for easier computing
+    
+    move_2_index_T = cell2mat(arrayfun(@(i) prod(move_shape((i+1):end)) .* ((1:move_shape(i))-1), 1:(numel(move_shape)-1), 'uniformoutput',false));
+    targ_2_index_T = cell2mat(arrayfun(@(i) prod(targ_shape((i+1):end)) .* ((1:targ_shape(i))-1), 1:(numel(targ_shape)-1), 'uniformoutput',false));
+    
+    %move_2_index_T(end-move_shape(end-1)+1:end) = move_2_index_T(end-move_shape(end-1)+1:end) + 1;
+    targ_2_index_T(end-targ_shape(end-1)+1:end) = targ_2_index_T(end-targ_shape(end-1)+1:end) + 1;
+    
+    T = [move_2_index_T * (prod(targ_shape)+1), targ_2_index_T];
 end
