@@ -1,4 +1,4 @@
-function [state2vindex, m_f, t_f, a_f] = r_basii_4_2()
+function [state2identity, m_f, t_f, a_f] = r_basii_4_2()
 
     m_f = move_features();
     t_f = targ_features();
@@ -9,9 +9,7 @@ function [state2vindex, m_f, t_f, a_f] = r_basii_4_2()
     a_n = size(a_f,2);
     a_T = basii2indexes_T([3 3 3 3],[4 8 4]);
     
-    e_n = @(n,bs) cell2mat(arrayfun(@(b) [zeros(b-1,1);1;zeros(n-b,1)], bs, 'UniformOutput', false)');
-    
-    state2vindex = @(states) e_n(a_n,1+a_T*r_basii_cells(states));
+    state2identity = @(states) double(1:a_n == (1+a_T*r_basii_cells(states))' )';
 end
 
 function m_features = move_features()

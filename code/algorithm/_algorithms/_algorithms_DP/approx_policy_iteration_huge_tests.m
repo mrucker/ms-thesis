@@ -3,7 +3,7 @@ close all
 fprintf('\n');
 try run('../../paths.m'); catch; end
 
-rewd_count = 30;
+rewd_count = 1;
 eval_steps = 10;
 
 trans_pre = @(s,a) huge_trans_pre (s,a);
@@ -47,17 +47,17 @@ algo_n = @(s_r) approx_policy_iteration_13f(s_1, s_a, s_r, v_b, trans_pst, trans
 algo_o = @(s_r) approx_policy_iteration_13f(s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 5, 400, 5, 4); %  no-opt
 
 algo_p = @(s_r) approx_policy_iteration_13g(s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 50, 5, 3); %  no-opt
-algo_q = @(s_r) approx_policy_iteration_13h(s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 50, 5, 3); %  no-opt
+algo_q = @(s_r) approx_policy_iteration_13h(s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 70, 3, 3); %  no-opt
 
 algos = {
 %   algo_a, 'algorithm_2  (G=0.9, L=1.0, N=30, M=50 , S=2, W=3)';
 %   algo_j, 'algorithm_13b(G=0.9, L=1.0, N=30, M=50 , S=5, W=3)';
    algo_l, 'algorithm_13e(G=0.9, L=1.0, N=30, M=50 , S=5, W=3)';
 %   algo_m, 'algorithm_13e(G=0.9, L=1.0, N=10, M=50 , S=7, W=3)';
-   algo_n, 'algorithm_13f(G=0.9, L=1.0, N=30, M=50 , S=5, W=3)';
+%   algo_n, 'algorithm_13f(G=0.9, L=1.0, N=30, M=50 , S=5, W=3)';
 %   algo_o, 'algorithm_13f(G=0.9, L=1.0, N=10, M=200, S=7, W=3)';
-   algo_p, 'algorithm_13g(G=0.9, L=1.0, N=30, M=50 , S=5, W=3)';
-   algo_q, 'algorithm_13h(G=0.9, L=1.0, N=30, M=50 , S=5, W=3)';
+%   algo_p, 'algorithm_13g(G=0.9, L=1.0, N=30, M=50 , S=5, W=3)';
+   algo_q, 'algorithm_13h(G=0.9, L=1.0, N=30, M=70 , S=3, W=3)';
 };
 
 states_c = cell(1, rewd_count);
@@ -228,26 +228,36 @@ function [vb,time] = value_basii_2(states)
         double(50 <= ds & ds < inf);
     ];
 
+    %2
     touch_features = [
         tf == 0;
         tf >= 1;
     ];
 
+    %27
     approach_features = [
         tm == 0;
         tm >= 1 & tm <= 2;
         tm >= 3;
     ];
 
+    %9
     location_features = [
         double(b_w(:,1) <= xs & xs < b_w(:,2));
         double(b_h(:,1) <= ys & ys < b_h(:,2));
     ];
 
     vb = [
+        %3^4 = 81
+        %4 directsion, 3 levels?
         deriv_features(deriv_ord,:);
+        %2^2
+        %3 levels (enter touch, leave touch, no touch)
         touch_features(touch_ord,:);
+        %3^3
+        %3 rings, 3 levels?
         approach_features(appr_ord,:);
+        %3^2
         location_features;
     ];
 

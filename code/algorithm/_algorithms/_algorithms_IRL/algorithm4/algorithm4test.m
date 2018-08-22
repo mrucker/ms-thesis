@@ -1,10 +1,11 @@
 try run '../../../paths'; catch; end
 
 N = 30;
-M = 50;
-T = 10;
-S = 5;
+M = 70;
+S = 3;
 W = 3;
+
+T = 10;
 g = .9;
 
 trans_pre = @huge_trans_pre;
@@ -22,7 +23,7 @@ v_b = @v_basii_4_2;
 r_t = rand(size(r_b(s_1()),1), 1);
 s_r = @(s) r_t' * a_f * state2vindex(s);
 
-[Pf, ~, ~, ~, ~, ~, f_time, b_time, m_time, a_time] = approx_policy_iteration_13e(s_1, s_a, s_r, v_b, trans_pst, trans_pre, g, N, M, S, W);
+[Pf, ~, ~, ~, ~, ~, f_time, b_time, m_time, a_time] = approx_policy_iteration_13h(s_1, s_a, s_r, v_b, trans_pst, trans_pre, g, N, M, S, W);
 [f_time, b_time, m_time, a_time]
 
 episodes = cell(1,5);
