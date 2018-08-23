@@ -3,11 +3,12 @@ var AWS = require('aws-sdk')
 AWS.config.region      = 'us-east-1' //for some reason it'll read the credentials from the shared file but not the region
 
 var params = {
-  TableName                : 'ThesisParticipants',
-  KeyConditionExpression   : 'Id = :id',
-  ExpressionAttributeValues: {
-    ':id': '22bf81593efa83ce8',
-  }
+	 TableName                : 'ThesisExperiments'
+	,ConsistentRead           : false
+	,KeyConditionExpression   : 'ParticipantId = :participant_id'
+	,ExpressionAttributeValues: {
+		':participant_id': '1ec6d9e95672ca072',
+	}
 };
 
 var documentClient = new AWS.DynamoDB.DocumentClient();
