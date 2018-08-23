@@ -1,4 +1,4 @@
-20 rewards
+20 rewards, v_basii_4_4
 
 algorithm_13h(G=0.9, L=1.0, N= 30, M= 10, S= 3, W= 2) AVG_MAX_V =  7.872; AVG_AVG_V =  7.318; AVG_LST_V =  7.571; AVG_VAR_V =  0.320; fT =  1.32; bT =  0.03; mT =  1.16; aT =  2.51; 
 algorithm_13h(G=0.9, L=1.0, N= 30, M= 10, S= 3, W= 3) AVG_MAX_V =  7.789; AVG_AVG_V =  7.316; AVG_LST_V =  7.393; AVG_VAR_V =  0.206; fT =  1.26; bT =  0.04; mT =  1.13; aT =  2.45; 

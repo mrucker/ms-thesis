@@ -1,6 +1,7 @@
 paths;
 
-trajectory_observations = jsondecode(fileread('huge-observed-trajectory-1.json'));
+%trajectory_observations = jsondecode(fileread('huge-observed-trajectory-1.json'));
+trajectory_observations = jsondecode(fileread('../data/dynamodb/entries/observations/14e18c555679fbefa.json'));
 trajectory_states       = huge_states_from(trajectory_observations);
 trajectory_states(1:4)  = []; %trim off the first four states since they have pre-game noise
 
@@ -17,5 +18,5 @@ for e = 1:trajectory_episodes_count
    trajectory_episodes{e} = trajectory_states(episode_start:episode_stop); 
 end
 
-params     = struct ('epsilon',.0001, 'gamma',.9, 'seed',0, 'kernel', 5);
+params     = struct ('epsilon',.01, 'gamma',.9, 'seed',0, 'kernel', 5);
 result     = algorithm4run(trajectory_episodes, params, 1);
