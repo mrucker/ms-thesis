@@ -1,4 +1,4 @@
-Algorithm_13e, 20 samples
+Algorithm_13e, 20 rewards
 
 algorithm_13e(G=0.9, L=1.0, N= 10, M= 10, S= 3, W= 2) AVG_MAX_V =  542.663; AVG_AVG_V =  447.178; AVG_LST_V =  466.960; AVG_VAR_V =   5624.310; fT =  0.45; bT =  0.01; mT =  0.45; aT =  0.93; 
 algorithm_13e(G=0.9, L=1.0, N= 10, M= 10, S= 3, W= 3) AVG_MAX_V =  572.989; AVG_AVG_V =  451.946; AVG_LST_V =  438.915; AVG_VAR_V =  14782.031; fT =  0.45; bT =  0.01; mT =  0.49; aT =  0.98; 

@@ -1,4 +1,4 @@
-function [basii2index, v_p, v_b] = v_basii_4_3()
+function [basii2index, v_p, v_b] = v_basii_4_4()
     d_p = all_deriv_perms();
     t_p = all_touch_perms();
     a_p = all_approach_perms();
@@ -7,9 +7,10 @@ function [basii2index, v_p, v_b] = v_basii_4_3()
     [l_p_c, a_p_c, t_p_c, d_p_c] = ndgrid(1:size(l_p,2), 1:size(a_p,2), 1:size(t_p,2), 1:size(d_p,2));
 
     v_p = vertcat(d_p(:,d_p_c(:)), t_p(:,t_p_c(:)), a_p(:,a_p_c(:)), l_p(:,l_p_c(:)));
-    a_T = basii2indexes_T([3 3 3 3 2 2 3 3 3 3 3]);
     
-    basii2index = @(basii) a_T*basii;
+    a_T = basii2indexes_T([3 3 3 3 3 3 3 3 3 3], [1 1 1 1 3 1 1 1 1 1]);
+    
+    basii2index = @(basii) a_T*basii+1;
     
     v_b = @v_basii_cells;
 end
@@ -56,42 +57,45 @@ function [vb] = v_basii_feats(states)
     %appr_ind = 0:2;
     %appr_ord = reshape(appr_axs' + appr_ind,1,[]);
     appr_ord = [1 4 7 2 5 8 3 6 9];
-    
-    %touch_dir = 1:2:4;
-    %touch_ind = 0:1;
-    %touch_ord = reshape(touch_dir' + touch_ind,1,[]); 
-    touch_ord = [1 3 2 4];
-    
+        
     %.6
     tf = target_touch_features(states);
-    tm = target_approach_features(states);
+    af = target_approach_features(states);
 
     deriv_features = [
-        double(0  <= ds & ds < 15 );
-        double(15 <= ds & ds < 50 );
-        double(50 <= ds & ds < inf);
+        double(0  <= ds & ds < 15 ) .* 0.0;
+        double(15 <= ds & ds < 50 ) .* 0.5;
+        double(50 <= ds & ds < inf) .* 1.0;
     ];
 
     touch_features = [
-        tf == 0;
-        tf >= 1;
+        tf(1,:) == 0 & tf(2,:) == 0;
+        tf(1,:) ~= 0;
+        tf(1,:) == 0 & tf(2,:) ~= 0;
     ];
 
     approach_features = [
-        tm == 0;
-        tm >= 1 & tm <= 2;
-        tm >= 3;
+        (af == 0          )  * 0.0;
+        (af >= 1 & af <= 2)  * 0.5;
+        (af >= 3          )  * 1.0;
     ];
 
     location_features = [
-        double(b_w(:,1) <= xs & xs < b_w(:,2));
-        double(b_h(:,1) <= ys & ys < b_h(:,2));
+        double(b_w(:,1) <= xs & xs < b_w(:,2)) .* [0;.5;1];
+        double(b_h(:,1) <= ys & ys < b_h(:,2)) .* [0;.5;1];
     ];
 
+    deriv_features    = deriv_features(deriv_ord,:);
+    approach_features = approach_features(appr_ord,:);
+    
+    deriv_features    = [ sum(deriv_features(1:3,:),1); sum(deriv_features(4:6,:),1); sum(deriv_features(7:9,:),1); sum(deriv_features(10:12,:),1) ];
+    approach_features = [ sum(approach_features(1:3,:),1); sum(approach_features(4:6,:),1); sum(approach_features(7:9,:),1) ];
+    location_features = [ sum(location_features(1:3,:),1); sum(location_features(4:6,:),1); ];
+    
     vb = [
-        deriv_features(deriv_ord,:);
-        touch_features(touch_ord,:);
-        approach_features(appr_ord,:);
+        deriv_features
+        touch_features;
+        approach_features;        
         location_features;
     ];
 
@@ -157,10 +161,10 @@ function [cd, pd] = target_distance_features(states)
 end
 
 function adp = all_deriv_perms()
-    d1x_f = eye(3);
-    d1y_f = eye(3);
-    d2x_f = eye(3);
-    d2y_f = eye(3);
+    d1x_f = [0, .5, 1];
+    d1y_f = [0, .5, 1];
+    d2x_f = [0, .5, 1];
+    d2y_f = [0, .5, 1];
 
     [d2y_c, d2x_c, d1y_c, d1x_c] = ndgrid(1:size(d2y_f,2), 1:size(d2x_f,2), 1:size(d1y_f,2), 1:size(d1x_f,2));
 
@@ -168,18 +172,13 @@ function adp = all_deriv_perms()
 end
 
 function atp = all_touch_perms()
-    atp = [
-        1 1 0 0;
-        0 0 1 1;
-        1 0 1 0;
-        0 1 0 1;
-    ];
+    atp = eye(3);
 end
 
 function aap = all_approach_perms()
-    xap_f = eye(3);
-    yap_f = eye(3);
-    bap_f = eye(3);
+    xap_f = [0, .5, 1];
+    yap_f = [0, .5, 1];
+    bap_f = [0, .5, 1];
 
     [bap_c, yap_c, xap_c] = ndgrid(1:size(bap_f,2), 1:size(yap_f,2), 1:size(xap_f,2));
 
@@ -187,22 +186,22 @@ function aap = all_approach_perms()
 end
 
 function alp = all_location_perms()
-    lox_f = eye(3);
-    loy_f = eye(3);
+    lox_f = [0, .5, 1];
+    loy_f = [0, .5, 1];
 
     [loy_c, lox_c] = ndgrid(1:size(loy_f,2), 1:size(lox_f,2));
 
     alp = vertcat(lox_f(:,lox_c(:)), loy_f(:,loy_c(:)));
 end
 
-function T = basii2indexes_T(shape)
+function T = basii2indexes_T(vals, vars)
 
-    shape = [shape, 1]; %add one for easier computing
+    vals = [vals, 1]; %add one for easier computing
     
-    value_2_index_T = cell2mat(arrayfun(@(i) prod(shape((i+1):end)) .* ((1:shape(i))-1), 1:(numel(shape)-1), 'UniformOutput',false));
+    value_2_index_T = cell2mat(arrayfun(@(i) prod(vals((i+1):end)) .* fliplr((vals(i)-1) - (0:vars(i)-1)), 1:(numel(vals)-1), 'UniformOutput',false));
     
-    value_2_index_T(end-shape(end-1)+1:end) = value_2_index_T(end-shape(end-1)+1:end) + 1;
+    value_2_index_T(end-vals(end-1)+1:end) = value_2_index_T(end-vals(end-1)+1:end);
 
-    %[0 26244 52488 0 8748 17496 0 2916 5832 0 972 1944 0 486 0 243 0 81 162 0 27 54 0 9 18 0 3 6 1 2 3]
+    %[52488 17496 5832 1944 0 243 486 162 54 18 6 2]
     T = value_2_index_T;
 end
