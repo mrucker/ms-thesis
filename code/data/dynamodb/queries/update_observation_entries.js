@@ -10,8 +10,8 @@ fs.readdir('entries/experiments/', (err, fileNames) => {
 		console.log(err);
 	}
 	else {
-		fileNames.forEach(function(fileName) => {
-			var experimentId = fileName.substring(0,str.lastIndexOf(".json"));
+		fileNames.forEach((fileName) => {
+			var experimentId = fileName.substring(0,fileName.lastIndexOf(".json"));
 			
 			var filePath = 'entries/observations/' + experimentId + '.json';
 			var fileFlag = 'wx+';
@@ -34,7 +34,7 @@ fs.readdir('entries/experiments/', (err, fileNames) => {
 					  ,ExpressionAttributeValues : {':experiment_id' : experimentId}
 					};
 					
-					documentClient.scan(params, function(err, data) {
+					documentClient.scan(params, (err, data) => {
 						if(err) {
 							console.log(err);
 						}
@@ -44,7 +44,7 @@ fs.readdir('entries/experiments/', (err, fileNames) => {
 							
 							fs.write(fd, JSON.stringify(flattenedObservations), (err) => { if(err) console.log(err) });
 						}
-					}
+					});
 				}
 			});
 		});
