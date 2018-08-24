@@ -102,86 +102,47 @@ function Target(mouse, featureWeights) {
         return dist(targetX,targetY,mouseX,mouseY) <= effectiveR;
     };
     
-    this.getReward = function() {
-        var r_param = featureWeights;
-        var f_value = self.getFeatures();
-        var r_value = f_value[0]*r_param[0] + f_value[1]*r_param[1] + f_value[2]*r_param[2] + f_value[3]*r_param[3] + f_value[4]*r_param[4];
+    this.getReward = function(canvas) {
+		
+        var f_classes = self.getFeatures(canvas);		
 
-        r_value = r_value * 1/r_param[4];
-        r_value = Math.max(r_value,-1);
-        r_value = Math.min(r_value, 1);
+		var cnt_index = [0,32,64,96];
+		var dir_index = [0,4,8,12,16,20,24,28];
+		var age_index = [1,2,3,4];
 
-        return r_value;
+		var r_index = cnt_index[f_classes[0]-1] + dir_index[f_classes[1]-1] + age_index[f_classes[2]-1] + 1;
+
+		var rewards = [0.42,0.5,0.81,0.64,0.5,0.29,0.67,0.45,0.17,0.24,0.62,0.2,0.23,0.23,0.39,0.14,0.17,0.25,0.35,0.16,0.2,0.24,0.3,0.34,0.14,0.21,0.37,0.12,0.14,0.24,0.3,0.24,0.36,0.63,1,0.78,0.28,0.32,0.63,0.5,0.61,0.31,0.42,0.36,0.5,0.28,0.55,0.35,0.25,0.24,0.37,0.19,0.23,0.23,0.32,0.25,0.13,0.17,0.41,0.11,0,0.24,0.39,0.18,0.13,0.43,0.55,0.46,0.39,0.35,0.47,0.38,0.35,0.32,0.42,0.33,0.33,0.31,0.4,0.31,0.29,0.29,0.37,0.29,0.28,0.29,0.36,0.31,0.26,0.27,0.36,0.27,0.24,0.29,0.37,0.3,0.28,0.43,0.55,0.46,0.39,0.35,0.47,0.38,0.35,0.32,0.42,0.33,0.33,0.31,0.4,0.31,0.29,0.29,0.37,0.29,0.28,0.29,0.36,0.31,0.26,0.27,0.36,0.27,0.24,0.29,0.37,0.3,0.28];
+
+        return rewards[r_index];
     };
     
-    this.getFeatures = function () {
-        var maxD = 3526;
-
-        var mouseHistPos = mouse.getHistoryPos();
-        var mouseHistDot = mouse.getHistoryDot();
-
-        var targetLoc    = [effectiveX,effectiveY];
-        var targetLocDot = Math.pow(effectiveX,2) + Math.pow(effectiveY,2);
-
-        var d3 = targetLocDot + mouseHistDot[0] - 2*(targetLoc[0]*mouseHistPos[0][0] + targetLoc[1]*mouseHistPos[0][1]);
-        var d2 = targetLocDot + mouseHistDot[1] - 2*(targetLoc[0]*mouseHistPos[1][0] + targetLoc[1]*mouseHistPos[1][1]);
-        var d1 = targetLocDot + mouseHistDot[2] - 2*(targetLoc[0]*mouseHistPos[2][0] + targetLoc[1]*mouseHistPos[2][1]);
-        var d0 = targetLocDot + mouseHistDot[3] - 2*(targetLoc[0]*mouseHistPos[3][0] + targetLoc[1]*mouseHistPos[3][1]);
-
-        d3 = d3/Math.pow(maxD,2);
-        d2 = d2/Math.pow(maxD,2);
-        d1 = d1/Math.pow(maxD,2);
-        d0 = d0/Math.pow(maxD,2);
-
-        d3 = Math.sqrt(d3);
-        d2 = Math.sqrt(d2);
-        d1 = Math.sqrt(d1);
-        d0 = Math.sqrt(d0);
-        
-        var d = d3;
-        var v = d3-d2;
-        var a = d3/2-d2+d1/2;
-        var j = d3/4-3*d2/4+3*d1/4-d0/4;
-
-        return [d, v, a, j, self.isTouched()*1];
+    this.getFeatures = function (canvas) {
+		
+		//center
+		//direction
+		//age
+		
+		var centerX = canvas.getResolution(0)/2;
+		var centerY = canvas.getResolution(1)/2;
+		
+		var cnt_distance = dist(effectiveX, effectiveY, centerX, centerY);
+		var cnt_class    = cnt_distance <= 400 ? 1 : cnt_distance <= 900 ? 2 : cnt_distance <= 1500 ? 3 : 4;
+		
+		var mouseX = mouse.getX();
+        var mouseY = mouse.getY();
+		
+		var dir_radian = Math.atan2(effectiveY - mouseY, effectiveX - mouseX);				
+		var dir_class  = Math.floor( (dir_radian + 3*Math.PI/8) / (Math.PI/4)) + ((dir_radian < -3*Math.PI/8) ? 8 : 0);
+		
+		var age_value = self.getAge();		
+		var age_class = age_value <= 250 ? 1 : age_value <= 500 ? 2 : age_value <= 750 ? 3 : 4;
+		
+		return [cnt_class, dir_class, age_class];
     };
     
     this.draw = function(canvas, r) {
         self.drawImage(canvas, r);
-    }
-
-    this.drawCircle = function(canvas){
-
-        originalWidth   = originalWidth  || canvas.getResolution(0);
-        originalHeight  = originalHeight || canvas.getResolution(1);
-        originalX       = originalX      || (canvas.getResolution(0) - effectiveR*2) * Math.random() + effectiveR;
-        originalY       = originalY      || (canvas.getResolution(1) - effectiveR*2) * Math.random() + effectiveR;
-
-        effectiveX = Math.round((originalX/originalWidth ) * canvas.getResolution(0),0);
-        effectiveY = Math.round((originalY/originalHeight) * canvas.getResolution(1),0);
-
-        var context   = canvas.getContext2d();
-
-        context.fillStyle = fillStyle();
-        context.beginPath();
-        context.arc(effectiveX, effectiveY, effectiveR, 0, 2 * Math.PI);
-        context.fill(); 
-    }
-
-    this.drawSquare = function(canvas){
-
-        originalWidth   = originalWidth  || canvas.getResolution(0);
-        originalHeight  = originalHeight || canvas.getResolution(1);
-        originalX       = originalX      || (canvas.getResolution(0) - effectiveR*2) * Math.random() + effectiveR;
-        originalY       = originalY      || (canvas.getResolution(1) - effectiveR*2) * Math.random() + effectiveR;
-
-        effectiveX = Math.round((originalX/originalWidth ) * canvas.getResolution(0),0);
-        effectiveY = Math.round((originalY/originalHeight) * canvas.getResolution(1),0);
-
-        var context = canvas.getContext2d();
-
-        context.fillStyle = fillStyle();
-        context.fillRect(effectiveX-effectiveL/2, effectiveY-effectiveL/2, effectiveL, effectiveL); 
     }
 
     this.drawImage = function(canvas){
@@ -196,7 +157,7 @@ function Target(mouse, featureWeights) {
 
         var context = canvas.getContext2d();
 
-        var xOffset = _renderer.xOffset(self.getReward());
+        var xOffset = _renderer.xOffset(self.getReward(canvas));
         var yOffset = _renderer.yOffset(self.getAge());
 
 		if(self.isTouched()) {
@@ -210,10 +171,6 @@ function Target(mouse, featureWeights) {
 
     function dist(x1,y1,x2,y2) {
         return Math.sqrt(Math.pow(x1-x2,2)+Math.pow(y1-y2,2));
-    }
-
-    function fillStyle() {
-        return 'rgba('+ renderer.rgb(self.getReward()) +','+ renderer.opacity(self.getAge()) +')';
     }
 }
 

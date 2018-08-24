@@ -18,5 +18,7 @@ for e = 1:trajectory_episodes_count
    trajectory_episodes{e} = trajectory_states(episode_start:episode_stop); 
 end
 
-params     = struct ('epsilon',.01, 'gamma',.9, 'seed',0, 'kernel', 5);
+params     = struct ('epsilon',.0001, 'gamma',.9, 'seed',0, 'kernel', 5);
 result     = algorithm4run(trajectory_episodes, params, 1);
+
+result'

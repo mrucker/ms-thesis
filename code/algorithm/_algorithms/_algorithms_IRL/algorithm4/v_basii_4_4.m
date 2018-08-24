@@ -198,9 +198,7 @@ function T = basii2indexes_T(vals, vars)
 
     vals = [vals, 1]; %add one for easier computing
     
-    value_2_index_T = cell2mat(arrayfun(@(i) prod(vals((i+1):end)) .* fliplr((vals(i)-1) - (0:vars(i)-1)), 1:(numel(vals)-1), 'UniformOutput',false));
-    
-    value_2_index_T(end-vals(end-1)+1:end) = value_2_index_T(end-vals(end-1)+1:end);
+    value_2_index_T = cell2mat(arrayfun(@(i) prod(vals((i+1):end)) .* fliplr((vals(i)-1) - (0:vars(i)-1)), 1:(numel(vals)-1), 'UniformOutput',false));        
 
     %[52488 17496 5832 1944 0 243 486 162 54 18 6 2]
     T = value_2_index_T;

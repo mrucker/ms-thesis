@@ -3,9 +3,9 @@ function irl_result = algorithm4run(episodes, params, verbosity)
     EVAL_N = 500;
     
     N = 30;
-    M = 90;    
+    M = 70;    
     S = 3;
-    W = 4;
+    W = 3;
     
     T = 10;
 
@@ -15,7 +15,7 @@ function irl_result = algorithm4run(episodes, params, verbosity)
     episode_states = horzcat(episodes{:});
     episode_starts = episode_states(1:episode_length:episode_count*episode_length);
 
-    [state2identity, a_f, ~, ~] = r_basii_4_2();
+    [state2identity, a_f, ~] = r_basii_4_4();
 
     adp_algorithm = @approx_policy_iteration_13h;
 
@@ -114,6 +114,7 @@ function irl_result = algorithm4run(episodes, params, verbosity)
     m
     [a_f*E, a_f*ss{i}]'
 
+    %irl_result = a_f * (E-sb{i-1});
     irl_result = rs{i};
 end
 
@@ -149,7 +150,7 @@ end
 function k = k(x1, x2, kernel)
     p = 2;
     c = 1;
-    s = .01;
+    s = 1;
 
     switch kernel
         case 1

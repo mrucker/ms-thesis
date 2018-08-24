@@ -1,4 +1,4 @@
-function [state2identity, r_p, r_b, m_p, t_p] = r_basii_4_2()
+function [state2identity, r_p, r_b, m_p, t_p] = r_basii_4_3()
 
     m_p = all_move_perms();
     t_p = all_targ_perms();
@@ -28,24 +28,32 @@ function rb = r_basii_feats(states)
 
     sc = size(states,2);
     ds = abs(states(3:6,:));
-
-    %loc = target_location(states);
-    tou = target_touch_features(states);
-    cnt = target_center_features(states);
-    age = target_age_features(states);
-
-    target_features = zeros(16,sc);
     
-    for s_i = 1:sc
-        %doing this means we don't differentiate between a doublez touch and
-        %a single touch. This decision was made in order to reduce the size 
-        %of our total feature matrix for kernel mathematics purposes.
-        t_i = find(tou(:,s_i),1);
-        tou(:  ,s_i) = 0;
-        tou(t_i,s_i) = 1;
-        
-        dir = target_direction_features(states(:,s_i));
-        target_features(:,s_i) = vertcat(cnt, dir, age) * tou;
+    %.5
+    tou = target_touch_features(states);
+    
+    if any(sum(tou,1)>1)
+        %.1
+        [tv,ti] = max(tou,[],1);
+        tou(:) = 0;
+        tou(sub2ind(size(tou), ti, 1:sc))  = tv;
+    end    
+
+    if any(sum(tou,1) == 0)
+        target_features = zeros(16,1);
+    else
+        %loc = target_location(states);
+
+        %.25
+        cnt = sum(target_center_features(states)    .* tou,1);
+
+        %.25
+        dir = sum(target_direction_features(states) .* tou,1);    
+
+        %.15
+        age = sum(target_age_features(states)       .* tou,1);
+
+        target_features = double(vertcat((1:4)' == cnt, (1:8)' == dir, (1:4)' == age));
     end
 
     deriv_features = [
@@ -71,7 +79,7 @@ function tt = target_touch_features(states)
 
     ct = cd <= r2;
     pt = pd <= r2;
-    nt = states(14:3:end, 1) == 10; %10 comes from huge_trans_pre
+    nt = states(14:3:end, 1) <= 30; %in theory this could be 33 (aka, one observation 30 times a second)
 
     tt = ct&(~pt|nt);
 end
@@ -81,46 +89,51 @@ function [cd, pd] = target_distance_features(states)
     pp = states(1:2,:) - states(3:4,:);   
     tp = [states(12:3:end, 1)';states(13:3:end, 1)'];
     
-    dtp = dot(tp,tp,1)';
+    dtp = dot(tp,tp,1);
     dcp = dot(cp,cp,1);
     dpp = dot(pp,pp,1);
     
-    cd = dcp+dtp-2*(tp'*cp);
-    pd = dpp+dtp-2*(tp'*pp);
+    cd = dcp+dtp'-2*(tp'*cp);
+    pd = dpp+dtp'-2*(tp'*pp);
 end
 
 function td = target_direction_features(states)
 
-    directions = [
-        -1*pi/8, +1*pi/8, 1;
-        +1*pi/8, +3*pi/8, 2;
-        +3*pi/8, +5*pi/8, 3;
-        +5*pi/8, +7*pi/8, 4;
-        +7*pi/8, +8*pi/8, 5;
-        -8*pi/8, -7*pi/8, 5;
-        -7*pi/8, -5*pi/8, 6;
-        -5*pi/8, -3*pi/8, 7;
-        -3*pi/8, -1*pi/8, 8;
-    ];
+    % +1 ... 1
+    % +2 ... 2
+    % +3 ... 3
+    % +4 ... 4
+    % +5 ... 5
+    % -4 ... 5
+    % -3 ... 6
+    % -2 ... 7
+    % -1 ... 8
 
-    direction_eye = eye(8);
+    %   cx1, cx2, c3 ...
+    %tx1
+    %tx2
+    %tx3
+    %...
 
-    sc = size(states,2);
-    cp = reshape(states(1:2,:), [], 1);
-    tp = repmat([states(12:3:end, 1)';states(13:3:end, 1)'], sc, 1);
+    cx = states(1,:); %row
+    cy = states(2,:); %row
 
-    tp_with_cp_as_origin = tp-cp;
+    tx = states(12:3:end, 1); %col
+    ty = states(13:3:end, 1); %col
+
+    tx_with_cx_as_origin = tx-cx;
+    ty_with_cy_as_origin = ty-cy;
 
     %when there are two maxes, it returns the first index. This might introduce
     %bias when learning rewards, but I don't think it is enough to matter.
-    tv     = atan2(tp_with_cp_as_origin(2:2:end,:), tp_with_cp_as_origin(1:2:end,:));
-    [~,ti] = max(directions(:,1) <= tv & tv <= directions(:,2), [], 1);
-    td     = direction_eye(:,directions(ti,3)');
+    tv2 = atan2(ty_with_cy_as_origin, tx_with_cx_as_origin);    
+    tv2 = floor((tv2 + 3*pi/8 ) ./ (2*pi/8));
+    tv2 = tv2 + ((tv2<=0) * 9);
+
+    td = tv2;
 end
 
 function ta = target_age_features(states)
-
-    age_eye = eye(4);
 
     ages = [
         0  , 250, 1;
@@ -131,12 +144,10 @@ function ta = target_age_features(states)
 
     tv     = states(14:3:end, 1)';
     [~,ti] = max(ages(:,1) <= tv & tv <= ages(:,2), [], 1);
-    ta     = age_eye(:,ages(ti,3)');
+    ta     = repmat(ti', 1, size(states,2));
 end
 
 function tc = target_center_features(states)
-
-    center_eye = eye(4);
 
     centers = [
         0   , 400 , 1;
@@ -150,7 +161,7 @@ function tc = target_center_features(states)
 
     tv     = vecnorm(tp-sc);
     [~,ti] = max(centers(:,1) <= tv & tv <= centers(:,2), [], 1);
-    tc     = center_eye(:,centers(ti,3)');
+    tc     = repmat(ti', 1, size(states,2));
 end
 
 function m_features = all_move_perms()

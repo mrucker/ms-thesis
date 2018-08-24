@@ -67,8 +67,10 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
             init_states = all_states(randi(numel(all_states),1,M));    
         end
  
+        std_Y = std(Y);
+        
         t_start = tic;
-        parfor m = 1:M
+        for m = 1:M
 
             %0.28
             post_states = trans_post(init_states{m}, actions(init_states{m}));
@@ -77,13 +79,13 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
 
             if ~isempty(X)
                %post_val_se      = mean(S) * ones(1, size(post_states,2));
-                post_val_se      = std(Y)  * ones(1, size(post_states,2));
+                post_val_se      = std_Y  * ones(1, size(post_states,2));
                 [lia, locb]      = ismember(post_basii', X', 'rows');
                 post_val_se(lia) = sqrt(S(locb(lia)));
 
                 post_values = post_values + 1.5*post_val_se;
             end
-            
+
             %.11
             a_m = max(post_values);
             a_i = find(post_values == a_m);
@@ -107,7 +109,7 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
                     post_states = trans_post(s_t, action_matrix);
 
                     %1.26
-                    [post_basii]  = v_b(post_states);                    
+                    [post_basii]  = v_b(post_states);
 
                     %.05
                     post_values = v_v(v_i(post_basii));
@@ -128,7 +130,7 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
                 %.06
                 X_b_m{m}(:,t+1) = post_basii(:,a_i);
 
-                %.32                
+                %.32
                 X_r_m{m}(:,t+1) = reward(s_t);
             end
         end
@@ -242,7 +244,15 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
         b_time = b_time + toc(t_start);
 
         t_start = tic;
-            model = fitrsvm(vertcat(X, J)',Y','KernelFunction','rbf', 'Solver', 'SMO', 'Standardize',true);
+            
+            %https://www.mathworks.com/help/stats/fitrsvm.html#busljl4-BoxConstraint            
+            if iqr(Y) < .0001
+                box_constraint = 1;
+            else
+                box_constraint = iqr(Y)/1.349;
+            end
+            
+            model = fitrsvm(vertcat(X, J)',Y','KernelFunction','rbf', 'BoxConstraint', box_constraint, 'Solver', 'SMO', 'Standardize',true);
 
             v_v(v_i(v_p)) = predict(model, vertcat(v_p, n*ones(1,size(v_p,2)))');
             
