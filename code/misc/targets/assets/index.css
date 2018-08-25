@@ -1,0 +1,30 @@
+/*Overwrite the broswer's default styles*/
+body, html { height:100%; }
+
+#thanks {
+    display:none;
+    position: absolute;
+    top: 50%;
+    left:50%;
+    transform: translate(-50%,-50%);
+}
+
+/*Center the canvas on the screen; https://stackoverflow.com/a/7782251/1066291*/
+#c {
+    padding : 0;
+    margin  : auto;
+    display : block;
+    position: absolute;
+    top     : 0;
+    bottom  : 0;
+    left    : 0;
+    right   : 0;
+}
+
+/*Set the style for dialog boxes*/
+#my-modal-content {
+    display: none;
+}
+
+/*Place box around canvas to find it easily when debugging*/
+/*#c         { border: 1px solid black; }*/

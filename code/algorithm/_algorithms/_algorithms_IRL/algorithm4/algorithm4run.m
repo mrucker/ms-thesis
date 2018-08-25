@@ -15,7 +15,7 @@ function irl_result = algorithm4run(episodes, params, verbosity)
     episode_states = horzcat(episodes{:});
     episode_starts = episode_states(1:episode_length:episode_count*episode_length);
 
-    [state2identity, a_f, ~] = r_basii_4_4();
+    [state2identity, a_f, ~] = r_basii_4_5();
 
     adp_algorithm = @approx_policy_iteration_13h;
 

@@ -1,4 +1,4 @@
-function Experiment(participantId, rewardId)
+function Experiment(participantId, featureWeights)
 {
     var id     = Id.generate();
     var self   = this;
@@ -7,7 +7,7 @@ function Experiment(participantId, rewardId)
 
     var canvas  = new Canvas(document.querySelector('#c'));
     var mouse   = new Mouse(canvas);
-    var targets = new Targets(mouse, rewardId);
+    var targets = new Targets(mouse, featureWeights);
     var counter = new Counter(3, 3000, true);
     var timer   = new Timer(15000, true);
     

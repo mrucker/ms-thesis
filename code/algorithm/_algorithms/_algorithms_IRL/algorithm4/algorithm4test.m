@@ -11,7 +11,7 @@ g = .9;
 trans_pre = @huge_trans_pre;
 trans_pst = @huge_trans_post;
 
-[state2rew_ident, r_p, r_b] = r_basii_4_4();
+[state2rew_ident, r_p, r_b] = r_basii_4_5();
 
 v_b = @v_basii_4_4;
 

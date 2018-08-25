@@ -21,4 +21,4 @@ end
 params     = struct ('epsilon',.0001, 'gamma',.9, 'seed',0, 'kernel', 5);
 result     = algorithm4run(trajectory_episodes, params, 1);
 
-result'
+jsonencode(round(result',2));

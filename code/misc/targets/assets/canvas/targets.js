@@ -3,76 +3,24 @@ var _renderer  = new TargetRenderer(0, .5, .5, 1000);
 var _prerender_n_touch = _renderer.prerender(_renderer.gradientRGB, _renderer.evenOpacity, _renderer.evenFill, _renderer.mediumStroke);
 var _prerender_y_touch = _renderer.prerender(_renderer.allBlack   , _renderer.evenOpacity, _renderer.evenFill, _renderer.mediumStroke);
 
-function Targets(mouse, rewardId) {
-    var radius     = 150;
-    var targets    = [];
-    var effectiveA = 0;
-    var effectiveR = 0;
+function Target(mouse, x_pct, y_pct, effectiveR, age) {
     
-    //if you change this 200 value be sure to remember to also change the matlab huge_trans_pre function as well
-    var process = poissonProcess.create(200, function () { targets.push(new Target(mouse, rewardId))} );
-
-    this.startAppearing = function() {
-        process.start();
-    }
-
-    this.stopAppearing = function() {
-        process.stop();
-    }
-
-    this.draw = function(canvas){
-
-        effectiveA = (canvas.getResolution(0)/3000) * (canvas.getResolution(1)/1500) * (Math.PI * radius * radius);
-        effectiveR = Math.round(Math.sqrt(effectiveA/Math.PI),0);
-
-		//_renderer.sample(canvas,0,0);
-		
-		var context = canvas.getContext2d();
-		
-        targets.forEach(function(target){ target.setR(effectiveR); target.draw(canvas); });
-
-        targets = targets.filter(function(target) {return !target.isDead();} );
-    }
-
-    this.getData = function(width, height) {
-        
-        //this is a little janky, but because the targets are positioned relative to the canvas they don't have a position until the next 
-        //time the canvas is redrawn. Therefore it is possible for the target to exist and not have a position so we ignore it until it does.       
-        var ts = targets.filter(function(target) { return target.getX() != null && target.getY() != null; });
-        var ds = ts.map(function(target) { return target.getData().map(Math.round); });
-        
-        return [effectiveR].concat(ds.toFlat());
-    }
-
-    this.touchCount = function() {
-        return targets.filter(function(target) { return target.isNewTouch(); }).length;
-    }
-}
-
-function Target(mouse, rewardId) {
-
-	var self = this;
-
-	var x_pct = 0;
-	var y_pct = 0;
-
-    var effectiveX = 0;
-    var effectiveY = 0;
-    var effectiveR = 0;
-	
-    var creationTime   = Date.now();
 	var isNextTouchNew = true;
 	
+	var effectiveX = 0;
+    var effectiveY = 0;
+    
 	var xOffsetOnTouch = 0;
-
-    this.setR   = function(r){ effectiveR = r;    };
+	
+	var createTime = Date.now();
+    var self       = this;
+    
     this.getR   = function() { return effectiveR; };
     this.getX   = function() { return effectiveX; };
     this.getY   = function() { return effectiveY; };
-    this.getAge = function() { return Date.now() - creationTime; };
-    this.isDead = function() { return self.getAge() >= 100 && _renderer.yOffset(self.getAge()) == 0;};
+    this.getAge = function() { return age || (Date.now() - createTime); };
 
-    this.getData     = function() {
+    this.getData     = function() { 
         return [
             Math.round(self.getX()     ,0),
             Math.round(self.getY()     ,0),
@@ -80,58 +28,62 @@ function Target(mouse, rewardId) {
         ];
     };
 
-    this.isNewTouch = function() {
-
+	this.isNewTouch  = function() {
+		
 		if(self.isTouched() && isNextTouchNew) {
 			isNextTouchNew = false;
 			return true;
 		}
-
+		
 		if(!self.isTouched()) {
 			isNextTouchNew = true;
 		}
 
 		return false;
-    }
-
+    };
+	
     this.isTouched  = function() {
-
+        
         var targetX = effectiveX;
         var targetY = effectiveY;
         var mouseX = mouse.getX();
         var mouseY = mouse.getY();
 
-        return dist(targetX,targetY,mouseX,mouseY) <= effectiveR;
+		return dist(targetX,targetY,mouseX,mouseY) <= effectiveR;
     };
 
     this.getReward = function(canvas) {
+		
+        var f_classes = self.getFeatures(canvas);		
 
-        var f_classes = self.getFeatures(canvas);
-
-		var cnt_index = [0,32,64,96];
+		//var cnt_index = [0,32,64,96];		
+		var lox_index = [0,96,192]
+		var loy_index = [0,32,64];
 		var dir_index = [0,4,8,12,16,20,24,28];
 		var age_index = [1,2,3,4];
 
-		var r_index = cnt_index[f_classes[0]-1] + dir_index[f_classes[1]-1] + age_index[f_classes[2]-1] + 1;
+		//var r_index = cnt_index[f_classes[0]-1] + dir_index[f_classes[1]-1] + age_index[f_classes[2]-1] + 1;
+		var r_index = lox_index[f_classes[0]-1] + loy_index[f_classes[1]-1] + dir_index[f_classes[2]-1] + age_index[f_classes[3]-1] + 1;
 
-		var rewards = [0.42,0.5,0.81,0.64,0.5,0.29,0.67,0.45,0.17,0.24,0.62,0.2,0.23,0.23,0.39,0.14,0.17,0.25,0.35,0.16,0.2,0.24,0.3,0.34,0.14,0.21,0.37,0.12,0.14,0.24,0.3,0.24,0.36,0.63,1,0.78,0.28,0.32,0.63,0.5,0.61,0.31,0.42,0.36,0.5,0.28,0.55,0.35,0.25,0.24,0.37,0.19,0.23,0.23,0.32,0.25,0.13,0.17,0.41,0.11,0,0.24,0.39,0.18,0.13,0.43,0.55,0.46,0.39,0.35,0.47,0.38,0.35,0.32,0.42,0.33,0.33,0.31,0.4,0.31,0.29,0.29,0.37,0.29,0.28,0.29,0.36,0.31,0.26,0.27,0.36,0.27,0.24,0.29,0.37,0.3,0.28,0.43,0.55,0.46,0.39,0.35,0.47,0.38,0.35,0.32,0.42,0.33,0.33,0.31,0.4,0.31,0.29,0.29,0.37,0.29,0.28,0.29,0.36,0.31,0.26,0.27,0.36,0.27,0.24,0.29,0.37,0.3,0.28];
-
+		//var rewards = [0.29,0.38,0.75,0.62,0.53,0.19,0.53,0.38,0.1,0.23,0.74,0.2,0.21,0.21,0.35,0.07,0.1,0.17,0.21,0.28,0.01,0.13,0.34,0.14,0.03,0.22,0.3,0.34,0.46,0.51,0.68,0.44,0.26,0.52,0.65,0.57,0.24,0.25,0.56,0.49,0.57,0.35,0.49,0.54,0.52,0.3,0.6,0.48,0.34,0.2,0.16,0.15,0,0.24,0.41,0.25,0.09,0.23,0.38,0.02,0.02,0.63,1,0.89,0.34,0.39,0.49,0.43,0.36,0.32,0.43,0.37,0.32,0.33,0.45,0.37,0.33,0.31,0.41,0.33,0.28,0.26,0.32,0.28,0.21,0.27,0.37,0.29,0.23,0.29,0.37,0.3,0.27,0.42,0.53,0.46,0.36,0.39,0.49,0.43,0.36,0.32,0.43,0.37,0.32,0.33,0.45,0.37,0.33,0.31,0.41,0.33,0.28,0.26,0.32,0.29,0.21,0.27,0.37,0.29,0.24,0.29,0.37,0.3,0.27,0.42,0.53,0.46,0.36];
+		var rewards = [0.34,0.38,0.59,0.47,0.35,0.36,0.52,0.35,0.29,0.35,0.5,0.4,0.34,0.3,0.45,0.37,0.15,0.28,0.42,0.33,0.21,0.29,0.47,0.41,0.31,0.28,0.43,0.3,0.23,0.43,1,0.78,0.34,0.28,0.4,0.4,0.25,0.31,0.46,0.33,0.49,0.28,0.43,0.3,0.42,0.23,0.51,0.39,0.21,0.15,0.28,0.06,0.02,0.23,0.45,0.25,0.2,0.19,0.32,0,0.17,0.31,0.46,0.34,0.24,0.39,0.48,0.41,0.39,0.41,0.69,0.45,0.36,0.38,0.5,0.65,0.49,0.32,0.34,0.34,0.4,0.29,0.37,0.3,0.23,0.31,0.42,0.35,0.25,0.31,0.37,0.31,0.3,0.53,0.46,0.32,0.36,0.35,0.51,0.69,0.36,0.32,0.47,0.38,0.3,0.3,0.45,0.36,0.29,0.25,0.37,0.3,0.21,0.23,0.36,0.3,0.21,0.23,0.39,0.32,0.24,0.23,0.36,0.38,0.09,0.32,0.5,0.42,0.3,0.27,0.62,0.31,0.23,0.26,0.41,0.24,0.21,0.22,0.51,0.09,0.23,0.13,0.32,0.12,0.11,0.14,0.21,0.18,0.11,0.17,0.32,0.09,0.12,0.19,0.21,0.14,0.45,0.22,0.5,0.16,0.19,0.38,0.52,0.28,0.66,0.39,0.79,0.62,0.4,0.31,0.64,0.35,0.33,0.23,0.37,0.12,0.24,0.26,0.38,0.19,0.26,0.28,0.41,0.28,0.23,0.28,0.4,0.29,0.3,0.34,0.47,0.33,0.32,0.36,0.43,0.44,0.33,0.34,0.42,0.38,0.33,0.29,0.37,0.34,0.28,0.26,0.34,0.32,0.23,0.26,0.32,0.3,0.22,0.28,0.35,0.33,0.25,0.28,0.34,0.32,0.25,0.37,0.46,0.44,0.32,0.3,0.37,0.54,0.25,0.32,0.38,0.31,0.57,0.23,0.31,0.22,0.24,0.23,0.29,0.26,0.2,0.19,0.13,0.19,0.06,0.23,0.28,0.19,0.15,0.23,0.27,0.23,0.24,0.46,0.27,0.48,0.28,0.46,0.4,0.39,0.33,0.36,0.41,0.48,0.34,0.26,0.26,0.33,0.21,0.21,0.29,0.27,0.12,0.25,0.28,0.25,0.2,0.28,0.32,0.29,0.23,0.28,0.32,0.3,0.25,0.36,0.38,0.36,0.3];
+		
         return rewards[r_index];
     };
-
+    
     this.getFeatures = function (canvas) {
 
-		var centerX = canvas.getResolution(0)/2;
-		var centerY = canvas.getResolution(1)/2;
+		var width  = canvas.getResolution(0);
+		var height = canvas.getResolution(1);
 
-		var cnt_distance = dist(effectiveX, effectiveY, centerX, centerY);
-		var cnt_class    = cnt_distance <= 400 ? 1 : cnt_distance <= 900 ? 2 : cnt_distance <= 1500 ? 3 : 4;
+		var lox_class = effectiveX <= 1/3 * width  ? 1 : effectiveX <= 2/3 * width  ? 2 : 3;
+		var loy_class = effectiveY <= 1/3 * height ? 1 : effectiveY <= 2/3 * height ? 2 : 3;
 
 		var mouseX = mouse.getX();
         var mouseY = mouse.getY();
 
 		var dir_radian = Math.atan2(effectiveY - mouseY, effectiveX - mouseX);
-		var dir_class  = Math.floor( (dir_radian + 3*Math.PI/8) / (Math.PI/4));
+		var dir_class  = Math.floor( (dir_radian + 3*Math.PI/8) / (Math.PI/4) );
 
 		if(dir_class <= 0) {
 			dir_class += 8;
@@ -140,20 +92,15 @@ function Target(mouse, rewardId) {
 		var age_value = self.getAge();
 		var age_class = age_value <= 250 ? 1 : age_value <= 500 ? 2 : age_value <= 750 ? 3 : 4;
 
-		return [cnt_class, dir_class, age_class];
+		return [lox_class, loy_class, dir_class, age_class];
     };
 
-    this.draw = function(canvas, r) {
-        self.drawImage(canvas, r);
-    }
+    this.draw = function(canvas) {
+		x_pct  = x_pct || ((canvas.getResolution(0) - 2*effectiveR) * Math.random() + effectiveR)/canvas.getResolution(0);
+        y_pct  = y_pct || ((canvas.getResolution(1) - 2*effectiveR) * Math.random() + effectiveR)/canvas.getResolution(1);
 
-    this.drawImage = function(canvas){
-
-		x_pct  = x_pct || Math.random();
-        y_pct  = y_pct || Math.random();
-
-        effectiveX = Math.round(x_pct * (canvas.getResolution(0) - 2 * effectiveR) + effectiveR,0);
-        effectiveY = Math.round(y_pct * (canvas.getResolution(1) - 2 * effectiveR) + effectiveR,0);
+        effectiveX = Math.round(x_pct * canvas.getResolution(0),0);
+        effectiveY = Math.round(y_pct * canvas.getResolution(1),0);
 
         var context = canvas.getContext2d();
 
@@ -194,25 +141,25 @@ function TargetRenderer(fadeInTime, fadeOffTime, fadeOutTime, lifespan) {
     }
 
     this.gradientRGB = function(rewStep) {
-
-        var c_stop0 = [200, 0  ,  0 ];
-        var c_stop1 = [ 0 , 200,  0 ];
-        var c_stop2 = [ 0 , 0  , 200];
-
-        var c_val0 = 0.0 * rewSteps;
+	
+        var c_stop0 = [200, 0 ,  0 ];
+        var c_stop1 = [100, 0 , 100];
+        var c_stop2 = [ 0 , 0 , 200];
+		
+        var c_val0 = 0.0 * rewSteps; 
         var c_val1 = 0.5 * rewSteps;
         var c_val2 = 1.0 * rewSteps;
-
+		
 		var c_wgt0 = 0;
 		var c_wgt1 = 0;
 		var c_wgt2 = 0;
-
+		
 		if(c_val0 <= rewStep && rewStep < c_val1) {
 			c_wgt0 = Math.max(0, Math.min((1       ),(c_val1 - rewStep)/(c_val1-c_val0)));
-			c_wgt1 = Math.max(0, Math.min((1-c_wgt0),(c_val2 - rewStep)/(c_val2-c_val1)));
+			c_wgt1 = Math.max(0, Math.min((1-c_wgt0),(c_val2 - rewStep)/(c_val2-c_val1))); 
 		} 
 		if(c_val1 <= rewStep && rewStep <= c_val2) {
-			c_wgt1 = Math.max(0, Math.min((1-c_wgt0),(c_val2 - rewStep)/(c_val2-c_val1)));
+			c_wgt1 = Math.max(0, Math.min((1-c_wgt0),(c_val2 - rewStep)/(c_val2-c_val1))); 
 		    c_wgt2 = Math.max(0, Math.min((1-c_wgt1),(1                               ))); 
 		}			
 
