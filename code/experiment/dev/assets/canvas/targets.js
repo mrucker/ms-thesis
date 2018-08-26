@@ -129,11 +129,6 @@ function Target(mouse, rewardId) {
 		else {
 			return 0.5;
 		}
-					
-		
-		
-		
-		
     };
 
     this.getFeatures = function (canvas) {
