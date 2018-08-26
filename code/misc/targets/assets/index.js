@@ -16,7 +16,7 @@ $(document).ready( function () {
 		
 	for(x = 1; x <= xs; x++) {
 		for(y = 1; y <= ys; y++) {
-			targets.push(new Target(mouse, x/(xs+1), y/(ys+1), 100, 100))
+			targets.push(new Target(mouse, x/(xs+1), y/(ys+1), 100, 900))
 		}
 	}
 	

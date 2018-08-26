@@ -21,4 +21,19 @@ end
 params     = struct ('epsilon',.0001, 'gamma',.9, 'seed',0, 'kernel', 5);
 result     = algorithm4run(trajectory_episodes, params, 1);
 
-jsonencode(round(result',2));
+sorted_result = sort(result);
+
+lower = sorted_result(10);
+upper = sorted_result(end-9);
+
+epsilon_result = result;
+
+epsilon_result(result < lower) = lower;
+epsilon_result(result > upper) = upper;
+
+min_result = min(epsilon_result);
+max_result = max(epsilon_result);
+
+normal_epsilon_result = round((epsilon_result - min_result)/(max_result-min_result),2);
+
+jsonencode(normal_epsilon_result)
