@@ -2,10 +2,11 @@ function Observations(participantId, experimentId, mouse, targets, canvas)
 {
     var self    = this;
     var started = false;
-    var stopped = false;
-    var touches = 0;
+    var stopped = false;    
     var errors  = [];
     
+	var touchCount = 0;
+	
     var payloadSize  = 30;
     var obsInQueue   = [];
     var obsInMemory  = [];
@@ -17,12 +18,12 @@ function Observations(participantId, experimentId, mouse, targets, canvas)
     var maxAttempts     = 2;
     var maxObservations = 15*ops_Hz; //to protect myself from a bug writing a crazy amount of data.
 
-    this.getObservations = function() {
-        return obsInMemory;
+    this.getObservationCount = function() {
+        return obsInMemory.length;
     }
 
-    this.getTouches = function() {
-        return touches;
+    this.getTouchCount = function() {
+        return touchCount;
     }
     
     this.getHz = function () {
@@ -81,7 +82,7 @@ function Observations(participantId, experimentId, mouse, targets, canvas)
                 obsInQueue = obsInQueue.slice(payloadSize);
             }
 
-            touches += targets.touchCount();
+            touchCount += targets.touchCount();
 
             setTimeout(observe, 1000/ops.correctedHz(1,ops_Hz));
         }

@@ -11,7 +11,7 @@ $(document).ready( function () {
 
     if(querystring.exists("test")) {
 		
-		var experiment1 = new Experiment("testOnly", getFeatureWeights());
+		var experiment1 = new Experiment("testOnly", 2);
 		
         $.Deferred().resolve()
             .then(showModalContent("demo"      , true ))
@@ -24,8 +24,8 @@ $(document).ready( function () {
     } else {
 
         var participant = new Participant();
-        var experiment1 = new Experiment(participant.getId(),[0      ,0      ,0      ,0      ,1     ]);
-        var experiment2 = new Experiment(participant.getId(),[-0.1921,-0.0462,-0.0107,-0.0009,0.0790]);
+        var experiment1 = new Experiment(participant.getId(),1);
+        var experiment2 = new Experiment(participant.getId(),2);
 
         if(querystring.exists("id")) {
             alert(participant.getId());

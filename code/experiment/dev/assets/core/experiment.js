@@ -50,8 +50,18 @@ function Experiment(participantId, rewardId)
         fps.stop();
         obs.stopObserving();
         
+		var touchCount = obs.getTouchCount();
+		var observationCount = obs.getObservationCount();
+		
         //Measurements to add: touch count, observation count,
-        saveData({"stopTime":new Date().toUTCString(), "fps": fps.getHz(), "ops": obs.getHz(), "errors" : errors.concat(obs.getErrors()).toDistinct()});
+        saveData({
+			"stopTime" :new Date().toUTCString()
+			, "fps"    : fps.getHz()
+			, "ops"    : obs.getHz()
+			, "errors" : errors.concat(obs.getErrors()).toDistinct()
+			, "o_n"    : observationCount
+			, "t_n"    : touchCount
+		});
     }
     
     function runCountdown() {
