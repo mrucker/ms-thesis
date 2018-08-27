@@ -10,7 +10,7 @@ function Mouse(canvas)
     var mps        = new Frequency("mps", false);
 
     this.startTracking = function () {
-        
+
         mps.start();
         
         canvas.addOnDeviceMove(onDeviceMove);

@@ -1,7 +1,7 @@
 paths;
 
 %trajectory_observations = jsondecode(fileread('huge-observed-trajectory-1.json'));
-trajectory_observations = jsondecode(fileread('../data/dynamodb/entries/observations/14e18c555679fbefa.json'));
+trajectory_observations = jsondecode(fileread('../../data/dynamodb/entries/observations/18c1b010577d16eac.json'));
 trajectory_states       = huge_states_from(trajectory_observations);
 trajectory_states(1:4)  = []; %trim off the first four states since they have pre-game noise
 
@@ -37,3 +37,5 @@ max_result = max(epsilon_result);
 normal_epsilon_result = round((epsilon_result - min_result)/(max_result-min_result),2);
 
 jsonencode(normal_epsilon_result)
+
+hist(normal_epsilon_result)
