@@ -14,6 +14,8 @@ function Mouse(canvas)
         mps.start();
         
         canvas.addOnDeviceMove(onDeviceMove);
+		
+		position = {x:canvas.getResolution(0)/2, y:canvas.getResolution(1)/2};
     };
 
     this.stopTracking = function () {

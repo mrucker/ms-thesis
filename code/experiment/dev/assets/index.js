@@ -130,13 +130,4 @@ $(document).ready( function () {
             $("#modalBody"  ).html($content.html());
             $("#modalButton").html($content.data('btnTxt'));
     }
-
-	function getFeatureWeights() {
-        if(querystring.exists("reward")) {
-            return JSON.parse(querystring.value("reward"));
-        }
-        else {
-            return [-0.1921,-0.0462,-0.0107,-0.0009,0.0790]; 
-        }
-    }
 });

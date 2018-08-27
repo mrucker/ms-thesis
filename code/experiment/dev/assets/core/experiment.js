@@ -27,7 +27,34 @@ function Experiment(participantId, rewardId)
             return $.Deferred.reject("HTML5 Canvas is not supported on this device");
         }
         else {
-            return runCountdown().then(runTask).then(runCleanup);
+			var deferred = $.Deferred();
+			
+			//runCountdown()
+			canvas .startAnimating();
+			counter.startCounting();
+			mouse  .startTracking();
+
+			counter.onElapsed(function() { 
+				//runTask()
+				startExperiment();
+        
+				targets.startAppearing();
+				timer  .startTiming();
+				timer  .onElapsed(function() { 
+					//runCleanup()
+					mouse  .stopTracking();
+					targets.stopAppearing();
+					counter.stopCounting();
+					canvas .stopAnimating();
+					timer  .stopTiming();
+
+					stopExperiment();
+					
+					deferred.resolve();
+				})
+			});
+			
+			return deferred;
         }
     }
 
@@ -63,43 +90,7 @@ function Experiment(participantId, rewardId)
 			, "t_n"    : touchCount
 		});
     }
-    
-    function runCountdown() {
-
-        var deferred = $.Deferred();
-
-        canvas .startAnimating();
-        counter.startCounting();
-        
-        mouse.startTracking();
-
-        counter.onElapsed(function() { deferred.resolve(); });
-
-        return deferred;
-    }
-    
-    function runTask() {
-        var deferred = $.Deferred();
-        
-        startExperiment();
-        
-        targets.startAppearing();
-        timer  .startTiming();
-        timer  .onElapsed(function() { deferred.resolve(); });
-        
-        return deferred;
-    }
-
-    function runCleanup() {
-        mouse  .stopTracking();
-        targets.stopAppearing();
-        counter.stopCounting();
-        canvas .stopAnimating();        
-        timer  .stopTiming();
-        
-        stopExperiment();
-    }
-    
+	
     function saveData(data) {        
         if(!post) {
             post = $.ajax({
