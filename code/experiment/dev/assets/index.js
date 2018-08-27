@@ -21,22 +21,24 @@ $(document).ready( function () {
             .then(showModalContent("finished"  , false))
             .then(showThanks                           );
     } 
-	else if(querystring.exists("palette")) {
+	else if(querystring.exists("pal")) {
 		var mouse   = new Mouse(canvas);
 		var targets = [];
-		
+
 		var xs = 10;
-		var ys = 03;
-			
+		var ys = 05;
+
 		for(x = 1; x <= xs; x++) {
 			for(y = 1; y <= ys; y++) {
 				targets.push(new Target(mouse, 100, x/(xs+1), y/(ys+1), 100, 2))
 			}
 		}
-		
+
+		targets.forEach(function(t) { t.setPal(true) });
+
 		mouse .startTracking();
 		canvas.startAnimating();
-		
+
 		canvas.draw = function() {
 			targets.forEach(function(target) {target.draw(canvas)});
 			mouse.draw(canvas);

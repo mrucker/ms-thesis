@@ -3,7 +3,7 @@ var fs  = require('fs');
 
 AWS.config.region = 'us-east-1'
 
-		  QueryParticipants('2018-08-23T15:20:01.602Z') /*.then(console.log);*/
+		  QueryParticipants('2018-08-27T15:20:01.602Z') /*.then(console.log);*/
  	.then(WriteParticipants)
 	.then(QueryExperiments )
 	.then(WriteExperiments )
