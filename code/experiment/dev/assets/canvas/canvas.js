@@ -1,20 +1,25 @@
 function Canvas(canvas)
 {
-    var self       = this;    
-    var everyother = false;
-    var onMove     = undefined;
-    var started    = undefined;
-    var stopped    = undefined;
-    var fps        = new Frequency("fps", false);
-    
+    var self        = this;    
+    var everyother  = false;
+    var onMove      = undefined;
+    var started     = undefined;
+    var stopped     = undefined;
+    var fps         = new Frequency("fps", false);
+	var areaPctSqrt = Math.sqrt(canvas.width * canvas.height / (1500 * 3000));
+
     this.getData = function() {
         return self.getResolution();
     }
-    
+
     this.getContext2d = function() {
         return canvas.getContext('2d');
     };
-    
+
+	this.getAreaPctSqrt = function() {
+		return areaPctSqrt;
+	}
+
     this.getDimensions = function(dim) {
         if(dim != 0 && dim != 1 && dim != undefined) {
             throw "invalid dimension";
@@ -29,7 +34,7 @@ function Canvas(canvas)
 
         return [w, h][dim]
     }
-    
+
     this.getResolution = function(dim) {
         if(dim != 0 && dim != 1 && dim != undefined) {
             throw "invalid dimension";
@@ -38,7 +43,7 @@ function Canvas(canvas)
         if(dim == undefined) {
             return [canvas.width, canvas.height];
         }
-        
+
         return [canvas.width, canvas.height][dim]    }
      
     this.startAnimating = function () {
@@ -52,9 +57,9 @@ function Canvas(canvas)
     
     this.stopAnimating = function () {
         fps.stop();
-        
+
         self.wipe(self);
-        
+
         stopped = true;
     };
     
@@ -89,6 +94,8 @@ function Canvas(canvas)
         //this represents the amount of space the canvas consumes on the page
         canvas.style.width  = styleW + 'px';
         canvas.style.height = styleH + 'px';
+
+		areaPctSqrt = Math.sqrt( (canvas.width*canvas.height) / (3000 * 1500) );
     }
     
     function animate() {

@@ -10,7 +10,7 @@ function Targets(mouse, rewardId) {
     var effectiveR = 0;
     
     //if you change this 200 value be sure to remember to also change the matlab huge_trans_pre function as well
-    var process = poissonProcess.create(200, function () { targets.push(new Target(mouse, rewardId))} );
+    var process = poissonProcess.create(200, function () { targets.push(new Target(mouse, radius, 0, 0, 0, rewardId))} );
 
     this.startAppearing = function() {
         process.start();
@@ -22,16 +22,9 @@ function Targets(mouse, rewardId) {
 
     this.draw = function(canvas){
 
-        effectiveA = (canvas.getResolution(0)/3000) * (canvas.getResolution(1)/1500) * (Math.PI * radius * radius);
-        effectiveR = Math.round(Math.sqrt(effectiveA/Math.PI),0);
+		targets.forEach(function(target){ target.draw(canvas); });
 
-		//_renderer.sample(canvas,0,0);
-		
-		var context = canvas.getContext2d();
-		
-        targets.forEach(function(target){ target.setR(effectiveR); target.draw(canvas); });
-
-        targets = targets.filter(function(target) {return !target.isDead();} );
+        targets = targets.filter(function(target) { return !target.isDead();} );
     }
 
     this.getData = function(width, height) {
@@ -49,12 +42,12 @@ function Targets(mouse, rewardId) {
     }
 }
 
-function Target(mouse, rewardId) {
+function Target(mouse, radius, x_pct, y_pct, fixed_age, rewardId) {
 
 	var self = this;
 
-	var x_pct = 0;
-	var y_pct = 0;
+	x_pct = x_pct || Math.random();
+	y_pct = y_pct || Math.random();
 
     var effectiveX = 0;
     var effectiveY = 0;
@@ -64,12 +57,11 @@ function Target(mouse, rewardId) {
 	var isNextTouchNew = true;
 	
 	var xOffsetOnTouch = 0;
-
-    this.setR   = function(r){ effectiveR = r;    };
-    this.getR   = function() { return effectiveR; };
+    
+	this.getR   = function() { return effectiveR; };
     this.getX   = function() { return effectiveX; };
     this.getY   = function() { return effectiveY; };
-    this.getAge = function() { return Date.now() - creationTime; };
+    this.getAge = function() { return fixed_age || (Date.now() - creationTime); };
     this.isDead = function() { return self.getAge() >= 100 && _renderer.yOffset(self.getAge()) == 0;};
 
     this.getData     = function() {
@@ -248,12 +240,13 @@ function Target(mouse, rewardId) {
 		return [lox_class, loy_class, vox_class, voy_class, dir_class];
     };
 
-    this.draw = function(canvas, r) {
-		x_pct = x_pct || Math.random();
-        y_pct = y_pct || Math.random();
+    this.draw = function(canvas) {
 
-        effectiveX = Math.round(x_pct * (canvas.getResolution(0) - 2 * effectiveR) + effectiveR,0);
-        effectiveY = Math.round(y_pct * (canvas.getResolution(1) - 2 * effectiveR) + effectiveR,0);
+		console.log(canvas.getAreaPctSqrt());
+	
+        effectiveR = Math.round(radius * (canvas.getAreaPctSqrt()                 )             );
+        effectiveX = Math.round(x_pct  * (canvas.getResolution(0) - 2 * effectiveR) + effectiveR);
+        effectiveY = Math.round(y_pct  * (canvas.getResolution(1) - 2 * effectiveR) + effectiveR);
 
         var context = canvas.getContext2d();
 

@@ -1,24 +1,15 @@
-function Experiment(participantId, rewardId)
+function Experiment(canvas, participantId, rewardId)
 {
     var id     = Id.generate();
     var self   = this;
     var errors = [];
     var post   = undefined;
 
-    var canvas  = new Canvas(document.querySelector('#c'));
     var mouse   = new Mouse(canvas);
     var targets = new Targets(mouse, rewardId);
     var counter = new Counter(3, 3000, true);
     var timer   = new Timer(15000, true);
-    
-    canvas.draw = function() {
-        targets.draw(canvas);
-        counter.draw(canvas);
-        timer  .draw(canvas);
-        mouse  .draw(canvas);
-        self   .draw(canvas);
-    };
-    
+
     var obs = new Observations(participantId, id, mouse, targets, canvas);
     var fps = new Frequency("fps", false);
 
@@ -28,6 +19,14 @@ function Experiment(participantId, rewardId)
         }
         else {
 			var deferred = $.Deferred();
+			
+			canvas.draw = function() {
+				targets.draw(canvas);
+				counter.draw(canvas);
+				timer  .draw(canvas);
+				mouse  .draw(canvas);
+				self   .draw(canvas);
+			};
 			
 			//runCountdown()
 			canvas .startAnimating();

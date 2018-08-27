@@ -1,6 +1,6 @@
 $(document).ready( function () {
 
-    initializeCanvas();
+    var canvas = initializeCanvas();
 
     //if(querystring.exists("noData")) {
     if(!querystring.exists("data")) {
@@ -11,21 +11,42 @@ $(document).ready( function () {
 
     if(querystring.exists("test")) {
 		
-		var experiment1 = new Experiment("testOnly", 2);
+		var experiment1 = new Experiment(canvas, "testOnly", 2);
 		
         $.Deferred().resolve()
             .then(showModalContent("demo"      , true ))
 			.then(showModalContent("directions", true ))
-			.then(showModalContent("begin1"    , true ))
 			.then(showModalContent("begin2"    , false))
             .then(experiment1.run                      )
             .then(showModalContent("finished"  , false))
             .then(showThanks                           );
-    } else {
+    } 
+	else if(querystring.exists("palette")) {
+		var mouse   = new Mouse(canvas);
+		var targets = [];
+		
+		var xs = 10;
+		var ys = 03;
+			
+		for(x = 1; x <= xs; x++) {
+			for(y = 1; y <= ys; y++) {
+				targets.push(new Target(mouse, 100, x/(xs+1), y/(ys+1), 100, 2))
+			}
+		}
+		
+		mouse .startTracking();
+		canvas.startAnimating();
+		
+		canvas.draw = function() {
+			targets.forEach(function(target) {target.draw(canvas)});
+			mouse.draw(canvas);
+		};
+	}	
+	else {
 
         var participant = new Participant();
-        var experiment1 = new Experiment(participant.getId(),1);
-        var experiment2 = new Experiment(participant.getId(),2);
+        var experiment1 = new Experiment(canvas, participant.getId(),1);
+        var experiment2 = new Experiment(canvas, participant.getId(),2);
 
         if(querystring.exists("id")) {
             alert(participant.getId());
@@ -121,6 +142,8 @@ $(document).ready( function () {
         $(window).on('resize', function() {
             canvas.resize($(window).width() - 10, $(window).height() - 10);
         });
+		
+		return canvas;
     }
     
     function loadModalContent(contentId) {

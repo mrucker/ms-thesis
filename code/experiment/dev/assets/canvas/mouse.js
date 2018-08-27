@@ -10,12 +10,10 @@ function Mouse(canvas)
     var mps        = new Frequency("mps", false);
 
     this.startTracking = function () {
-
-        mps.start();
+        
+		mps.start();
         
         canvas.addOnDeviceMove(onDeviceMove);
-		
-		position = {x:canvas.getResolution(0)/2, y:canvas.getResolution(1)/2};
     };
 
     this.stopTracking = function () {
@@ -28,11 +26,11 @@ function Mouse(canvas)
     };
 
     this.getX = function() {
-        return position.x;
+        return position.x || canvas.getResolution(0)/2;
     };
 
     this.getY = function() {
-        return position.y;
+        return position.y || canvas.getResolution(1)/2;
     };
 
     this.getHistoryPos = function() {
