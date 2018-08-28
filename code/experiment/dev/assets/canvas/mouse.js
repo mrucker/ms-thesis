@@ -1,18 +1,19 @@
 function Mouse(canvas)
 {
-    var self       = this;
-    var position   = {x:undefined, y:undefined};
-    var historyPos = [[0,0],[0,0],[0,0],[0,0]];
-    var historyDot = [0,0,0,0];
-    
+    var self     = this;
+    var position = {x:undefined, y:undefined};
+	var velocity = {x:undefined, y:undefined, m:undefined};
+
+	var moveTimeout = undefined;
+	
     //chrome: 60  mps
     //IE    : 120 mps
     var mps        = new Frequency("mps", false);
 
     this.startTracking = function () {
-        
+
 		mps.start();
-        
+
         canvas.addOnDeviceMove(onDeviceMove);
     };
 
@@ -22,7 +23,8 @@ function Mouse(canvas)
 
         mps.stop();
 
-        position = { x:undefined, y:undefined};
+        position = {x:undefined, y:undefined};
+		velocity = {x:undefined, y:undefined, m:undefined};
     };
 
     this.getX = function() {
@@ -33,13 +35,20 @@ function Mouse(canvas)
         return position.y || canvas.getResolution(1)/2;
     };
 
-    this.getHistoryPos = function() {
-        return historyPos.slice(0,4);
-    }
+	this.getVelocity = function(dim) {
+		if(dim == 0) return velocity.x;
+		if(dim == 1) return velocity.y;
 
-    this.getHistoryDot = function() {
-        return historyDot.slice(0,4);
-    }
+		return velocity.m;
+	}
+
+	this.getDirectionFrom = function(x,y) {
+		return Math.atan2(y - position.y, x - position.x);
+	}
+
+	this.getDirectionFromCenter = function() {
+		return self.getDirectionFrom(canvas.getResolution(0)/2, canvas.getResolution(1)/2)
+	}
 
     this.getData = function() {
         return [
@@ -58,14 +67,23 @@ function Mouse(canvas)
         context.fillStyle = "rgb(200,0,0)";
         context.fillRect(effectiveX - 3, effectiveY - 3, 6, 6);
     };
-    
+
+	function notMoving() {
+		velocity = {x:0, y:0, m:0};
+	}
+	
     function onDeviceMove(x,y) {
         mps.cycle();
-                
+
+		velocity.x = x - position.x;
+		velocity.y = y - position.y;
+		velocity.m = Math.sqrt(velocity.x^2 + velocity.y^2)
+
         position.x = x;
         position.y = y;
-
-        historyPos.unshift([x,y]);
-        historyDot.unshift(Math.pow(x,2) + Math.pow(y,2));
+		
+		if(moveTimeout) clearTimeout(moveTimeout);
+		
+		moveTimeout = setTimeout(notMoving, 30);
     }
 }

@@ -102,32 +102,15 @@ function Target(mouse, radius, x_pct, y_pct, fixed_age, rewardId) {
         return dist(targetX,targetY,mouseX,mouseY) <= effectiveR;
     };
 	
-	this.getReward_4_4 = function(canvas) {
+	this.getReward = function() {
+		return self.getReward_4_7();
+	}
+
+    this.getReward_4_5 = function() {
 		
 		if(rewardId == 1) return 0.5;
 		
-        var f_classes = self.getFeatures_4_4(canvas).map(function(v) { return v-1; });
-
-		var cnt_index = [0,32,64,96];		
-		var dir_index = [0,4,8,12,16,20,24,28];
-		var age_index = [1,2,3,4];
-
-		var r_index = cnt_index[f_classes[0]] + dir_index[f_classes[1]] + age_index[f_classes[2]];
-
-		if(rewardId == 2) {
-			var rewards = [0.34,0.38,0.59,0.47,0.35,0.36,0.52,0.35,0.29,0.35,0.5,0.4,0.34,0.3,0.45,0.37,0.15,0.28,0.42,0.33,0.21,0.29,0.47,0.41,0.31,0.28,0.43,0.3,0.23,0.43,1,0.78,0.34,0.28,0.4,0.4,0.25,0.31,0.46,0.33,0.49,0.28,0.43,0.3,0.42,0.23,0.51,0.39,0.21,0.15,0.28,0.06,0.02,0.23,0.45,0.25,0.2,0.19,0.32,0,0.17,0.31,0.46,0.34,0.24,0.39,0.48,0.41,0.39,0.41,0.69,0.45,0.36,0.38,0.5,0.65,0.49,0.32,0.34,0.34,0.4,0.29,0.37,0.3,0.23,0.31,0.42,0.35,0.25,0.31,0.37,0.31,0.3,0.53,0.46,0.32,0.36,0.35,0.51,0.69,0.36,0.32,0.47,0.38,0.3,0.3,0.45,0.36,0.29,0.25,0.37,0.3,0.21,0.23,0.36,0.3,0.21,0.23,0.39,0.32,0.24,0.23,0.36,0.38,0.09,0.32,0.5,0.42,0.3,0.27,0.62,0.31,0.23,0.26,0.41,0.24,0.21,0.22,0.51,0.09,0.23,0.13,0.32,0.12,0.11,0.14,0.21,0.18,0.11,0.17,0.32,0.09,0.12,0.19,0.21,0.14,0.45,0.22,0.5,0.16,0.19,0.38,0.52,0.28,0.66,0.39,0.79,0.62,0.4,0.31,0.64,0.35,0.33,0.23,0.37,0.12,0.24,0.26,0.38,0.19,0.26,0.28,0.41,0.28,0.23,0.28,0.4,0.29,0.3,0.34,0.47,0.33,0.32,0.36,0.43,0.44,0.33,0.34,0.42,0.38,0.33,0.29,0.37,0.34,0.28,0.26,0.34,0.32,0.23,0.26,0.32,0.3,0.22,0.28,0.35,0.33,0.25,0.28,0.34,0.32,0.25,0.37,0.46,0.44,0.32,0.3,0.37,0.54,0.25,0.32,0.38,0.31,0.57,0.23,0.31,0.22,0.24,0.23,0.29,0.26,0.2,0.19,0.13,0.19,0.06,0.23,0.28,0.19,0.15,0.23,0.27,0.23,0.24,0.46,0.27,0.48,0.28,0.46,0.4,0.39,0.33,0.36,0.41,0.48,0.34,0.26,0.26,0.33,0.21,0.21,0.29,0.27,0.12,0.25,0.28,0.25,0.2,0.28,0.32,0.29,0.23,0.28,0.32,0.3,0.25,0.36,0.38,0.36,0.3];
-			return rewards[r_index];
-		}
-		else {
-			return 0.5;
-		}
-    };
-
-    this.getReward_4_5 = function(canvas) {
-		
-		if(rewardId == 1) return 0.5;
-		
-        var f_classes = self.getFeatures_4_5(canvas).map(function(v) { return v-1; });
+        var f_classes = self.getFeatures_4_5().map(function(v) { return v-1; });
 
 		var lox_index = [0,96,192]
 		var loy_index = [0,32,64];
@@ -145,11 +128,11 @@ function Target(mouse, radius, x_pct, y_pct, fixed_age, rewardId) {
 		}
     };
 	
-	this.getReward_4_6 = function(canvas) {
+	this.getReward_4_6 = function() {
 
 		if(rewardId == 1) return 0.5;
 
-        var f_classes = self.getFeatures_4_6(canvas).map(function(v) { return v-1; });
+        var f_classes = self.getFeatures_4_6().map(function(v) { return v-1; });
 
 		var lox_index = [0, 216, 432];
 		var loy_index = [0,  72, 144];
@@ -170,37 +153,32 @@ function Target(mouse, radius, x_pct, y_pct, fixed_age, rewardId) {
 		}
     };
 
-	this.getFeatures_4_4 = function (canvas) {
+	this.getReward_4_7 = function() {
 
-		var centerX = canvas.getResolution(0)/2;
-		var centerY = canvas.getResolution(1)/2;
+		if(rewardId == 1) return 0.5;
 
-		var cnt_distance = dist(effectiveX, effectiveY, centerX, centerY);
-		var cnt_class    = cnt_distance <= 400 ? 1 : cnt_distance <= 900 ? 2 : cnt_distance <= 1500 ? 3 : 4;		
+        var f_classes = self.getFeatures_4_7().map(function(v) { return v-1; });
 		
-		var mouseX = mouse.getX();
-        var mouseY = mouse.getY();
+		var lox_index = [0, 144, 288];
+		var loy_index = [0,  48,  96];
+		var vel_index = [0,8,16,24,32,40];
+		var dir_index = [1,2,3,4,5,6,7,8];
 
-		var dir_radian = Math.atan2(effectiveY - mouseY, effectiveX - mouseX);
-		var dir_class  = Math.floor( (dir_radian + 3*Math.PI/8) / (Math.PI/4) );
+		var r_index = lox_index[f_classes[0]] + loy_index[f_classes[1]] + vel_index[f_classes[2]] + dir_index[f_classes[3]];
 
-		if(dir_class <= 0) {
-			dir_class += 8;
+		if(rewardId == 2) {
+			var rewards = [0.36,0.49,0.49,0.49,0.49,0.5,0.5,0.5,0.49,0.51,0.5,0.49,0.49,0.49,0.49,0.5,0.5,0.58,0.53,0.49,0.49,0.5,0.5,0.51,0.54,0.63,0.56,0.49,0.49,0.51,0.51,0.53,0.57,0.51,0.45,0.43,0.47,0.57,0.55,0.56,0.5,0.39,0.34,0.36,0.45,0.63,0.6,0.6,0.43,0.49,0.48,0.48,0.49,0.5,0.5,0.5,0.49,0.52,0.5,0.49,0.49,0.5,0.5,0.5,0.51,0.64,0.56,0.5,0.49,0.5,0.51,0.52,0.58,0.73,0.59,0.49,0.5,0.54,0.55,0.57,0.64,0.46,0.35,0.37,0.49,0.69,0.72,0.68,0.53,0.18,0.11,0.24,0.48,0.84,0.89,0.81,0.42,0.49,0.48,0.48,0.49,0.5,0.5,0.51,0.5,0.51,0.49,0.49,0.49,0.5,0.5,0.5,0.51,0.57,0.53,0.49,0.49,0.5,0.51,0.52,0.55,0.62,0.53,0.47,0.49,0.53,0.55,0.58,0.6,0.45,0.34,0.35,0.46,0.64,0.7,0.77,0.63,0.29,0.14,0.22,0.44,0.76,0.87,0.98,0.67,0.49,0.49,0.49,0.49,0.5,0.51,0.5,0.49,0.5,0.49,0.49,0.49,0.5,0.5,0.5,0.5,0.54,0.51,0.49,0.49,0.5,0.51,0.51,0.52,0.56,0.52,0.48,0.48,0.53,0.55,0.54,0.53,0.47,0.46,0.42,0.44,0.65,0.74,0.64,0.47,0.38,0.39,0.35,0.39,0.78,0.94,0.74,0.42,0.48,0.47,0.47,0.48,0.5,0.52,0.51,0.49,0.5,0.49,0.48,0.48,0.5,0.51,0.51,0.5,0.56,0.51,0.47,0.48,0.5,0.52,0.52,0.54,0.58,0.5,0.44,0.44,0.53,0.59,0.6,0.58,0.29,0.22,0.21,0.29,0.63,0.9,0.86,0.53,0,0,0,0.12,0.74,1,1,0.48,0.48,0.47,0.47,0.48,0.49,0.51,0.52,0.5,0.5,0.49,0.48,0.48,0.49,0.5,0.51,0.5,0.53,0.5,0.47,0.48,0.49,0.51,0.52,0.53,0.53,0.46,0.43,0.43,0.5,0.56,0.6,0.58,0.34,0.21,0.2,0.25,0.52,0.78,0.89,0.67,0.15,0,0,0.06,0.54,1,1,0.77,0.48,0.48,0.48,0.49,0.5,0.51,0.5,0.49,0.49,0.49,0.49,0.49,0.5,0.5,0.5,0.49,0.49,0.49,0.48,0.49,0.5,0.51,0.5,0.49,0.46,0.46,0.46,0.48,0.54,0.58,0.54,0.48,0.27,0.32,0.36,0.44,0.71,0.85,0.69,0.38,0.07,0.18,0.25,0.4,0.88,1,0.85,0.28,0.47,0.47,0.47,0.48,0.5,0.52,0.52,0.49,0.48,0.48,0.48,0.48,0.5,0.51,0.51,0.49,0.49,0.48,0.47,0.47,0.5,0.52,0.52,0.5,0.43,0.42,0.41,0.43,0.52,0.62,0.61,0.5,0.11,0.12,0.16,0.23,0.61,1,0.96,0.46,0,0,0,0.03,0.7,1,1,0.41,0.48,0.47,0.47,0.48,0.49,0.51,0.51,0.5,0.49,0.48,0.48,0.48,0.49,0.5,0.5,0.5,0.49,0.48,0.47,0.47,0.49,0.51,0.51,0.5,0.46,0.43,0.42,0.43,0.49,0.56,0.58,0.52,0.27,0.21,0.2,0.22,0.47,0.78,0.85,0.57,0.07,0,0,0,0.45,1,1,0.62];
+			return rewards[r_index];
 		}
-
-		var age_value = self.getAge();
-		var age_class = age_value <= 250 ? 1 : age_value <= 500 ? 2 : age_value <= 750 ? 3 : 4;
-
-		return [cnt_class, dir_class, age_class];
+		else {
+			return 0.5;
+		}
     };
 	
-    this.getFeatures_4_5 = function (canvas) {
+    this.getFeatures_4_5 = function () {
 
-		var width  = canvas.getResolution(0);
-		var height = canvas.getResolution(1);
-
-		var lox_class = effectiveX <= 1/3 * width  ? 1 : effectiveX <= 2/3 * width  ? 2 : 3;
-		var loy_class = effectiveY <= 1/3 * height ? 1 : effectiveY <= 2/3 * height ? 2 : 3;
+		var lox_class = x_pct <= 1/3 ? 1 : x_pct <= 2/3 ? 2 : 3;
+		var loy_class = y_pct <= 1/3 ? 1 : y_pct <= 2/3 ? 2 : 3;
 
 		var mouseX = mouse.getX();
         var mouseY = mouse.getY();
@@ -218,37 +196,40 @@ function Target(mouse, radius, x_pct, y_pct, fixed_age, rewardId) {
 		return [lox_class, loy_class, dir_class, age_class];
     };
 	
-	this.getFeatures_4_6 = function (canvas) {
-		
-		var directionX = isPal ? canvas.getResolution(0)/2 : effectiveX;
-		var directionY = isPal ? canvas.getResolution(1)/2 :effectiveY;
+	this.getFeatures_4_6 = function () {
 	
-		var max_lox = canvas.getResolution(0);
-		var max_loy = canvas.getResolution(1);
+		var vox_pct = mouse.getVelocity(0)/99;
+		var voy_pct = mouse.getVelocity(1)/99;
+		var dir_rad = isPal ? mouse.getDirectionFromCenter() : mouse.getDirectionFrom(effectiveX, effectiveY);
 
-		var lox_class = effectiveX <= 1/3 * max_lox ? 1 : effectiveX <= 2/3 * max_lox ? 2 : 3;
-		var loy_class = effectiveY <= 1/3 * max_loy ? 1 : effectiveY <= 2/3 * max_loy ? 2 : 3;
-
-		var max_vox = 99;
-		var max_voy = 99;
-
-		var effective_vox = (mouse.getHistoryPos()[0][0] - mouse.getHistoryPos()[1][0]) || 0;
-		var effective_voy = (mouse.getHistoryPos()[0][1] - mouse.getHistoryPos()[1][1]) || 0;
-		
-		var vox_class = effective_vox <= 1/3 * max_vox ? 1 : effective_vox <= 2/3 * max_vox ? 2 : 3;
-		var voy_class = effective_voy <= 1/3 * max_voy ? 1 : effective_voy <= 2/3 * max_voy ? 2 : 3;
-
-		var mouseX = mouse.getX();
-        var mouseY = mouse.getY();
-
-		var dir_radian = Math.atan2(directionY - mouseY, directionX - mouseX);
-		var dir_class  = Math.floor( (dir_radian + 3*Math.PI/8) / (Math.PI/4) );
+		var lox_class = x_pct   <= 1/3 ? 1 : x_pct   <= 2/3 ? 2 : 3;
+		var loy_class = y_pct   <= 1/3 ? 1 : y_pct   <= 2/3 ? 2 : 3;
+		var vox_class = vox_pct <= 1/3 ? 1 : vox_pct <= 2/3 ? 2 : 3;
+		var voy_class = voy_pct <= 1/3 ? 1 : voy_pct <= 2/3 ? 2 : 3;
+		var dir_class  = Math.floor( (dir_rad + 3*Math.PI/8) / (Math.PI/4) );
 
 		if(dir_class <= 0) {
 			dir_class += 8;
 		}
 
 		return [lox_class, loy_class, vox_class, voy_class, dir_class];
+    };
+	
+	this.getFeatures_4_7 = function () {
+
+		var d_rad = isPal ? mouse.getDirectionFromCenter() : mouse.getDirectionFrom(effectiveX, effectiveY);
+		var v_pct = mouse.getVelocity()/78;
+		
+		var x_class = x_pct <= 1/3 ? 1 : x_pct <= 2/3 ? 2 : 3;
+		var y_class = y_pct <= 1/3 ? 1 : y_pct <= 2/3 ? 2 : 3;
+		var v_class = v_pct <= 1/6 ? 1 : v_pct <= 2/6 ? 2 : v_pct <= 3/6 ? 3 : v_pct <= 4/6 ? 4 : v_pct <= 5/6 ? 5 : 6;
+		var d_class  = Math.floor( (d_rad + 3*Math.PI/8) / (Math.PI/4) );
+
+		if(d_class <= 0) {
+			d_class += 8;
+		}
+
+		return [x_class, y_class, v_class, d_class];
     };
 
     this.draw = function(canvas) {		
@@ -259,7 +240,7 @@ function Target(mouse, radius, x_pct, y_pct, fixed_age, rewardId) {
 
         var context = canvas.getContext2d();
 
-        var xOffset = _renderer.xOffset(self.getReward_4_6(canvas), 0, 1);
+        var xOffset = _renderer.xOffset(self.getReward(), 0, 1);
         var yOffset = _renderer.yOffset(self.getAge());
 
 		if(self.isTouched()) {
