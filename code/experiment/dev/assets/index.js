@@ -2,14 +2,11 @@ $(document).ready( function () {
 
     var canvas = initializeCanvas();
 
-    //if(querystring.exists("noData")) {
-    if(!querystring.exists("data")) {
-        $.ajax = function(params) {
+    if(querystring.exists("test")) {
+		
+		$.ajax = function(params) {
             return $.Deferred().resolve();
         }
-    }
-
-    if(querystring.exists("test")) {
 		
 		var experiment1 = new Experiment(canvas, "testOnly", 2);
 		
@@ -54,24 +51,35 @@ $(document).ready( function () {
             alert(participant.getId());
         }
 
-        $.Deferred().resolve()
-            .then(showModalContent("demo"      , true ))
-            .then(showModalContent("welcome"   , true ))
-            .then(showModalContent("consent"   , true ))
-            .then(showDemographicForm                  )
-            .then(showModalContent("directions", true ))
-            .then(showModalContent("begin1"    , false))
-            .then(experiment1.run                      )
-            .then(showModalContent("break"     , true ))
-            .then(showModalContent("begin2"    , false))
-            .then(experiment2.run                      )
-            .then(showModalContent("finished"  , false))
-            .then(showThanks                           );
+		var functions = [
+			,(showModalContent("welcome"   , true ))
+			,(showModalContent("consent"   , true ))
+			,(showDemographicForm                  )
+			,(showModalContent("directions", true ))
+			,(showModalContent("begin1"    , false))
+			,(experiment1.run                      )
+			,(showModalContent("break"     , true ))
+			,(showModalContent("begin2"    , false))
+			,(experiment2.run                      )
+			,(showModalContent("finished"  , false))
+			,(showThanks                           )
+		];
+		
+		if(!querystring.exists("data")) {
+			$.ajax = function(params) {
+				return $.Deferred().resolve();
+			}
+			functions.unshift(showModalContent("demo"      , true ));
+		}
+		
+		var chainStart = $.Deferred().resolve();		
+		var eventChain = functions.reduce(function(chain, nextFunction) { return chain.then(nextFunction) }, chainStart);
+		
     }
 
     function showModalContent(contentId, preventDefault) {
         return function() {
-
+		
             loadModalContent(contentId);
 
             $("#modal").modal('show');

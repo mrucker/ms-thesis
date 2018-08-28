@@ -13,14 +13,15 @@ if(isNaN(Date.parse(process.argv[3]))) {
 	return;
 }
 
-var dataPath = process.argv[2];
-var dateFrom = new Date(process.argv[3]);
+var dataDir = process.argv[2];
+var dateISO = new Date(process.argv[3]).toISOString();
 
 DownloadAllFilesToPathAfterDate();
 
 function DownloadAllFilesToPathAfterDate() {
 
-          QueryParticipants(dateFrom.toISOString())
+Promise.resolve()
+    .then(QueryParticipants)
  	.then(WriteParticipants)
 	.then(QueryExperiments )
 	.then(WriteExperiments )
@@ -29,12 +30,12 @@ function DownloadAllFilesToPathAfterDate() {
 	.then(() => console.log("All Done"));
 }
 
-function QueryParticipants(lastUpdateTime) {
+function QueryParticipants() {
 	var params = {
 		 TableName                : 'ThesisParticipants'
 		,ConsistentRead           : false
 		,KeyConditionExpression   : 'StudyId = :study_id and InsertTimeStamp > :last_update_time'
-		,ExpressionAttributeValues: {':study_id' : '1', ':last_update_time' : lastUpdateTime }
+		,ExpressionAttributeValues: {':study_id' : '1', ':last_update_time' : dateISO }
 	};
 
 	return QueryDynamoPromise(params).catch(err => {console.log(err)});	
@@ -117,7 +118,7 @@ function WriteFilesPromise(items, getId, folder) {
 		return new Promise((res, rej) => {
 			var itemId = getId(item);
 
-			var filePath = dataPath + folder + '/' + itemId + '.json';
+			var filePath = dataDir + folder + '/' + itemId + '.json';
 			var fileData = JSON.stringify(item);
 			var fileFlag = {flag: 'wx+'};
 			
