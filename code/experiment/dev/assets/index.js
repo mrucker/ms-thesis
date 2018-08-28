@@ -47,10 +47,6 @@ $(document).ready( function () {
         var experiment1 = new Experiment(canvas, participant.getId(),1);
         var experiment2 = new Experiment(canvas, participant.getId(),2);
 
-        if(querystring.exists("id")) {
-            alert(participant.getId());
-        }
-
 		var functions = [
 			,(showModalContent("welcome"   , true ))
 			,(showModalContent("consent"   , true ))
@@ -64,7 +60,7 @@ $(document).ready( function () {
 			,(showModalContent("finished"  , false))
 			,(showThanks                           )
 		];
-		
+
 		if(!querystring.exists("data")) {
 			$.ajax = function(params) {
 				return $.Deferred().resolve();
@@ -72,11 +68,22 @@ $(document).ready( function () {
 			functions.unshift(showModalContent("demo"      , true ));
 		}
 		
+		if(querystring.exists("id")) {
+			functions.unshift(showParticipantId(participant.getId()));
+        }
+		
 		var chainStart = $.Deferred().resolve();		
 		var eventChain = functions.reduce(function(chain, nextFunction) { return chain.then(nextFunction) }, chainStart);
 		
     }
 
+	function showParticipantId(participantId) {
+		
+		$("#participantId").append("<h2>" + participantId + "</h2>");
+		
+		return showModalContent("participantId", true);
+	}
+	
     function showModalContent(contentId, preventDefault) {
         return function() {
 		

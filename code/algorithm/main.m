@@ -1,7 +1,7 @@
 paths;
 
-%trajectory_observations = jsondecode(fileread('huge-observed-trajectory-1.json'));
-trajectory_observations = jsondecode(fileread('../../data/entries/observations/143fd71c57d8d6c85.json'));
+%1ff40e9f5818b8978.json super back and forth
+trajectory_observations = jsondecode(fileread('../../data/entries/observations/1ff40e9f5818b8978.json'));
 trajectory_states       = huge_states_from(trajectory_observations);
 trajectory_states(1:4)  = []; %trim off the first four states since they have pre-game noise
 
