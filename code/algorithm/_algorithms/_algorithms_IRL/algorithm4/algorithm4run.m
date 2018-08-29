@@ -1,24 +1,30 @@
 function irl_result = algorithm4run(episodes, params, verbosity)
 
-    EVAL_N = 500;
-    
-    N = 30;
-    M = 70;
-    S = 3;
-    W = 3;
-    
+    a_start = tic;
+
     N = 30;
     M = 90;
     S = 3;
     W = 4;
-    
+
+    %N = 30;
+    %M = 70;
+    %S = 3;
+    %W = 3;
+
     T = 10;
+
+    p_time = 0;
+    s_time = 0;
 
     episode_count  = numel(episodes);
     episode_length = size(episodes{1},2);
 
     episode_states = horzcat(episodes{:});
     episode_starts = episode_states(1:episode_length:episode_count*episode_length);
+
+    EVAL_N = 1;
+    %EVAL_N = ceil(500/numel(episode_starts));
 
     [state2identity, a_f, a_b] = r_basii_4_8();
 
@@ -36,11 +42,6 @@ function irl_result = algorithm4run(episodes, params, verbosity)
     if params.seed ~= 0
         rng(params.seed);
     end
-
-    exp_time = 0;
-    krn_time = 0;
-    svm_time = 0;
-    mdp_time = 0;
 
     E = 0;
 
@@ -60,17 +61,21 @@ function irl_result = algorithm4run(episodes, params, verbosity)
     sb = {};
     ts = {};
 
-    % Generate random policy.
-    tic;
-        rs{i} = ff*rand(size(ff,1),1);
-        s_r   = @(s) rs{i}'*r_b(s);
+    % Generate arbitray reward
 
+    rs{i} = ff*rand(size(ff,1),1);
+    s_r   = @(s) rs{i}'*r_b(s);
+
+    t_start = tic;
         Pf    = adp_algorithm(s_1, s_a, s_r, v_b, @huge_trans_post, @huge_trans_pre, params.gamma, N, M, S, W);
-        ss{i} = policy_eval_at_states(Pf{N+1}, episode_starts, r_b, params.gamma, T, @huge_trans_pre, ceil(EVAL_N/numel(episode_starts)));
-    mdp_time = mdp_time + toc;
+    p_time = p_time + toc(t_start);
+
+    t_start = tic;
+        ss{i} = policy_eval_at_states(Pf{N+1}, episode_starts, r_b, params.gamma, T, @huge_trans_pre, EVAL_N);
+    s_time = s_time + toc(t_start);
 
     sb{i} = ss{i};
-    ts{i} = Inf;    
+    ts{i} = Inf;
 
     if verbosity ~= 0
         fprintf(1,'Completed IRL iteration, i=%d, t=%f\n',1,ts{1});
@@ -80,13 +85,16 @@ function irl_result = algorithm4run(episodes, params, verbosity)
 
     while 1
 
-        tic;
-            rs{i} = ff*(E-sb{i-1});
-            s_r   = @(s) rs{i}'*r_b(s);
+        rs{i} = ff*(E-sb{i-1});
+        s_r   = @(s) rs{i}'*r_b(s);
 
+        t_start = tic;
             Pf    = adp_algorithm(s_1, s_a, s_r, v_b, @huge_trans_post, @huge_trans_pre, params.gamma, N, M, S, W);
-            ss{i} = policy_eval_at_states(Pf{N+1}, episode_starts, r_b, params.gamma, T, @huge_trans_pre, ceil(EVAL_N/numel(episode_starts)));
-        mdp_time = mdp_time + toc;
+        p_time = p_time + toc(t_start);
+
+        t_start = tic;
+            ss{i} = policy_eval_at_states(Pf{N+1}, episode_starts, r_b, params.gamma, T, @huge_trans_pre, EVAL_N);
+        s_time = s_time + toc(t_start);
 
         ts{i} = sqrt(E'*ff*E + sb{i-1}'*ff*sb{i-1} - 2*E'*ff*sb{i-1});
 
@@ -100,20 +108,20 @@ function irl_result = algorithm4run(episodes, params, verbosity)
 
         i = i + 1;
 
-        tic;
         sn       = (ss{i-1}-sb{i-2})'*ff*(E-sb{i-2});
         sd       = (ss{i-1}-sb{i-2})'*ff*(ss{i-1}-sb{i-2});
         sc       = sn/sd;
         sb{i-1}  = sb{i-2} + sc*(ss{i-1}-sb{i-2});
-        svm_time = svm_time + toc;
     end
 
     [m,i] = min(diag((E-cell2mat(ss))'*ff*(E-cell2mat(ss))));
 
+    a_time = toc(a_start);
+    
     if verbosity ~= 0
         fprintf('\n');
         fprintf(1,'FINISHED IRL,i=%d, t=%f \n',i,ts{i});
-        fprintf(1,'exp_time=%.2f;  krn_time=%.2f; svm_time=%.2f; mdp_time=%.2f; \n',[exp_time, krn_time, svm_time, mdp_time]);
+        fprintf(1,'p_time=%.2f; s_time=%.2f; a_time=%.2f \n',[p_time, s_time, a_time]);
     end
 
     m
