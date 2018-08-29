@@ -182,8 +182,8 @@ function perms = all_targ_perms()
 
     val_to_loc = @(val, den) [cos(val*pi/den); sin(val*pi/den)];
 
-    lox_f = cell2mat(arrayfun(@(v) val_to_loc(v-1,4), 1:3, 'UniformOutput', false));
-    loy_f = cell2mat(arrayfun(@(v) val_to_loc(v-1,4), 1:3, 'UniformOutput', false));
+    lox_f = cell2mat(arrayfun(@(v) val_to_loc(v-1,2), 1:3, 'UniformOutput', false));
+    loy_f = cell2mat(arrayfun(@(v) val_to_loc(v-1,2), 1:3, 'UniformOutput', false));
     vel_f = cell2mat(arrayfun(@(v) val_to_loc(v-1,4), 1:6, 'UniformOutput', false));
     dir_f = cell2mat(arrayfun(@(v) val_to_loc(v+3,4), 1:8, 'UniformOutput', false));
 

@@ -8,7 +8,7 @@ $(document).ready( function () {
             return $.Deferred().resolve();
         }
 		
-		var experiment1 = new Experiment(canvas, "testOnly", getRewardId(0) || 2);
+		var experiment1 = new Experiment(canvas, "testOnly", getRewardId(1) || 2);
 		
         $.Deferred().resolve()
             .then(showModalContent("demo"      , true ))
