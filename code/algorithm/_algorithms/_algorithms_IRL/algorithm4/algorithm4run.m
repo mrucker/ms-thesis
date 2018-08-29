@@ -3,9 +3,14 @@ function irl_result = algorithm4run(episodes, params, verbosity)
     EVAL_N = 500;
     
     N = 30;
-    M = 70;    
+    M = 70;
     S = 3;
     W = 3;
+    
+    N = 30;
+    M = 90;
+    S = 3;
+    W = 4;
     
     T = 10;
 
@@ -15,7 +20,7 @@ function irl_result = algorithm4run(episodes, params, verbosity)
     episode_states = horzcat(episodes{:});
     episode_starts = episode_states(1:episode_length:episode_count*episode_length);
 
-    [state2identity, a_f, a_b] = r_basii_4_7();
+    [state2identity, a_f, a_b] = r_basii_4_8();
 
     adp_algorithm = @approx_policy_iteration_13h;
 

@@ -1,21 +1,22 @@
 function Mouse(canvas)
 {
     var self     = this;
-    var position = {x:undefined, y:undefined};
-	var velocity = {x:undefined, y:undefined, m:undefined};
+    
+	var position  = {x:undefined, y:undefined};
+	var velocity  = {x:undefined, y:undefined, m:undefined, d:undefined};
 
 	var moveTimeout = undefined;
 
     //chrome: 60  mps
     //IE    : 120 mps
-    var mps        = new Frequency("mps", false);
+    var mps = new Frequency("mps", false);
 
     this.startTracking = function () {
 
 		mps.start();
 
 		position = {x:canvas.getResolution(0)/2, y:canvas.getResolution(1)/2};
-		velocity = {x:0, y:0, m:0};
+		velocity = {x:0, y:0, m:0, d:0};
 
         canvas.addOnDeviceMove(onDeviceMove);
     };
@@ -27,7 +28,7 @@ function Mouse(canvas)
         mps.stop();
 
         position = {x:undefined, y:undefined};
-		velocity = {x:undefined, y:undefined, m:undefined};
+		velocity = {x:undefined, y:undefined, m:undefined, d:undefined};
     };
 
     this.getX = function() {
@@ -41,16 +42,18 @@ function Mouse(canvas)
 	this.getVelocity = function(dim) {
 		if(dim == 0) return velocity.x;
 		if(dim == 1) return velocity.y;
-
+		if(dim == 2) return velocity.m;
+		if(dim == 3) return velocity.d;
+		
 		return velocity.m;
 	}
 
-	this.getDirectionFrom = function(x,y) {
+	this.getDirectionTo = function(x,y) {
 		return Math.atan2(y - position.y, x - position.x);
 	}
 
-	this.getDirectionFromCenter = function() {
-		return self.getDirectionFrom(canvas.getResolution(0)/2, canvas.getResolution(1)/2)
+	this.getDirectionToCenter = function() {
+		return self.getDirectionTo(canvas.getResolution(0)/2, canvas.getResolution(1)/2)
 	}
 
     this.getData = function() {
@@ -91,15 +94,17 @@ function Mouse(canvas)
 
 		moveTimeout = setTimeout(notMoving, 100);
     }
-	
+
 	function updateVelocity(oldPosition, x, y) {
 
 		newVelocityX = x - oldPosition.x;
 		newVelocityY = y - oldPosition.y;
 		newVelocityM = Math.sqrt(Math.pow(newVelocityX,2) + Math.pow(newVelocityY,2));
+		newVelocityD = Math.atan2(newVelocityY,newVelocityX);
 
 		velocity.x = 2/6 * velocity.x + 4/6 * newVelocityX;
 		velocity.y = 2/6 * velocity.y + 4/6 * newVelocityY;
 		velocity.m = 5/6 * velocity.m + 1/6 * newVelocityM;
+		velocity.d = 2/6 * velocity.d + 4/6 * newVelocityD;
 	}
 }

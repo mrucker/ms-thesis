@@ -70,7 +70,7 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
         std_Y = std(Y);
         
         t_start = tic;
-        for m = 1:M
+        parfor m = 1:M
 
             %0.28
             post_states = trans_post(init_states{m}, actions(init_states{m}));
