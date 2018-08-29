@@ -6,7 +6,7 @@ paths;
 
 %1ff40e9f5818b8978.json super back and forth, seems to work well. (RewardId = 2)
 
-%1a92ecaf5864960f1.json very few touches but with correct radius so RL can get touches
+%1a92ecaf5864960f1.json very few touches but with correct radius so RL can get touches (RewardId = 3)
     %this works well but brings up an interesting conundrum. It scores all the targets highly 
     %but the dead space higher... This is broken by the way I handle the "top 10" since it makes 
     %several states equal to empty space perhaps a solution to this is to subtract empty space 
@@ -36,8 +36,8 @@ result = algorithm4run(trajectory_episodes, params, 1);
 
 cleaned_result = result_clean_2(result);
 
-jsonencode(cleaned_result);
-      hist(cleaned_result);
+fprintf('%s', jsonencode(cleaned_result));
+                    hist(cleaned_result);
 
 function rc = result_clean_1(result)
     sorted_result = sort(result);
@@ -54,13 +54,18 @@ function rc = result_clean_1(result)
     max_result = max(epsilon_result);
 
     normal_epsilon_result = round((epsilon_result - min_result)/(max_result-min_result),2);
-    
+
     rc = normal_epsilon_result;
 end
 
 function rc = result_clean_2(result)
 
     epsilon_result = result - result(1);
+
+    if(max(epsilon_result) == 0)
+        epsilon_result(epsilon_result == 0) = 1;
+    end
+
     epsilon_result(epsilon_result<0) = 0;
 
     min_result = min(epsilon_result);

@@ -8,7 +8,7 @@ $(document).ready( function () {
             return $.Deferred().resolve();
         }
 		
-		var experiment1 = new Experiment(canvas, "testOnly", 2);
+		var experiment1 = new Experiment(canvas, "testOnly", getRewardId(0) || 2);
 		
         $.Deferred().resolve()
             .then(showModalContent("demo"      , true ))
@@ -27,7 +27,7 @@ $(document).ready( function () {
 
 		for(x = 1; x <= xs; x++) {
 			for(y = 1; y <= ys; y++) {
-				targets.push(new Target(mouse, 100, x/(xs+1), y/(ys+1), 100, 2))
+				targets.push(new Target(mouse, 100, x/(xs+1), y/(ys+1), 100, getRewardId(1) || 2))
 			}
 		}
 
@@ -44,8 +44,8 @@ $(document).ready( function () {
 	else {
 
         var participant = new Participant();
-        var experiment1 = new Experiment(canvas, participant.getId(),1);
-        var experiment2 = new Experiment(canvas, participant.getId(),2);
+        var experiment1 = new Experiment(canvas, participant.getId(), getRewardId(0) || 1);
+        var experiment2 = new Experiment(canvas, participant.getId(), getRewardId(1) || 2);
 
 		var functions = [
 			,(showModalContent("welcome"   , true ))
@@ -170,4 +170,20 @@ $(document).ready( function () {
             $("#modalBody"  ).html($content.html());
             $("#modalButton").html($content.data('btnTxt'));
     }
+
+	function getRewardId(index) {
+         if(querystring.exists("rewards")) {
+             var rewards = JSON.parse(querystring.value("rewards"));
+			 
+			 if(typeof rewards == "number") {
+				 return [undefined, rewards][index];
+			 }
+			 
+			 if(Array.isArray(rewards)) {
+				 return rewards[index];
+			 }
+		 }
+		 
+		 return undefined;
+     }
 });
