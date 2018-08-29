@@ -1,5 +1,7 @@
 paths;
 
+%all these observations are in the trial 1 dataset
+
 %4460e5ee57d6e87e2.json absolutely no touches (radius = 0) (but also impossible to get touches, so it is meaningless)
 
 %1ff40e9f5818b8978.json super back and forth, seems to work well. (RewardId = 2)
@@ -10,7 +12,9 @@ paths;
     %several states equal to empty space perhaps a solution to this is to subtract empty space 
     %from targets making the majority of targets show 0 value instaed of majority showing .98
     
-trajectory_observations = jsondecode(fileread('../../data/entries/observations/1a92ecaf5864960f1.json'));
+%a3cb0e1e586811391.json stayed entirely on the right third of the screen, otherwise normal.
+    
+trajectory_observations = jsondecode(fileread('../../data/entries/observations/a3cb0e1e586811391.json'));
 trajectory_states       = huge_states_from(trajectory_observations);
 
 trajectory_episodes_count  = 380; %we finish at (380+10+30) to trim the last second in case of noise
@@ -30,21 +34,39 @@ end
 params = struct ('epsilon',.00001, 'gamma',.9, 'seed',0, 'kernel', 5);
 result = algorithm4run(trajectory_episodes, params, 1);
 
-sorted_result = sort(result);
+cleaned_result = result_clean_2(result);
 
-lower = sorted_result(10);
-upper = sorted_result(end-9);
+jsonencode(cleaned_result);
+      hist(cleaned_result);
 
-epsilon_result = result;
+function rc = result_clean_1(result)
+    sorted_result = sort(result);
 
-epsilon_result(result < lower) = lower;
-epsilon_result(result > upper) = upper;
+    lower = sorted_result(10);
+    upper = sorted_result(end-9);
 
-min_result = min(epsilon_result);
-max_result = max(epsilon_result);
+    epsilon_result = result;
 
-normal_epsilon_result = round((epsilon_result - min_result)/(max_result-min_result),2);
+    epsilon_result(result < lower) = lower;
+    epsilon_result(result > upper) = upper;
 
-jsonencode(normal_epsilon_result)
+    min_result = min(epsilon_result);
+    max_result = max(epsilon_result);
 
-hist(normal_epsilon_result)
+    normal_epsilon_result = round((epsilon_result - min_result)/(max_result-min_result),2);
+    
+    rc = normal_epsilon_result;
+end
+
+function rc = result_clean_2(result)
+
+    epsilon_result = result - result(1);
+    epsilon_result(epsilon_result<0) = 0;
+
+    min_result = min(epsilon_result);
+    max_result = max(epsilon_result);
+
+    normal_epsilon_result = round((epsilon_result - min_result)/(max_result-min_result),2);
+    
+    rc = normal_epsilon_result;
+end

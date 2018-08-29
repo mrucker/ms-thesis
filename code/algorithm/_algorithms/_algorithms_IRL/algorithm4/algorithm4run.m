@@ -23,8 +23,12 @@ function irl_result = algorithm4run(episodes, params, verbosity)
     episode_states = horzcat(episodes{:});
     episode_starts = episode_states(1:episode_length:episode_count*episode_length);
 
+    %this represents the number of times we evaluate an episode start
+    %when calculating feature expectation. Through experimentation it
+    %seemed important that this wasn't less than 1 (aka, randomly pick 
+    %a subset of episode starts) while anything greater than 1 didn't add
+    %much accuracy but greatly increased execution time.
     EVAL_N = 1;
-    %EVAL_N = ceil(500/numel(episode_starts));
 
     [state2identity, a_f, a_b] = r_basii_4_8();
 
