@@ -11,9 +11,9 @@ paths;
     %but the dead space higher... This is broken by the way I handle the "top 10" since it makes 
     %several states equal to empty space perhaps a solution to this is to subtract empty space 
     %from targets making the majority of targets show 0 value instaed of majority showing .98
-    
+
 %a3cb0e1e586811391.json stayed entirely on the right third of the screen, otherwise normal.
-    
+
 trajectory_observations = jsondecode(fileread('../../data/entries/observations/a3cb0e1e586811391.json'));
 trajectory_states       = huge_states_from(trajectory_observations);
 

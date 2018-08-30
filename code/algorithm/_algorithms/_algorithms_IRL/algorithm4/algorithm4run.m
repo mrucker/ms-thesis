@@ -4,8 +4,8 @@ function irl_result = algorithm4run(episodes, params, verbosity)
 
     r_basii = @r_basii_4_9;
 
-    N = 30;
-    M = 90;
+    N = 30;%30;
+    M = 90;%90;
     S = 3;
     W = 4;
 
@@ -77,17 +77,20 @@ function irl_result = algorithm4run(episodes, params, verbosity)
 
     t_start = tic;
         Pf    = adp_algorithm(s_1, s_a, s_r, v_b, @huge_trans_post, @huge_trans_pre, params.gamma, N, M, S, W);
-    p_time = p_time + toc(t_start);
+    np_time = toc(t_start);
 
     t_start = tic;
         ss{i} = policy_eval_at_states(Pf{N+1}, episode_starts, r_e, params.gamma, T, @huge_trans_pre, EVAL_N);
-    s_time = s_time + toc(t_start);
+    ns_time = toc(t_start);
 
+    p_time = p_time + np_time;
+    s_time = s_time + ns_time;
+    
     sb{i} = ss{i};
     ts{i} = Inf;
 
     if verbosity ~= 0
-        fprintf(1,'Completed IRL iteration, i=%d, t=%f\n',1,ts{1});
+        fprintf('Completed IRL iteration, i=%03d, t=%8.6f, p_time=%06.3f, s_time=%06.3f\n',[i,ts{i}, np_time, ns_time]);
     end
 
     i = 2;
@@ -99,16 +102,19 @@ function irl_result = algorithm4run(episodes, params, verbosity)
 
         t_start = tic;
             Pf    = adp_algorithm(s_1, s_a, s_r, v_b, @huge_trans_post, @huge_trans_pre, params.gamma, N, M, S, W);
-        p_time = p_time + toc(t_start);
+        np_time = toc(t_start);
 
         t_start = tic;
             ss{i} = policy_eval_at_states(Pf{N+1}, episode_starts, r_e, params.gamma, T, @huge_trans_pre, EVAL_N);
-        s_time = s_time + toc(t_start);
+        ns_time = toc(t_start);
 
         ts{i} = sqrt(E'*ff*E + sb{i-1}'*ff*sb{i-1} - 2*E'*ff*sb{i-1});
 
+        p_time = p_time + np_time;
+        s_time = s_time + ns_time;
+
         if verbosity ~= 0
-            fprintf(1,'Completed IRL iteration, i=%d, t=%f\n',i,ts{i});
+            fprintf('Completed IRL iteration, i=%03d, t=%8.6f, p_time=%06.3f, s_time=%06.3f\n',[i,ts{i}, np_time, ns_time]);
         end
 
         if  (abs(ts{i}-ts{i-1}) <= params.epsilon) || (ts{i} <= params.epsilon)
@@ -172,7 +178,7 @@ end
 function k = k(x1, x2, kernel)
     p = 2;
     c = 1;
-    s = .65;
+    s = .60;
 
     switch kernel
         case 1

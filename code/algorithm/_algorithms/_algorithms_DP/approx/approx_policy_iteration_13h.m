@@ -108,7 +108,7 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
                     %0.29
                     post_states = trans_post(s_t, action_matrix);
 
-                    %1.26
+                    %4.4
                     [post_basii]  = v_b(post_states);
 
                     %.05
@@ -120,9 +120,8 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
                 a_i = a_i(randi(length(a_i)));
                 s_a = post_states(:,a_i);
 
-                %.47
-                %.22
-                s_t = trans_pre(s_a, []);
+                %.42
+                s_t = trans_pre(s_a, []);                
 
                 %.15
                 X_s_m{m}        = horzcat(X_s_m{m}, s_t);
@@ -130,7 +129,7 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
                 %.06
                 X_b_m{m}(:,t+1) = post_basii(:,a_i);
 
-                %.32
+                %.8
                 X_r_m{m}(:,t+1) = reward(s_t);
             end
         end
@@ -256,7 +255,7 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
 
             v_v(v_i(v_p)) = predict(model, vertcat(v_p, n*ones(1,size(v_p,2)))');
             
-            Vf{n+1} = @(ss) predict(model, vertcat(v_b(ss), n*ones(1,size(ss,2)))');
+            Vf{n+1} = @(ss) v_v(v_i(v_b(ss)));
             Pf{n+1} = policy_function(actions, Vf{n+1}, trans_post);
 
         m_time = m_time + toc(t_start);

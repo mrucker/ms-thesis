@@ -1,9 +1,9 @@
 try run '../../../paths'; catch; end
 
 N = 30;
-M = 70;
+M = 90;
 S = 3;
-W = 3;
+W = 4;
 
 T = 10;
 g = .9;
@@ -11,7 +11,10 @@ g = .9;
 trans_pre = @huge_trans_pre;
 trans_pst = @huge_trans_post;
 
-[state2rew_ident, r_p, r_b] = r_basii_4_5();
+[r_i, r_p, r_b] = r_basii_4_9();
+
+r_n = size(r_p,2);
+r_e = @(states) double((1:r_n)' == r_i(states));
 
 v_b = @v_basii_4_4;
 
@@ -21,7 +24,10 @@ r_t = rand(size(r_b(state_rand()),1), 1);
 
 s_1 = @() state_rand();
 s_a = s_act_4_2();
-s_r = @(s) r_t' * r_b(s);
+
+R = r_t' * r_p;
+
+s_r = @(s) R(r_i(s));
 
 [Pf, ~, ~, ~, ~, ~, f_time, b_time, m_time, a_time] = approx_policy_iteration_13h(s_1, s_a, s_r, v_b, trans_pst, trans_pre, g, N, M, S, W);
 [f_time, b_time, m_time, a_time]

@@ -1,152 +1,146 @@
 function [r_i, r_p, r_b] = r_basii_4_9()
 
+    LEVELS_N = [3 3 12 6 8 1];
+    
     r_p = r_perms();
 
-    r_I = basii2indexes_T([3 3 12 6 8]);
+    r_I = I(LEVELS_N);
 
-    r_i = @(states) r_I*statesfun(@r_levels, states) + 1;
+    r_i = @(states) r_I'*(statesfun(@r_levels, states)-1) + 1;
     r_b = @(states) statesfun(@r_feats, states);
 end
 
 function rl = r_levels(states)
 
-    sc = size(states,2);
+    s_n = size(states,2);
+    tou = touch_features(states);
 
-    %.5
-    tou = target_touch_features(states);
-
-    if any(sum(tou,1)>1)
-        %.1
-        [tv,ti] = max(tou,[],1);
-        tou(:) = 0;
-        tou(sub2ind(size(tou), ti, 1:sc))  = tv;
-    end
-
-    if any(sum(tou,1) == 0)
-        target_features = zeros(3 + 3 + 12 + 6 + 8, 1);
+    if all(all(~tou))
+        rl = ones(6, s_n);
     else
-        
-        lox = sum(target_lox_features(states) .* tou,1);
-        loy = sum(target_loy_features(states) .* tou,1);
-        vel = sum(target_vel_features(states) .* tou,1);
-        acc = sum(target_acc_features(states) .* tou,1);
-        dir = sum(target_dir_features(states) .* tou,1);
+        [~,ti] = max(tou,[],1);
+        tou(:) = 0;
+        tou(sub2ind(size(tou), ti, 1:s_n)) = 1;
 
-        target_features = double(vertcat((1:3)' == lox, (1:3)' == loy, (1:12)' == vel, (1:6)' == acc, (1:8)' == dir));
+        lox = sum(target_x_features(states) .* tou,1) + all(~tou);
+        loy = sum(target_y_features(states) .* tou,1) + all(~tou);
+        vel = sum(target_v_features(states) .* tou,1) + all(~tou);
+        acc = sum(target_a_features(states) .* tou,1) + all(~tou);
+        dir = sum(target_d_features(states) .* tou,1) + all(~tou);
+        tou = 1*(sum(tou,1) == 0) + 2*(sum(tou,1) == 1);
+
+        rl = vertcat(lox, loy, vel, acc, dir, tou);
     end
-
-    rl = target_features;
 end
 
 function rf = r_feats(states)
 
-    sc = size(states,2);
+    levels = r_levels(states);
 
-    %.5
-    tou = target_touch_features(states);
+    assert(all(levels>0), 'bad levels');
 
-    if any(sum(tou,1)>1)
-        %.1
-        [tv,ti] = max(tou,[],1);
-        tou(:) = 0;
-        tou(sub2ind(size(tou), ti, 1:sc))  = tv;
-    end
+    val_to_rad = @(val, den) (val~=-1) .* [cos(val*pi/den); sin(val*pi/den)];
 
-    if all(sum(tou,1) == 0)
-        target_features = [zeros(10,size(tou,2));4*ones(1,size(tou,2))];
-    else
-        lox = sum(target_lox_features(states) .* tou,1);
-        loy = sum(target_loy_features(states) .* tou,1);
-        vel = sum(target_vel_features(states) .* tou,1);
-        acc = sum(target_acc_features(states) .* tou,1);
-        dir = sum(target_dir_features(states) .* tou,1);
+    x = levels(1,:) - (levels(end) == 1);
+    y = levels(2,:) - (levels(end) == 1);
+    v = levels(3,:) - (levels(end) == 1);
+    a = levels(4,:) - (levels(end) == 1);
+    d = levels(5,:) - (levels(end) == 1);
 
-        val_to_rad = @(val, den) [cos(val*pi/den); sin(val*pi/den)];
+    rf = [
+        val_to_rad(x-1, 2 );
+        val_to_rad(y-1, 2 );
+        val_to_rad(v-1, 30);
+        val_to_rad(a-1, 5 );
+        val_to_rad(d-1, 4 );
+        4 * all(levels(end)==1);
+    ];
 
-        target_features = [
-            val_to_rad(lox-1, 2 );%0*pi/2, 1*pi/2, 2*pi/2
-            val_to_rad(loy-1, 2 );%0*pi/2, 1*pi/2, 2*pi/2
-            val_to_rad(vel-1, 30);%0*pi/5, 1*pi/5, 2*pi/5, 3*pi/5, 4*pi/5, 5*pi/5
-            val_to_rad(acc-1, 5 );%0*pi/2, 1*pi/2, 2*pi/2
-            val_to_rad(dir-1, 4 );%0*pi/4, 1*pi/4, 2*pi/4, 3*pi/4, ......, 7*pi/4
-            all(~tou) * 4;
-        ];
-    end
-
-    rf = target_features;
 end
 
 function rp = r_perms()
 
+    LEVELS_N = [3 3 12 6 8 1];
+
     val_to_rad = @(val, den) [cos(val*pi/den); sin(val*pi/den)];
 
-    lox_f = cell2mat(arrayfun(@(v) val_to_rad(v-1,2 ), 1:3  , 'UniformOutput', false));
-    loy_f = cell2mat(arrayfun(@(v) val_to_rad(v-1,2 ), 1:3  , 'UniformOutput', false));
-    vel_f = cell2mat(arrayfun(@(v) val_to_rad(v-1,30), 1:12 , 'UniformOutput', false));
-    acc_f = cell2mat(arrayfun(@(v) val_to_rad(v-1,5 ), 1:6  , 'UniformOutput', false));
-    dir_f = cell2mat(arrayfun(@(v) val_to_rad(v-1,4 ), 1:8  , 'UniformOutput', false));
+    x_f = cell2mat(arrayfun(@(v) val_to_rad(v-1,2 ), 1:LEVELS_N(1), 'UniformOutput', false));
+    y_f = cell2mat(arrayfun(@(v) val_to_rad(v-1,2 ), 1:LEVELS_N(2), 'UniformOutput', false));
+    v_f = cell2mat(arrayfun(@(v) val_to_rad(v-1,30), 1:LEVELS_N(3), 'UniformOutput', false));
+    a_f = cell2mat(arrayfun(@(v) val_to_rad(v-1,5 ), 1:LEVELS_N(4), 'UniformOutput', false));
+    d_f = cell2mat(arrayfun(@(v) val_to_rad(v-1,4 ), 1:LEVELS_N(5), 'UniformOutput', false));
+    z_f = 0;
 
-    lox_i = 1:size(lox_f,2);
-    loy_i = 1:size(loy_f,2);
-    vel_i = 1:size(vel_f,2);
-    acc_i = 1:size(acc_f,2);
-    dir_i = 1:size(dir_f,2);
+    x_i = 1:size(x_f,2);
+    y_i = 1:size(y_f,2);
+    v_i = 1:size(v_f,2);
+    a_i = 1:size(a_f,2);
+    d_i = 1:size(d_f,2);
+    z_i = 1:size(z_f,2);
 
-    [dir_c, acc_c, vel_c, loy_c, lox_c] = ndgrid(dir_i, acc_i, vel_i, loy_i, lox_i);
+    [z_c, d_c, a_c, v_c, y_c, x_c] = ndgrid(z_i, d_i, a_i, v_i, y_i, x_i);
 
-    t_features = vertcat(lox_f(:,lox_c(:)), loy_f(:,loy_c(:)), vel_f(:,vel_c(:)), acc_f(:,acc_c(:)), dir_f(:,dir_c(:)));
-    t_features = vertcat(t_features, zeros(1,size(t_features,2)));
-    z_features = [zeros(size(t_features,1)-1,1); 4];
+    touch_1 = vertcat(x_f(:,x_c(:)), y_f(:,y_c(:)), v_f(:,v_c(:)), a_f(:,a_c(:)), d_f(:,d_c(:)), z_f(:,z_c(:)));
+    touch_0 = [zeros(10,1); 4];
 
-    rp = horzcat(z_features,t_features);
+    rp = horzcat(touch_0,touch_1);
 end
 
-function tx = target_lox_features(states)
+function tx = target_x_features(states)
 
-    vals = states(12:3:end,1);
-    bin_n = 3;
-    bin_s = states(09,1)/bin_n;
-    
+    LEVELS_N = [3 3 12 6 8 1];
 
-    tx = repmat(target_bin_features(vals, bin_s, bin_n)', 1, size(states,2));
+    bin_n = LEVELS_N(1);
+    bin_s = states(09,1)/bin_n;    
+    vals  = states(12:3:end,1);
+
+    tx = repmat(binned_features(vals, bin_s, bin_n)', 1, size(states,2));
 end
 
-function ty = target_loy_features(states)
+function ty = target_y_features(states)
 
-    vals = states(13:3:end,1);
-    bin_n = 3;
-    bin_s = states(10,1)/bin_n;    
+    LEVELS_N = [3 3 12 6 8 1];
 
-    ty = repmat(target_bin_features(vals, bin_s, bin_n)', 1, size(states,2));
+    bin_n = LEVELS_N(2);
+    bin_s = states(10,1)/bin_n;
+    vals  = states(13:3:end,1);
+
+    ty = repmat(binned_features(vals, bin_s, bin_n)', 1, size(states,2));
 end
 
-function tx = target_vel_features(states)
+function tv = target_v_features(states)
 
-    vals = vecnorm(states(3:4,:))';
+    LEVELS_N = [3 3 12 6 8 1];
+
+    bin_n = LEVELS_N(3);
     bin_s = 6;
-    bin_n = 12;
+    vals = vecnorm(states(3:4,:))';
 
     trg_n = (size(states,1) - 11)/3;
 
-    tx = repmat(target_bin_features(vals, bin_s, bin_n), trg_n, 1);
+    tv = repmat(binned_features(vals, bin_s, bin_n), trg_n, 1);
 end
 
-function ta = target_acc_features(states)
-    
-    vals = vecnorm(states(5:6,:))';
+function ta = target_a_features(states)
+
+    LEVELS_N = [3 3 12 6 8 1];
+
+    bin_n = LEVELS_N(4);
     bin_s = 20;
-    bin_n = 6;
+    vals = vecnorm(states(5:6,:))';
 
     trg_n = (size(states,1) - 11)/3;
 
-    ta = repmat(target_bin_features(vals, bin_s, bin_n), trg_n, 1);
+    ta = repmat(binned_features(vals, bin_s, bin_n), trg_n, 1);
 end
 
-function td = target_dir_features(states)
+function td = target_d_features(states)
 
-    slice = 8;
+    LEVELS_N = [3 3 12 6 8 1];
+
+    slice = LEVELS_N(5);
     trg_n = (size(states,1) - 11)/3;
-    
+
     tv2 = atan2(-states(4,:), states(3,:));
     tv2 = floor((tv2 + 3*pi/slice) ./ (2*pi/slice));
     tv2 = tv2 + slice*(tv2<=0);
@@ -155,40 +149,30 @@ function td = target_dir_features(states)
 end
 
 %% Probably don't need to change %%
-function T = basii2indexes_T(vals, vars)
-
-    if(nargin<2)
-        vars = vals;
-    end
-
-    vals = [vals, 1]; %add one for easier computing
-
-    targ_2_index_T = cell2mat(arrayfun(@(i) prod(vals((i+1):end)) .* fliplr((vals(i)-1) - (0:vars(i)-1)), 1:(numel(vals)-1), 'UniformOutput',false));
-
-    targ_2_index_T(end-vals(end-1)+1:end) = targ_2_index_T(end-vals(end-1)+1:end) + 1;
-
-    T = targ_2_index_T;
+function v = I(n)
+    n = [n, 1]; %add one for easier computing
+    v = arrayfun(@(i) prod(n(i:end)), 2:numel(n))';
 end
 
-function rb = statesfun(func, states)
+function sf = statesfun(func, states)
     if iscell(states)
-        rb = cell2mat(cellfun(func, states, 'UniformOutput',false)');
+        sf = cell2mat(cellfun(func, states, 'UniformOutput',false)');
     else
-        rb = func(states);
+        sf = func(states);
     end
 end
 
-function tb = target_bin_features(vals, bin_s, bin_n)
+function tb = binned_features(vals, bin_s, bin_n)
 
     bins = [1:bin_n-1, inf] * bin_s;
 
     [~, tb] = max(vals' <= bins');
 end
 
-function tt = target_touch_features(states)
+function tt = touch_features(states)
     r2 = states(11, 1).^2;
 
-    [cd, pd] = target_distance_features(states);
+    [cd, pd] = distance_features(states);
 
     ct = cd <= r2;
     pt = pd <= r2;
@@ -197,7 +181,7 @@ function tt = target_touch_features(states)
     tt = ct&(~pt|nt);
 end
 
-function [cd, pd] = target_distance_features(states)
+function [cd, pd] = distance_features(states)
     cp = states(1:2,:);
     pp = states(1:2,:) - states(3:4,:);   
     tp = [states(12:3:end, 1)';states(13:3:end, 1)'];
