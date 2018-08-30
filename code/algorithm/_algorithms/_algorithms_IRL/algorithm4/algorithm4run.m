@@ -2,15 +2,13 @@ function irl_result = algorithm4run(episodes, params, verbosity)
 
     a_start = tic;
 
-    r_basii = @r_basii_4_9;        
-    
+    r_basii = @r_basii_4_9;
+
     N = 30;
     M = 90;
     S = 3;
     W = 4;
 
-    
-    
     %N = 30;
     %M = 70;
     %S = 3;
@@ -34,13 +32,15 @@ function irl_result = algorithm4run(episodes, params, verbosity)
     %much accuracy but greatly increased execution time.
     EVAL_N = 1;    
 
-    [state2identity, a_f, a_b] = r_basii();
+    [r_i, r_p, r_b] = r_basii();
     
+    r_n = size(r_p,2);
+    r_e = @(states) double((1:r_n)' == r_i(states));
+
     adp_algorithm = @approx_policy_iteration_13h;
 
     s_1 = @() episode_starts{randi(numel(episode_starts))};
     s_a = s_act_4_2();
-    r_b = state2identity;
     v_b = @v_basii_4_4;
 
     fprintf(1,'Start of Algorithm4 \n');
@@ -53,16 +53,16 @@ function irl_result = algorithm4run(episodes, params, verbosity)
 
     E = 0;
 
-    for e = 1:numel(episodes)
-        for t = 1:size(episodes{e},2)
-            assert(all(a_f * r_b(episodes{e}(:,t)) == a_b(episodes{e}(:,t))), 'something is wrong with the r_basii');
-            E = E + params.gamma^(t-1) * r_b(episodes{e}(:,t));
+    for i = 1:numel(episodes)
+        for t = 1:size(episodes{i},2)
+            assert(all(r_p * r_e(episodes{i}(:,t)) == r_b(episodes{i}(:,t))), 'something is wrong with the reward basii');
+            E = E + params.gamma^(t-1) * r_e(episodes{i}(:,t));
         end
     end
 
     E = E./numel(episodes);
 
-    ff = k(a_f,a_f,params.kernel);
+    ff = k(r_p,r_p,params.kernel);
 
     i  = 1;
     rs = {};
@@ -72,15 +72,15 @@ function irl_result = algorithm4run(episodes, params, verbosity)
 
     % Generate arbitray reward
 
-    rs{i} = ff*rand(size(ff,1),1);
-    s_r   = @(s) rs{i}'*r_b(s);
+    rs{i} = rand(1,size(ff,1))*ff;
+    s_r   = @(s) rs{i}(r_i(s));
 
     t_start = tic;
         Pf    = adp_algorithm(s_1, s_a, s_r, v_b, @huge_trans_post, @huge_trans_pre, params.gamma, N, M, S, W);
     p_time = p_time + toc(t_start);
 
     t_start = tic;
-        ss{i} = policy_eval_at_states(Pf{N+1}, episode_starts, r_b, params.gamma, T, @huge_trans_pre, EVAL_N);
+        ss{i} = policy_eval_at_states(Pf{N+1}, episode_starts, r_e, params.gamma, T, @huge_trans_pre, EVAL_N);
     s_time = s_time + toc(t_start);
 
     sb{i} = ss{i};
@@ -94,15 +94,15 @@ function irl_result = algorithm4run(episodes, params, verbosity)
 
     while 1
 
-        rs{i} = ff*(E-sb{i-1});
-        s_r   = @(s) rs{i}'*r_b(s);
+        rs{i} = (E-sb{i-1})'*ff;
+        s_r   = @(s) rs{i}(r_i(s));
 
         t_start = tic;
             Pf    = adp_algorithm(s_1, s_a, s_r, v_b, @huge_trans_post, @huge_trans_pre, params.gamma, N, M, S, W);
         p_time = p_time + toc(t_start);
 
         t_start = tic;
-            ss{i} = policy_eval_at_states(Pf{N+1}, episode_starts, r_b, params.gamma, T, @huge_trans_pre, EVAL_N);
+            ss{i} = policy_eval_at_states(Pf{N+1}, episode_starts, r_e, params.gamma, T, @huge_trans_pre, EVAL_N);
         s_time = s_time + toc(t_start);
 
         ts{i} = sqrt(E'*ff*E + sb{i-1}'*ff*sb{i-1} - 2*E'*ff*sb{i-1});
@@ -134,9 +134,9 @@ function irl_result = algorithm4run(episodes, params, verbosity)
     end
 
     m
-    [a_f*E, a_f*ss{i}]'
+    [r_p*E, r_p*ss{i}]'
 
-    %irl_result = a_f * (E-sb{i-1});
+    %irl_result = r_p * (E-sb{i-1});
     irl_result = rs{i};
 end
 
@@ -172,7 +172,7 @@ end
 function k = k(x1, x2, kernel)
     p = 2;
     c = 1;
-    s = .5;
+    s = .65;
 
     switch kernel
         case 1

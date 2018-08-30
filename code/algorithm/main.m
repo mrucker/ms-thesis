@@ -60,11 +60,7 @@ end
 
 function rc = result_clean_2(result)
 
-    sorted_result = sort(result);
-    
-    upper = sorted_result(end-9);
-    
-    result(result > upper) = upper;
+    result(result > prctile(result,97)) = prctile(result,97);
 
     epsilon_result = result - result(1);
 
@@ -78,6 +74,6 @@ function rc = result_clean_2(result)
     max_result = max(epsilon_result);
 
     normal_epsilon_result = round((epsilon_result - min_result)/(max_result-min_result),2);
-    
+
     rc = normal_epsilon_result;
 end
