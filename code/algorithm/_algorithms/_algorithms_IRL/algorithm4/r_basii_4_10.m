@@ -1,4 +1,4 @@
-function [state2identity, r_p, r_b] = r_basii_4_8()
+function [state2identity, r_p, r_b] = r_basii_4_10()
 
     r_p = all_targ_perms();
 
@@ -36,10 +36,17 @@ function rb = r_basii_dummy(states)
     if any(sum(tou,1) == 0)
         target_features = zeros(20,1);
     else
-        lox = sum(target_lox_features(states) .* tou,1);
-        loy = sum(target_loy_features(states) .* tou,1);
-        vel = sum(target_vel_features(states) .* tou,1);
-        dir = sum(target_dir_features(states) .* tou,1);
+        %???
+        lox = sum(target_lox_features(states)       .* tou,1);
+
+        %???
+        loy = sum(target_loy_features(states)       .* tou,1);
+
+        %???
+        vel = sum(target_vel_features(states)       .* tou,1);
+
+        %.25
+        dir = sum(target_direction_features(states) .* tou,1);
 
         target_features = double(vertcat((1:3)' == lox, (1:3)' == loy, (1:6)' == vel, (1:8)' == dir));
     end
@@ -64,11 +71,17 @@ function rb = r_basii_feats(states)
     if all(sum(tou,1) == 0)
         target_features = [zeros(8,size(tou,2));4*ones(1,size(tou,2))];
     else
+        %???
+        lox = sum(target_lox_features(states)       .* tou,1);
 
-        lox = sum(target_lox_features(states) .* tou,1);
-        loy = sum(target_loy_features(states) .* tou,1);
-        vel = sum(target_vel_features(states) .* tou,1);
-        dir = sum(target_dir_features(states) .* tou,1);
+        %???
+        loy = sum(target_loy_features(states)       .* tou,1);
+
+        %???
+        vel = sum(target_vel_features(states)       .* tou,1);
+
+        %.25
+        dir = sum(target_direction_features(states) .* tou,1);
 
         val_to_loc = @(val, den) [cos(val*pi/den); sin(val*pi/den)];
 
@@ -76,7 +89,7 @@ function rb = r_basii_feats(states)
             val_to_loc(lox-1, 2);
             val_to_loc(loy-1, 2);
             val_to_loc(vel-1, 4);
-            val_to_loc(dir-1, 4);
+            val_to_loc(dir+3, 4);
             all(~tou) * 4;
         ];
     end
@@ -109,11 +122,21 @@ function [cd, pd] = target_distance_features(states)
     pd = dpp+dtp'-2*(tp'*pp);
 end
 
-function td = target_dir_features(states)
+function td = target_direction_features(states)
+
+    % +1 ... 1
+    % +2 ... 2
+    % +3 ... 3
+    % +4 ... 4
+    % +5 ... 5
+    % -4 ... 5
+    % -3 ... 6
+    % -2 ... 7
+    % -1 ... 8  
 
     trg_n = (size(states,1) - 11)/3;
     
-    tv2 = atan2(-states(4,:), states(3,:));
+    tv2 = atan2(states(4,:), states(3,:));    
     tv2 = floor((tv2 + 3*pi/8) ./ (pi/4));
     tv2 = tv2 + 8*(tv2<=0);
 
@@ -163,7 +186,7 @@ function perms = all_targ_perms()
     lox_f = cell2mat(arrayfun(@(v) val_to_loc(v-1,2), 1:3, 'UniformOutput', false));
     loy_f = cell2mat(arrayfun(@(v) val_to_loc(v-1,2), 1:3, 'UniformOutput', false));
     vel_f = cell2mat(arrayfun(@(v) val_to_loc(v-1,4), 1:6, 'UniformOutput', false));
-    dir_f = cell2mat(arrayfun(@(v) val_to_loc(v-1,4), 1:8, 'UniformOutput', false));
+    dir_f = cell2mat(arrayfun(@(v) val_to_loc(v+3,4), 1:8, 'UniformOutput', false));
 
     lox_i = 1:size(lox_f,2);
     loy_i = 1:size(loy_f,2);

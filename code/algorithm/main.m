@@ -31,12 +31,12 @@ for e = 1:trajectory_episodes_count
    trajectory_episodes{e} = trajectory_states(episode_start:episode_stop); 
 end
 
-params = struct ('epsilon',.00001, 'gamma',.9, 'seed',0, 'kernel', 5);
+params = struct ('epsilon',.0001, 'gamma',.9, 'seed',0, 'kernel', 5);
 result = algorithm4run(trajectory_episodes, params, 1);
 
 cleaned_result = result_clean_2(result);
 
-fprintf('%s', jsonencode(cleaned_result));
+fprintf('%s\n\n', jsonencode(cleaned_result));
                     hist(cleaned_result);
 
 function rc = result_clean_1(result)
@@ -59,6 +59,12 @@ function rc = result_clean_1(result)
 end
 
 function rc = result_clean_2(result)
+
+    sorted_result = sort(result);
+    
+    upper = sorted_result(end-9);
+    
+    result(result > upper) = upper;
 
     epsilon_result = result - result(1);
 

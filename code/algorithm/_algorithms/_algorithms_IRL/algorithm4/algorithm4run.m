@@ -2,11 +2,15 @@ function irl_result = algorithm4run(episodes, params, verbosity)
 
     a_start = tic;
 
+    r_basii = @r_basii_4_9;        
+    
     N = 30;
     M = 90;
     S = 3;
     W = 4;
 
+    
+    
     %N = 30;
     %M = 70;
     %S = 3;
@@ -28,10 +32,10 @@ function irl_result = algorithm4run(episodes, params, verbosity)
     %seemed important that this wasn't less than 1 (aka, randomly pick 
     %a subset of episode starts) while anything greater than 1 didn't add
     %much accuracy but greatly increased execution time.
-    EVAL_N = 1;
+    EVAL_N = 1;    
 
-    [state2identity, a_f, a_b] = r_basii_4_8();
-
+    [state2identity, a_f, a_b] = r_basii();
+    
     adp_algorithm = @approx_policy_iteration_13h;
 
     s_1 = @() episode_starts{randi(numel(episode_starts))};
@@ -51,6 +55,7 @@ function irl_result = algorithm4run(episodes, params, verbosity)
 
     for e = 1:numel(episodes)
         for t = 1:size(episodes{e},2)
+            assert(all(a_f * r_b(episodes{e}(:,t)) == a_b(episodes{e}(:,t))), 'something is wrong with the r_basii');
             E = E + params.gamma^(t-1) * r_b(episodes{e}(:,t));
         end
     end
@@ -167,7 +172,7 @@ end
 function k = k(x1, x2, kernel)
     p = 2;
     c = 1;
-    s = 1;
+    s = .5;
 
     switch kernel
         case 1

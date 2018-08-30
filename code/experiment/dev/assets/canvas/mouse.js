@@ -1,9 +1,12 @@
 function Mouse(canvas)
 {
-    var self     = this;
+    var self = this;
+
+	var noMoveTime = 40;
     
-	var position  = {x:undefined, y:undefined};
-	var velocity  = {x:undefined, y:undefined, m:undefined, d:undefined};
+	var position     = {x:undefined, y:undefined};
+	var velocity     = {x:undefined, y:undefined, m:undefined, d:undefined};
+	var acceleration = {x:undefined, y:undefined, m:undefined, d:undefined};
 
 	var moveTimeout = undefined;
 
@@ -15,8 +18,9 @@ function Mouse(canvas)
 
 		mps.start();
 
-		position = {x:canvas.getResolution(0)/2, y:canvas.getResolution(1)/2};
-		velocity = {x:0, y:0, m:0, d:0};
+		position     = {x:canvas.getResolution(0)/2, y:canvas.getResolution(1)/2};
+		velocity     = {x:0, y:0, m:0, d:0};
+		acceleration = {x:0, y:0, m:0, d:0};
 
         canvas.addOnDeviceMove(onDeviceMove);
     };
@@ -27,8 +31,9 @@ function Mouse(canvas)
 
         mps.stop();
 
-        position = {x:undefined, y:undefined};
-		velocity = {x:undefined, y:undefined, m:undefined, d:undefined};
+        position     = {x:undefined, y:undefined};
+		velocity     = {x:undefined, y:undefined, m:undefined, d:undefined};
+		acceleration = {x:undefined, y:undefined, m:undefined, d:undefined};
     };
 
     this.getX = function() {
@@ -47,9 +52,18 @@ function Mouse(canvas)
 		
 		return velocity.m;
 	}
+	
+	this.getAcceleration = function(dim) {
+		if(dim == 0) return acceleration.x;
+		if(dim == 1) return acceleration.y;
+		if(dim == 2) return acceleration.m;
+		if(dim == 3) return acceleration.d;
+		
+		return velocity.m;
+	}
 
 	this.getDirectionTo = function(x,y) {
-		return Math.atan2(y - position.y, x - position.x);
+		return Math.atan2(-(y - position.y), x - position.x);
 	}
 
 	this.getDirectionToCenter = function() {
@@ -75,11 +89,26 @@ function Mouse(canvas)
     };
 
 	function notMoving() {
-		updateVelocity(position, position.x, position.y);
+		
+		//this drops off too fast and doesn't look good
+		//instead I'm going to write a custom blend formula
+		//updateVelocity(position, position.x, position.y);
+		
+		var scale = 12/13;
+
+		velocity.x *= 12/13;
+		velocity.y *= 12/13;
+		velocity.m *= 12/13;
+
+		acceleration.x *= 12/13;
+		acceleration.y *= 12/13;
+		acceleration.m *= 12/13;
 
 		if(moveTimeout) clearTimeout(moveTimeout);
 
-		moveTimeout = setTimeout(notMoving, 100);
+		if(velocity.m > .0001) {
+			moveTimeout = setTimeout(notMoving, 9);
+		}
 	}
 
     function onDeviceMove(x,y) {
@@ -92,7 +121,7 @@ function Mouse(canvas)
 
 		if(moveTimeout) clearTimeout(moveTimeout);
 
-		moveTimeout = setTimeout(notMoving, 100);
+		moveTimeout = setTimeout(notMoving, 300);
     }
 
 	function updateVelocity(oldPosition, x, y) {
@@ -100,11 +129,21 @@ function Mouse(canvas)
 		newVelocityX = x - oldPosition.x;
 		newVelocityY = y - oldPosition.y;
 		newVelocityM = Math.sqrt(Math.pow(newVelocityX,2) + Math.pow(newVelocityY,2));
-		newVelocityD = Math.atan2(newVelocityY,newVelocityX);
+		newVelocityD = Math.atan2(-newVelocityY,newVelocityX);
+
+		newAccelerationX = x - oldPosition.x - velocity.x;
+		newAccelerationY = y - oldPosition.y - velocity.y;
+		newAccelerationM = Math.sqrt(Math.pow(newAccelerationX,2) + Math.pow(newAccelerationY,2));
+		//newAccelerationD = Math.atan2(-newAccelerationY,newAccelerationX);
 
 		velocity.x = 2/6 * velocity.x + 4/6 * newVelocityX;
 		velocity.y = 2/6 * velocity.y + 4/6 * newVelocityY;
-		velocity.m = 5/6 * velocity.m + 1/6 * newVelocityM;
+		velocity.m = 2/6 * velocity.m + 4/6 * newVelocityM;
 		velocity.d = 2/6 * velocity.d + 4/6 * newVelocityD;
+		
+		acceleration.x = 2/6 * acceleration.x + 4/6 * newAccelerationX;
+		acceleration.y = 2/6 * acceleration.y + 4/6 * newAccelerationY;
+		acceleration.m = 5/6 * acceleration.m + 1/6 * newAccelerationM;
+		//acceleration.d = 2/6 * acceleration.d + 4/6 * newAccelerationD;
 	}
 }
