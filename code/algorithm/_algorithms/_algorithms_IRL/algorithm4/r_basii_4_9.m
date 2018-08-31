@@ -22,11 +22,11 @@ function rl = r_levels(states)
         tou(:) = 0;
         tou(sub2ind(size(tou), ti, 1:s_n)) = 1;
 
-        lox = sum(target_x_features(states) .* tou,1) + all(~tou);
-        loy = sum(target_y_features(states) .* tou,1) + all(~tou);
-        vel = sum(target_v_features(states) .* tou,1) + all(~tou);
-        acc = sum(target_a_features(states) .* tou,1) + all(~tou);
-        dir = sum(target_d_features(states) .* tou,1) + all(~tou);
+        lox = sum(target_x_levels(states) .* tou,1) + all(~tou);
+        loy = sum(target_y_levels(states) .* tou,1) + all(~tou);
+        vel = sum(cursor_v_levels(states) .* tou,1) + all(~tou);
+        acc = sum(cursor_a_levels(states) .* tou,1) + all(~tou);
+        dir = sum(cursor_d_levels(states) .* tou,1) + all(~tou);
         tou = 1*(sum(tou,1) == 0) + 2*(sum(tou,1) == 1);
 
         rl = vertcat(lox, loy, vel, acc, dir, tou);
@@ -86,7 +86,7 @@ function rp = r_perms()
     rp = horzcat(touch_0,touch_1);
 end
 
-function tx = target_x_features(states)
+function tx = target_x_levels(states)
 
     LEVELS_N = [3 3 12 6 8 1];
 
@@ -97,7 +97,7 @@ function tx = target_x_features(states)
     tx = repmat(binned_features(vals, bin_s, bin_n)', 1, size(states,2));
 end
 
-function ty = target_y_features(states)
+function ty = target_y_levels(states)
 
     LEVELS_N = [3 3 12 6 8 1];
 
@@ -108,7 +108,7 @@ function ty = target_y_features(states)
     ty = repmat(binned_features(vals, bin_s, bin_n)', 1, size(states,2));
 end
 
-function tv = target_v_features(states)
+function cv = cursor_v_levels(states)
 
     LEVELS_N = [3 3 12 6 8 1];
 
@@ -118,10 +118,10 @@ function tv = target_v_features(states)
 
     trg_n = (size(states,1) - 11)/3;
 
-    tv = repmat(binned_features(vals, bin_s, bin_n), trg_n, 1);
+    cv = repmat(binned_features(vals, bin_s, bin_n), trg_n, 1);
 end
 
-function ta = target_a_features(states)
+function ca = cursor_a_levels(states)
 
     LEVELS_N = [3 3 12 6 8 1];
 
@@ -131,10 +131,10 @@ function ta = target_a_features(states)
 
     trg_n = (size(states,1) - 11)/3;
 
-    ta = repmat(binned_features(vals, bin_s, bin_n), trg_n, 1);
+    ca = repmat(binned_features(vals, bin_s, bin_n), trg_n, 1);
 end
 
-function td = target_d_features(states)
+function cd = cursor_d_levels(states)
 
     LEVELS_N = [3 3 12 6 8 1];
 
@@ -145,7 +145,7 @@ function td = target_d_features(states)
     tv2 = floor((tv2 + 3*pi/slice) ./ (2*pi/slice));
     tv2 = tv2 + slice*(tv2<=0);
 
-    td = repmat(tv2,trg_n,1);
+    cd = repmat(tv2,trg_n,1);
 end
 
 %% Probably don't need to change %%

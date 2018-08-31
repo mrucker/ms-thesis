@@ -9,10 +9,10 @@ eval_steps = 10;
 trans_pre = @(s,a) huge_trans_pre (s,a);
 trans_pst = @(s,a) huge_trans_post(s,a);
 
-[state2rew_ident, r_p, r_b] = r_basii_4_2();
+[r_i, r_p, r_b] = r_basii_4_9();
 
-s_1 = @( ) state_rand();
-s_a = s_act_4_1();
+s_1 = @() state_rand();
+s_a = s_act_4_2();
 v_b = @v_basii_4_4;
 
 %algorithm_2   == (lin ols regression with n-step Monte Carlo                             )
@@ -29,13 +29,6 @@ v_b = @v_basii_4_4;
 %algorithm_13g == (algorithm_13f but more intelligent explore/exploit logic               )
 %algorithm_14  == (true TD(lambda) with bootstrap, confidence interval and on-policy dist )
 
-%13e is always faster than 13d no matter what I do to the algorithm paramaters
-
-%#1 13b
-%#2 13
-%#3 14
-%#4 08b
-
 algo_a = @(s_r) approx_policy_iteration_2  (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 50, 2, 3);  %  no-opt
 
 algo_j = @(s_r) approx_policy_iteration_13b(s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 50, 5, 3); %  no-opt
@@ -47,8 +40,9 @@ algo_n = @(s_r) approx_policy_iteration_13f(s_1, s_a, s_r, v_b, trans_pst, trans
 algo_o = @(s_r) approx_policy_iteration_13f(s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 5, 400, 5, 4); %  no-opt
 
 algo_p = @(s_r) approx_policy_iteration_13g(s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 50, 5, 3); %  no-opt
-algo_q = @(s_r) approx_policy_iteration_13h(s_1, s_a, s_r, @v_basii_4_3, trans_pst, trans_pre, 0.9*1.0, 30, 70, 3, 3); %  no-opt
-algo_r = @(s_r) approx_policy_iteration_13h(s_1, s_a, s_r, @v_basii_4_4, trans_pst, trans_pre, 0.9*1.0, 30, 70, 3, 3); %  no-opt
+
+algo_q = @(s_r) approx_policy_iteration_13h(s_1, s_a, s_r, @v_basii_4_4, trans_pst, trans_pre, 0.9*1.0, 30, 90, 3, 4); %  no-opt
+algo_r = @(s_r) approx_policy_iteration_13i(s_1, s_a, s_r, @v_basii_4_5, trans_pst, trans_pre, 0.9*1.0, 30, 90, 3, 4); %  no-opt
 
 algos = {
 %   algo_a, 'algorithm_2  (G=0.9, L=1.0, N=30, M=50 , S=2, W=3)';
@@ -58,19 +52,18 @@ algos = {
 %   algo_n, 'algorithm_13f(G=0.9, L=1.0, N=30, M=50 , S=5, W=3)';
 %   algo_o, 'algorithm_13f(G=0.9, L=1.0, N=10, M=200, S=7, W=3)';
 %   algo_p, 'algorithm_13g(G=0.9, L=1.0, N=30, M=50 , S=5, W=3)';
-   algo_q, 'algorithm_13h(G=0.9, L=1.0, N=30, M=70 , S=3, W=3)';
-   algo_r, 'algorithm_13h(G=0.9, L=1.0, N=30, M=70 , S=3, W=3)';
+
+%   algo_q, 'algorithm_13h(G=0.9, L=1.0, N=30, M=70 , S=3, W=3)';
+   algo_r, 'algorithm_13i(G=0.9, L=1.0, N=30, M=70 , S=3, W=3)';
 };
 
 states_c = cell(1, rewd_count);
 reward_f = cell(1, rewd_count);
 
-for r_i = 1:rewd_count
-    reward_basii_n = size(r_b(s_1()),1);
-    reward_theta_r = reward_theta(reward_basii_n);
-
-    reward_f{r_i} = @(s) reward_theta_r'*r_b(s);
-    states_c{r_i} = state_init();
+for i = 1:rewd_count
+    R = reward_theta(size(r_p,1))' * r_p;
+    reward_f{i} = @(s) R(r_i(s));
+    states_c{i} = state_init();
 end
 
 for a_i = 1:size(algos,1)
@@ -91,8 +84,6 @@ for a_i = 1:size(algos,1)
     end
 
     if rewd_count == 1
-        %d_results_1(algos{a_i,2}, Ks, As);
-
         Vs = zeros(1,numel(Pf)-1);
 
         eval_states = states_c{r_i};
@@ -128,14 +119,13 @@ function rt = reward_theta(basii_count)
     %rt = [-.25*rand(basii_count-1,1);100];
 end
 
-function p_results(test_algo_name, f_time, b_time, v_time, a_time, P_val)
+function p_results(test_algo_name, f_time, b_time, m_time, a_time, P_val)
     fprintf('%s ', test_algo_name);
     fprintf('f_time = %5.2f; ', mean(f_time));
     fprintf('b_time = %5.2f; ', mean(b_time));
-    fprintf('v_time = %5.2f; ', mean(v_time));
+    fprintf('m_time = %5.2f; ', mean(m_time));
     fprintf('a_time = %5.2f; ', mean(a_time));
     fprintf('VAL = %7.3f; '   , mean(P_val));
-    %fprintf('TCH = %f; '       , mean(P_tch));
     fprintf('\n');
 end
 

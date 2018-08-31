@@ -2,7 +2,10 @@ function irl_result = algorithm4run(episodes, params, verbosity)
 
     a_start = tic;
 
-    r_basii = @r_basii_4_9;
+    s_a           = s_act_4_2();
+    v_b           = @v_basii_4_5;
+    r_basii       = @r_basii_4_9;
+    adp_algorithm = @approx_policy_iteration_13i;
 
     N = 30;%30;
     M = 90;%90;
@@ -33,15 +36,11 @@ function irl_result = algorithm4run(episodes, params, verbosity)
     EVAL_N = 1;    
 
     [r_i, r_p, r_b] = r_basii();
-    
+
     r_n = size(r_p,2);
     r_e = @(states) double((1:r_n)' == r_i(states));
 
-    adp_algorithm = @approx_policy_iteration_13h;
-
-    s_1 = @() episode_starts{randi(numel(episode_starts))};
-    s_a = s_act_4_2();
-    v_b = @v_basii_4_4;
+    s_1 = @() episode_starts{randi(numel(episode_starts))};    
 
     fprintf(1,'Start of Algorithm4 \n');
 
