@@ -87,41 +87,33 @@ end
 function cx = cursor_x_levels(states)
     LEVELS_N = [3 3 3 3 8 3 3];
 
-    bin_n = LEVELS_N(1);
-    bin_s = states(09,1)/bin_n;    
-    vals  = states(1,:);
+    min_level = 1;
+    max_level = LEVELS_N(1);
+    bin_size  = states(9,1)/max_level;
 
-    cx = bin_levels(vals, bin_s, bin_n);
+    cx = bin_levels(states(1,:), bin_size, min_level, max_level);
 end
 
 function cy = cursor_y_levels(states)
     LEVELS_N = [3 3 3 3 8 3 3];
 
-    bin_n = LEVELS_N(2);
-    bin_s = states(10,1)/bin_n;    
-    vals  = states(2,:);
+    min_level = 1;
+    max_level = LEVELS_N(2);
+    bin_size  = states(10,1)/max_level;
 
-    cy = bin_levels(vals, bin_s, bin_n);
+    cy = bin_levels(states(2,:), bin_size, min_level, max_level);
 end
 
 function cv = cursor_v_levels(states)
     LEVELS_N = [3 3 3 3 8 3 3];
 
-    bin_n = LEVELS_N(3);
-    bin_s = 25;
-    vals = vecnorm(states(3:4,:));
-
-    cv = bin_levels(vals, bin_s, bin_n);
+    cv = bin_levels(vecnorm(states(3:4,:)), 25, 1, LEVELS_N(3));
 end
 
 function ca = cursor_a_levels(states)
     LEVELS_N = [3 3 3 3 8 3 3];
 
-    bin_n = LEVELS_N(3);
-    bin_s = 25;
-    vals = vecnorm(states(5:6,:));
-
-    ca = bin_levels(vals, bin_s, bin_n);
+    ca = bin_levels(vecnorm(states(5:6,:)), 25, 1, LEVELS_N(4));
 end
 
 function cd = cursor_d_levels(states)
@@ -154,7 +146,7 @@ function [tt, tn] = target_t_n_levels(states)
     approach_n = sum(cd < pd,1);
 
     tt = [1 2 3] * [ (~enter_target & ~leave_target); (enter_target); (~enter_target & leave_target ); ];
-    tn = bin_levels(approach_n, 2, LEVELS_N(7));
+    tn = bin_levels(approach_n, 2, 1, LEVELS_N(7));
 end
 
 %% Probably don't need to change %%
@@ -171,18 +163,31 @@ function sf = statesfun(func, states)
     end
 end
 
-function bl = bin_levels(vals, bin_s, bin_n)
+function bl = bin_levels(vals, bin_size, min_level, max_level)
 
+    %fastest
+    bl = min(max(ceil((vals)/bin_size), min_level), max_level);
+    
+    %%second fastest
+    %bl = min(ceil((vals+.01)/bin_s), bin_n);
+    %%second fastest
+    
+    %%third fastest
+    %[~, bl] = max(vals <= [1:bin_n-1, inf]' * bin_s);
+    %%third fastest
+
+    %%fourth fastest (close 3rd)
     %r_bins = [   1:bin_n-1, inf]' * bin_s;
     %l_bins = [0, 1:bin_n-1     ]' * bin_s;
     
     %bin_ident = l_bins <= vals & vals < r_bins;
     %bl = (1:bin_n) * bin_ident;
+    %%fourth fastest (close 3rd)
     
-    [~, bl] = max(vals <= [1:bin_n-1, inf]' * bin_s);
-    
+    %%fifth fastest
     %bins = (1:bin_n-1) * bin_s;
     %bl = discretize(vals,[0,bins,inf]);
+    %%fifth fastest
 end
 
 function [cd, pd] = distance_features(states)

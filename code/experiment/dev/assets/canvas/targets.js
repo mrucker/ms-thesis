@@ -148,7 +148,7 @@ function Target(mouse, radius, x_pct, y_pct, fixed_age, rewardId) {
 	
 	this.getReward_4_9 = function() {
 
-        var level = self.getFeatures_4_9();
+        var level = self.getLevels_4_9();
 		
 		console.log(JSON.stringify(level));
 		
@@ -157,30 +157,6 @@ function Target(mouse, radius, x_pct, y_pct, fixed_age, rewardId) {
 		var v_index = [0,48,96,144,192,240,288,336,384,432,480,528];
 		var a_index = [0,8,16,24,32,40];
 		var d_index = [1,2,3,4,5,6,7,8];	
-		
-		//for 16
-		//var lox_index = [0,288,576];
-		//var loy_index = [0,96,192];
-		//var vel_index = [0,16,32,48,64,80];
-		//var dir_index = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];
-				
-		//for 20
-		//var lox_index = [0,360,720];
-		//var loy_index = [0,120,240];
-		//var vel_index = [0,20,40,60,80,100];
-		//var dir_index = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];
-		
-		//for 32
-		//var lox_index = [0,576,1152];
-		//var loy_index = [0,192,384];
-		//var vel_index = [0,32,64,96,128,160];
-		//var dir_index = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32];
-		
-		//for 12x32
-		//var lox_index = [0,1152,2304];
-		//var loy_index = [0,384,768];
-		//var vel_index = [0,32,64,96,128,160,192,224,256,288,320,352];
-		//var dir_index = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32];
 
 		var r_index = x_index[level.x] + y_index[level.y] + v_index[level.v] + a_index[level.a] + d_index[level.d];
 
@@ -225,21 +201,25 @@ function Target(mouse, radius, x_pct, y_pct, fixed_age, rewardId) {
 		return {'x':x_class-1, 'y':y_class-1, 'v':v_class-1, 'd':d_class-1};
     };
 	
-	this.getFeatures_4_9 = function () {
+	this.getLevels_4_9 = function () {
 
 		var d_rad = self.isTouched() ? mouse.getVelocity(3) : mouse.getDirectionTo(effectiveX, effectiveY);
-
-		var v_pct = mouse.getVelocity(2)/(6*12);
-		var a_pct = mouse.getAcceleration(2)/(20*6);
-
-		console.log(mouse.getVelocity(2));
+		var v_mag = mouse.getVelocity(2);
+		var a_mag = mouse.getAcceleration(2)/(20*6);
 		
-		var x_class = x_pct <= 1/3 ? 1 : x_pct <= 2/3 ? 2 : 3;
-		var y_class = y_pct <= 1/3 ? 1 : y_pct <= 2/3 ? 2 : 3;
-		var v_class = v_pct <= 1/12 ? 1 : v_pct <= 2/12 ? 2 : v_pct <= 3/12 ? 3 : v_pct <= 4/12 ? 4 : v_pct <= 5/12 ? 5 : v_pct <= 6/12 ? 6 : v_pct <= 7/12 ? 7 : v_pct <= 8/12 ? 8 : v_pct <= 9/12 ? 9 : v_pct <= 10/12 ? 10 : v_pct <= 11/12 ? 11 : 12;		
-		var a_class = a_pct <= 1/6 ? 1 : a_pct <= 2/6 ? 2 : a_pct <= 3/6 ? 3 : a_pct <= 4/6 ? 4 : a_pct <= 5/6 ? 5 : 6;
+		var x_bin = 1/3;
+		var y_bin = 1/3;
+		var v_bin = 6;
+		var a_bin = 20;
+		var d_bin = (Math.PI/4);
 
-		var d_class = Math.floor( (d_rad + 3*Math.PI/8) / (Math.PI/4) );
+		var x_level = bin_level(x_pct, x_bin, 1,  3);
+		var y_level = bin_level(y_pct, y_bin, 1,  3);
+		var v_level = bin_level(v_mag, v_bin, 1, 12);
+		var a_level = bin_level(a_mag, a_bin, 1,  6);
+		var d_level = bin_level(d_rad, d_bin,  )
+		
+		var d_class = Math.floor( (d_rad + 3*Math.PI/8) /  );
 
 		if(d_class <= 0) {
 			d_class += 8;
@@ -272,6 +252,10 @@ function Target(mouse, radius, x_pct, y_pct, fixed_age, rewardId) {
     function dist(x1,y1,x2,y2) {
         return Math.sqrt(Math.pow(x1-x2,2)+Math.pow(y1-y2,2));
     }
+	
+	function bin_level(value, bin_size, level_min, level_max) {
+		return Math.max(Math.min(Math.ceil(value/bin_size), level_max),level_min);
+	}
 }
 
 function TargetRenderer(fadeInTime, fadeOffTime, fadeOutTime, lifespan) {

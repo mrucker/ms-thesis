@@ -3,7 +3,7 @@ close all
 fprintf('\n');
 try run('../../paths.m'); catch; end
 
-rewd_count = 1;
+rewd_count = 10;
 eval_steps = 10;
 
 trans_pre = @(s,a) huge_trans_pre (s,a);
