@@ -1,6 +1,6 @@
 function [v_i, v_p, v_b] = v_basii_4_5()
     
-    LEVELS_N = [3 3 3 3 8 3 3];
+    LEVELS_N = [3 3 3 3 8 3 6];
            
     v_I = I(LEVELS_N);
 
@@ -22,12 +22,23 @@ function vl = v_levels(states)
 end
 
 function [vf] = v_feats(states)
-    val_to_d = @(val,den) val/den;
-    val_to_e = @(val,  n) double(1:n == val')';
-    val_to_r = @(val, den) [cos(val*pi/den); sin(val*pi/den)];
-    
+
+    LEVELS_N = [3 3 3 3 8 3 6];    
+
+    val_to_d = @(val,den      ) val/den;
+    val_to_e = @(val,  n      ) double(1:n == val')';
+    val_to_r = @(val, den, trn) [cos(trn*pi/den + val*pi/den); sin(trn*pi/den + val*pi/den)];
+
     levels = v_levels(states);
-    
+
+    x_n = LEVELS_N(1);
+    y_n = LEVELS_N(2);
+    v_n = LEVELS_N(3);
+    a_n = LEVELS_N(4);
+    d_n = LEVELS_N(5);
+    t_n = LEVELS_N(6);
+    n_n = LEVELS_N(7);
+
     x = levels(1,:);
     y = levels(2,:);
     v = levels(3,:);
@@ -35,33 +46,42 @@ function [vf] = v_feats(states)
     d = levels(5,:);
     t = levels(6,:);
     n = levels(7,:);
-    
+
     vf = [
-        val_to_d(x-1,2);
-        val_to_d(y-1,2);
-        val_to_d(v-1,2);
-        val_to_d(a-1,2);
-        val_to_r(d-1,4);
-        val_to_e(t-0,3);
-        val_to_d(n-1,2);
+        val_to_d(x-1,x_n-1     );
+        val_to_d(y-1,y_n-1     );
+        val_to_d(v-1,v_n-1     );
+        val_to_d(a-1,a_n-1     );
+        val_to_r(d-1,d_n/2, 4.5);
+        val_to_e(t-0,t_n-0     );
+        val_to_d(n-1,n_n-1     );
     ];
+
 end
 
 function rp = v_perms()
 
-    LEVELS_N = [3 3 3 3 8 3 3];
+    LEVELS_N = [3 3 3 3 8 3 6];
 
-    val_to_d = @(val,den) val/den;
-    val_to_e = @(val,  n) double(1:n == val)';
-    val_to_r = @(val, den) [cos(val*pi/den); sin(val*pi/den)];
+    val_to_d = @(val,den      ) val/den;
+    val_to_e = @(val,  n      ) double(1:n == val')';
+    val_to_r = @(val, den, trn) [cos(trn*pi/den + val*pi/den); sin(trn*pi/den + val*pi/den)];
 
-    x_f = cell2mat(arrayfun(@(L) val_to_d(L-1, 2), 1:LEVELS_N(1), 'UniformOutput', false));
-    y_f = cell2mat(arrayfun(@(L) val_to_d(L-1, 2), 1:LEVELS_N(2), 'UniformOutput', false));
-    v_f = cell2mat(arrayfun(@(L) val_to_d(L-1, 2), 1:LEVELS_N(3), 'UniformOutput', false));
-    a_f = cell2mat(arrayfun(@(L) val_to_d(L-1, 2), 1:LEVELS_N(4), 'UniformOutput', false));
-    d_f = cell2mat(arrayfun(@(L) val_to_r(L-1, 4), 1:LEVELS_N(5), 'UniformOutput', false));
-    t_f = cell2mat(arrayfun(@(L) val_to_e(L-0, 3), 1:LEVELS_N(6), 'UniformOutput', false));
-    n_f = cell2mat(arrayfun(@(L) val_to_d(L-1, 2), 1:LEVELS_N(7), 'UniformOutput', false));
+    x_n = LEVELS_N(1);
+    y_n = LEVELS_N(2);
+    v_n = LEVELS_N(3);
+    a_n = LEVELS_N(4);
+    d_n = LEVELS_N(5);
+    t_n = LEVELS_N(6);
+    n_n = LEVELS_N(7);
+    
+    x_f = cell2mat(arrayfun(@(L) val_to_d(L-1, x_n-1     ), 1:x_n, 'UniformOutput', false));
+    y_f = cell2mat(arrayfun(@(L) val_to_d(L-1, y_n-1     ), 1:y_n, 'UniformOutput', false));
+    v_f = cell2mat(arrayfun(@(L) val_to_d(L-1, v_n-1     ), 1:v_n, 'UniformOutput', false));
+    a_f = cell2mat(arrayfun(@(L) val_to_d(L-1, a_n-1     ), 1:a_n, 'UniformOutput', false));
+    d_f = cell2mat(arrayfun(@(L) val_to_r(L-1, d_n/2, 4.5), 1:d_n, 'UniformOutput', false));
+    t_f = cell2mat(arrayfun(@(L) val_to_e(L-0, t_n-0     ), 1:t_n, 'UniformOutput', false));
+    n_f = cell2mat(arrayfun(@(L) val_to_d(L-1, n_n-1     ), 1:n_n, 'UniformOutput', false));
 
     x_i = 1:size(x_f,2);
     y_i = 1:size(y_f,2);
@@ -85,7 +105,7 @@ function rp = v_perms()
 end
 
 function cx = cursor_x_levels(states)
-    LEVELS_N = [3 3 3 3 8 3 3];
+    LEVELS_N = [3 3 3 3 8 3 6];
 
     min_level = 1;
     max_level = LEVELS_N(1);
@@ -95,7 +115,7 @@ function cx = cursor_x_levels(states)
 end
 
 function cy = cursor_y_levels(states)
-    LEVELS_N = [3 3 3 3 8 3 3];
+    LEVELS_N = [3 3 3 3 8 3 6];
 
     min_level = 1;
     max_level = LEVELS_N(2);
@@ -105,32 +125,32 @@ function cy = cursor_y_levels(states)
 end
 
 function cv = cursor_v_levels(states)
-    LEVELS_N = [3 3 3 3 8 3 3];
+    LEVELS_N = [3 3 3 3 8 3 6];
 
     cv = bin_levels(vecnorm(states(3:4,:)), 25, 1, LEVELS_N(3));
 end
 
 function ca = cursor_a_levels(states)
-    LEVELS_N = [3 3 3 3 8 3 3];
+    LEVELS_N = [3 3 3 3 8 3 6];
 
     ca = bin_levels(vecnorm(states(5:6,:)), 25, 1, LEVELS_N(4));
 end
 
 function cd = cursor_d_levels(states)
-    LEVELS_N = [3 3 3 3 8 3 3];
+    LEVELS_N = [3 3 3 3 8 3 6];
 
-    slices = LEVELS_N(5);
+    min_level = 1;
+    max_level = LEVELS_N(5);
+    bin_size  = max_level*pi/2; 
 
-    tv2 = atan2(-states(4,:), states(3,:));
-    tv2 = floor((tv2 + 3*pi/slices) ./ (2*pi/slices));
-    tv2 = tv2 + slices*(tv2<=0);
-
-    cd = tv2;
+    vals = atan2(-states(4,:), states(3,:)) + pi;
+    
+    cd = bin_levels(vals, bin_size, min_level, max_level);
 end
 
 function [tt, tn] = target_t_n_levels(states)
     
-    LEVELS_N = [3 3 3 3 8 3 3];
+    LEVELS_N = [3 3 3 3 8 3 6];
     
     r2 = states(11, 1).^2;
     
@@ -146,7 +166,7 @@ function [tt, tn] = target_t_n_levels(states)
     approach_n = sum(cd < pd,1);
 
     tt = [1 2 3] * [ (~enter_target & ~leave_target); (enter_target); (~enter_target & leave_target ); ];
-    tn = bin_levels(approach_n, 2, 1, LEVELS_N(7));
+    tn = bin_levels(approach_n, 1, 1, LEVELS_N(7));
 end
 
 %% Probably don't need to change %%
@@ -157,7 +177,7 @@ end
 
 function sf = statesfun(func, states)
     if iscell(states)
-        sf = cell2mat(cellfun(func, states, 'UniformOutput',false)');
+        sf = cell2mat(cellfun(func, states, 'UniformOutput',false));
     else
         sf = func(states);
     end
@@ -166,7 +186,9 @@ end
 function bl = bin_levels(vals, bin_size, min_level, max_level)
 
     %fastest
-    bl = min(max(ceil((vals)/bin_size), min_level), max_level);
+    bl = ceil(vals/bin_size);
+    bl = max (bl, min_level);
+    bl = min (bl, max_level);
     
     %%second fastest
     %bl = min(ceil((vals+.01)/bin_s), bin_n);

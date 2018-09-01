@@ -1,6 +1,5 @@
 clear
 close all
-fprintf('\n');
 try run('../../paths.m'); catch; end
 
 rewd_count = 20;
@@ -9,41 +8,32 @@ eval_steps = 10;
 trans_pre = @(s,a) huge_trans_pre (s,a);
 trans_pst = @(s,a) huge_trans_post(s,a);
 
-[state2rew_ident, r_p, r_b] = r_basii_4_2();
+act_methd = @s_act_4_2;
+rew_basii = @r_basii_4_9;
+val_basii = @v_basii_4_9;
 
-v_b = @v_basii_4_4;
-s_1 = @() state_rand();
-s_a = s_act_4_1();
+[r_i, r_p, r_b] = rew_basii();
 
-%algorithm_2   == (lin ols regression with n-step Monte Carlo                             )
-%algorithm_5   == (gau ridge regression                                                   )
-%algorithm_8   == (gau svm regression with n-step Monte Carlo, BAKF, and ONPOLICY sampling)
-%algorithm_8b  == (algorithm_8 except I've reintroduced an old bug that made it run better)
-%algorithm_12  == (algorithm_8 but with bootstrapping after n-step Monte Carlo            )
-%algorithm_13  == (algorithm_8 but with interval estimation to choose the first action    )
-%algorithm_13b == (algorithm_13 but with a small bug fix around the on-policy distribution)
-%algorithm_14  == (full tabular TD lambda with interval estimation and on-policy sampling )
+v_b = val_basii;
+s_1 = @state_rand;
+s_a = act_methd();
 
 algos = {
-    @approx_policy_iteration_13h, 'algorithm_13h';
+    @approx_policy_iteration_13i, 'algorithm_13i';
 };
 
 states_c = cell(1, rewd_count);
 reward_f = cell(1, rewd_count);
 
-for r_i = 1:rewd_count
-    reward_basii_n = size(r_b(s_1()),1);
-    reward_theta_r = reward_theta(reward_basii_n);
-
-    reward_f{r_i} = @(s) reward_theta_r'*r_b(s);
-    states_c{r_i} = state_init();
+for i = 1:rewd_count
+    R = reward_theta(size(r_p,1))' * r_p;
+    reward_f{i} = @(s) R(r_i(s));
+    states_c{i} = state_init();
 end
 
 for a_i = 1:size(algos,1)
 
-    ts = tunings();
-    
-    for tuning = ts
+    for tuning = tunings()
 
         fT = zeros(1,rewd_count);
         bT = zeros(1,rewd_count);
@@ -64,6 +54,8 @@ for a_i = 1:size(algos,1)
             S = tuning(4);
             W = tuning(5);
 
+            algo_s = @(s_r) approx_policy_iteration_13i(s_1, s_a, s_r, @v_basii_4_9, trans_pst, trans_pre, 0.9*1.0, 30, 90, 3, 4); %  no-opt
+                        
             [Pf, ~, ~, ~, ~, ~, fT(r_i), bT(r_i), mT(r_i), aT(r_i)] = algos{a_i,1}(s_1, s_a, reward_f{r_i}, v_b, trans_pst, trans_pre, G*L, N, M, S, W);
 
             eval_states = states_c{r_i};
@@ -86,6 +78,20 @@ for a_i = 1:size(algos,1)
 
 end
 
+fprintf('\n');
+
+function t = tunings()
+    L = 1;
+    N = 30:10:50;
+    M = 10:20:90;
+    S = 3:1:9;
+    W = 2:4;
+
+    [cw, cs, cm, cn, cl] = ndgrid(W, S, M, N, L);
+
+    t = [cl(:), cn(:), cm(:), cs(:), cw(:)]';
+end
+
 function s = state_init()
     s = {
        [1145;673;-8;-2;-1;6;-7;4;3175;1535;156;626;555;155;2249;305;60];
@@ -100,10 +106,10 @@ function s = state_rand()
     s = population{randi(numel(population))};
 end
 
-function rt = reward_theta(basii_count)
-    %rt = [zeros(basii_count-1,1);1];
-    rt = 2*rand(basii_count,1) - 1;
-    %rt = [-.25*rand(basii_count-1,1);100];
+function t = reward_theta(basii_count)
+    %t = [zeros(basii_count-1,1);1];
+    t = 2*rand(basii_count,1) - 1;
+    %t = [-.25*rand(basii_count-1,1);100];
 end
 
 function p_results(algo_name, tuning, max_vs, avg_vs, lst_vs, var_vs, f_time, b_time, m_time, a_time)
@@ -122,15 +128,4 @@ function p_results(algo_name, tuning, max_vs, avg_vs, lst_vs, var_vs, f_time, b_
     fprintf('\n');
 end
 
-function params = tunings()
 
-    L = 1;
-    N = 30:10:50;
-    M = 10:20:90;
-    S = 3:1:9;
-    W = 2:4;
-
-    [cw, cs, cm, cn, cl] = ndgrid(W, S, M, N, L);
-
-    params = [cl(:), cn(:), cm(:), cs(:), cw(:)]';
-end

@@ -3,7 +3,7 @@ function irl_result = algorithm4run(episodes, params, verbosity)
     a_start = tic;
 
     s_a           = s_act_4_2();
-    v_b           = @v_basii_4_5;
+    v_b           = @v_basii_4_9;
     r_basii       = @r_basii_4_9;
     adp_algorithm = @approx_policy_iteration_13i;
 
@@ -54,8 +54,8 @@ function irl_result = algorithm4run(episodes, params, verbosity)
 
     for i = 1:numel(episodes)
         for t = 1:size(episodes{i},2)
-            assert(all(r_p * r_e(episodes{i}(:,t)) == r_b(episodes{i}(:,t))), 'something is wrong with the reward basii');
-            E = E + params.gamma^(t-1) * r_e(episodes{i}(:,t));
+            assert(all(r_p * r_e(episodes{i}{t}) == r_b(episodes{i}{t})), 'something is wrong with the reward basii');
+            E = E + params.gamma^(t-1) * r_e(episodes{i}{t});
         end
     end
 
@@ -177,7 +177,7 @@ end
 function k = k(x1, x2, kernel)
     p = 2;
     c = 1;
-    s = .60;
+    s = .5;
 
     switch kernel
         case 1

@@ -6,8 +6,8 @@ function [r_i, r_p, r_b] = r_basii_4_9()
 
     r_I = I(LEVELS_N);
 
-    r_i = @(states) r_I'*(statesfun(@r_levels, states)-1) + 1;
-    r_b = @(states) statesfun(@r_feats, states);
+    r_i = @(states) 1 + r_I'*(statesfun(@r_levels, states)-1);
+    r_b = @(states) r_feats(statesfun(@r_levels, states));
 end
 
 function rl = r_levels(states)
@@ -33,27 +33,25 @@ function rl = r_levels(states)
     end
 end
 
-function rf = r_feats(states)
+function rf = r_feats(levels)
 
-    levels = r_levels(states);
+    assert(all(all(levels>0)), 'bad levels');
 
-    assert(all(levels>0), 'bad levels');
+    val_to_rad = @(val, den, trn) (val~=-1) .* [cos(trn*pi/den + val*pi/den); sin(trn*pi/den + val*pi/den)];
 
-    val_to_rad = @(val, den) (val~=-1) .* [cos(val*pi/den); sin(val*pi/den)];
-
-    x = levels(1,:) - (levels(end) == 1);
-    y = levels(2,:) - (levels(end) == 1);
-    v = levels(3,:) - (levels(end) == 1);
-    a = levels(4,:) - (levels(end) == 1);
-    d = levels(5,:) - (levels(end) == 1);
+    x = levels(1,:) - (levels(end,:) == 1);
+    y = levels(2,:) - (levels(end,:) == 1);
+    v = levels(3,:) - (levels(end,:) == 1);
+    a = levels(4,:) - (levels(end,:) == 1);
+    d = levels(5,:) - (levels(end,:) == 1);
 
     rf = [
-        val_to_rad(x-1, 2 );
-        val_to_rad(y-1, 2 );
-        val_to_rad(v-1, 30);
-        val_to_rad(a-1, 5 );
-        val_to_rad(d-1, 4 );
-        4 * all(levels(end)==1);
+        val_to_rad(x-1, 2 , 0.0);
+        val_to_rad(y-1, 2 , 0.0);
+        val_to_rad(v-1, 30, 0.0);
+        val_to_rad(a-1, 5 , 0.0);
+        val_to_rad(d-1, 4 , 4.5);
+        4 * (levels(end,:)==1);
     ];
 
 end
@@ -62,90 +60,85 @@ function rp = r_perms()
 
     LEVELS_N = [3 3 12 6 8 1];
 
-    val_to_rad = @(val, den) [cos(val*pi/den); sin(val*pi/den)];
-
-    x_f = cell2mat(arrayfun(@(v) val_to_rad(v-1,2 ), 1:LEVELS_N(1), 'UniformOutput', false));
-    y_f = cell2mat(arrayfun(@(v) val_to_rad(v-1,2 ), 1:LEVELS_N(2), 'UniformOutput', false));
-    v_f = cell2mat(arrayfun(@(v) val_to_rad(v-1,30), 1:LEVELS_N(3), 'UniformOutput', false));
-    a_f = cell2mat(arrayfun(@(v) val_to_rad(v-1,5 ), 1:LEVELS_N(4), 'UniformOutput', false));
-    d_f = cell2mat(arrayfun(@(v) val_to_rad(v-1,4 ), 1:LEVELS_N(5), 'UniformOutput', false));
-    z_f = 0;
-
-    x_i = 1:size(x_f,2);
-    y_i = 1:size(y_f,2);
-    v_i = 1:size(v_f,2);
-    a_i = 1:size(a_f,2);
-    d_i = 1:size(d_f,2);
-    z_i = 1:size(z_f,2);
+    x = 1:LEVELS_N(1);
+    y = 1:LEVELS_N(2);
+    v = 1:LEVELS_N(3);
+    a = 1:LEVELS_N(4);
+    d = 1:LEVELS_N(5);
+    z = 2;
+    
+    x_i = 1:size(x,2);
+    y_i = 1:size(y,2);
+    v_i = 1:size(v,2);
+    a_i = 1:size(a,2);
+    d_i = 1:size(d,2);
+    z_i = 1:size(z,2);
 
     [z_c, d_c, a_c, v_c, y_c, x_c] = ndgrid(z_i, d_i, a_i, v_i, y_i, x_i);
-
-    touch_1 = vertcat(x_f(:,x_c(:)), y_f(:,y_c(:)), v_f(:,v_c(:)), a_f(:,a_c(:)), d_f(:,d_c(:)), z_f(:,z_c(:)));
+    
     touch_0 = [zeros(10,1); 4];
+    touch_1 = r_feats([
+        x(:,x_c(:));
+        y(:,y_c(:));
+        v(:,v_c(:));
+        a(:,a_c(:));
+        d(:,d_c(:));
+        z(:,z_c(:))
+    ]);
 
-    rp = horzcat(touch_0,touch_1);
+    rp = horzcat(touch_0, touch_1);
+
 end
 
 function tx = target_x_levels(states)
 
     LEVELS_N = [3 3 12 6 8 1];
 
-    bin_n = LEVELS_N(1);
-    bin_s = states(09,1)/bin_n;    
-    vals  = states(12:3:end,1);
+    lvl_x = bin_levels(states(12:3:end,1), states(09,1)/LEVELS_N(1), 1, LEVELS_N(1));
 
-    tx = repmat(binned_features(vals, bin_s, bin_n)', 1, size(states,2));
+    tx = repmat(lvl_x, 1, size(states,2));
 end
 
 function ty = target_y_levels(states)
 
     LEVELS_N = [3 3 12 6 8 1];
 
-    bin_n = LEVELS_N(2);
-    bin_s = states(10,1)/bin_n;
-    vals  = states(13:3:end,1);
+    lvl_y = bin_levels(states(13:3:end,1), states(10,1)/LEVELS_N(2), 1, LEVELS_N(2));
 
-    ty = repmat(binned_features(vals, bin_s, bin_n)', 1, size(states,2));
+    ty = repmat(lvl_y, 1, size(states,2));
 end
 
 function cv = cursor_v_levels(states)
 
     LEVELS_N = [3 3 12 6 8 1];
 
-    bin_n = LEVELS_N(3);
-    bin_s = 6;
-    vals = vecnorm(states(3:4,:))';
-
     trg_n = (size(states,1) - 11)/3;
+    lvl_v = bin_levels(vecnorm(states(3:4,:)), 6, 1, LEVELS_N(3));
 
-    cv = repmat(binned_features(vals, bin_s, bin_n), trg_n, 1);
+    cv = repmat(lvl_v, trg_n, 1);
 end
 
 function ca = cursor_a_levels(states)
 
     LEVELS_N = [3 3 12 6 8 1];
-
-    bin_n = LEVELS_N(4);
-    bin_s = 20;
-    vals = vecnorm(states(5:6,:))';
-
+    
     trg_n = (size(states,1) - 11)/3;
+    lvl_a = bin_levels(vecnorm(states(5:6,:)), 20, 1, LEVELS_N(4));
 
-    ca = repmat(binned_features(vals, bin_s, bin_n), trg_n, 1);
+    ca = repmat(lvl_a, trg_n, 1);
 end
 
 function cd = cursor_d_levels(states)
 
     LEVELS_N = [3 3 12 6 8 1];
 
-    slice = LEVELS_N(5);
-    trg_n = (size(states,1) - 11)/3;
+    min_level = 1;
+    max_level = LEVELS_N(5);
+    bin_size  = max_level*pi/2; 
 
-    tv2 = atan2(-states(4,:), states(3,:));
-    tv2 = floor((tv2 + 3*pi/slice) ./ (2*pi/slice));
-    tv2 = tv2 + slice*(tv2<=0);
+    vals = atan2(-states(4,:), states(3,:)) + pi;
 
-    cd = repmat(tv2,trg_n,1);
+    cd = bin_levels(vals, bin_size, min_level, max_level);
 end
 
 %% Probably don't need to change %%
@@ -156,17 +149,39 @@ end
 
 function sf = statesfun(func, states)
     if iscell(states)
-        sf = cell2mat(cellfun(func, states, 'UniformOutput',false)');
+        sf = cell2mat(cellfun(func, states, 'UniformOutput',false));
     else
         sf = func(states);
     end
 end
 
-function tb = binned_features(vals, bin_s, bin_n)
+function bl = bin_levels(vals, bin_size, min_level, max_level)
 
-    bins = [1:bin_n-1, inf] * bin_s;
+    %fastest
+    bl = ceil(vals/bin_size);
+    bl = max (bl, min_level);
+    bl = min (bl, max_level);
+    
+    %%second fastest
+    %bl = min(ceil((vals+.01)/bin_s), bin_n);
+    %%second fastest
+    
+    %%third fastest
+    %[~, bl] = max(vals <= [1:bin_n-1, inf]' * bin_s);
+    %%third fastest
 
-    [~, tb] = max(vals' <= bins');
+    %%fourth fastest (close 3rd)
+    %r_bins = [   1:bin_n-1, inf]' * bin_s;
+    %l_bins = [0, 1:bin_n-1     ]' * bin_s;
+    
+    %bin_ident = l_bins <= vals & vals < r_bins;
+    %bl = (1:bin_n) * bin_ident;
+    %%fourth fastest (close 3rd)
+    
+    %%fifth fastest
+    %bins = (1:bin_n-1) * bin_s;
+    %bl = discretize(vals,[0,bins,inf]);
+    %%fifth fastest
 end
 
 function tt = touch_features(states)

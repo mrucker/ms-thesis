@@ -2,7 +2,7 @@ function [r_i, r_p, r_b] = r_basii_4_8()
 
     r_I = basii2indexes_T([3 3 6 8],[3 3 6 8]);
 
-    r_i = @(states) r_I*statesfun(@r_levels, states) + 1;
+    r_i = @(states) 1 + r_I*statesfun(@r_levels, states);
     r_b = @(states) statesfun(@r_feats, states);
     r_p = r_perms();
 end
@@ -130,7 +130,7 @@ end
 function td = target_dir_features(states)
 
     trg_n = (size(states,1) - 11)/3;
-    
+
     tv2 = atan2(-states(4,:), states(3,:));
     tv2 = floor((tv2 + 3*pi/8) ./ (pi/4));
     tv2 = tv2 + 8*(tv2<=0);

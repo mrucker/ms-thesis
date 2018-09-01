@@ -1,9 +1,8 @@
 clear
 close all
-fprintf('\n');
 try run('../../paths.m'); catch; end
 
-rewd_count = 10;
+rewd_count = 30;
 eval_steps = 10;
 
 trans_pre = @(s,a) huge_trans_pre (s,a);
@@ -27,6 +26,8 @@ v_b = @v_basii_4_4;
 %algorithm_13e == (algorithm_13b but with a change to calculate all values once each N    )
 %algorithm_13f == (algorithm_13e but adding in policy_iter data to the kernel value basii )
 %algorithm_13g == (algorithm_13f but more intelligent explore/exploit logic               )
+%algorithm_13h == (algorithm_13g but more intelligent explore/exploit logic and faster Vf )
+%algorithm_13i == (algorithm_13h but with new level-based value architecture for speed    )
 %algorithm_14  == (true TD(lambda) with bootstrap, confidence interval and on-policy dist )
 
 algo_a = @(s_r) approx_policy_iteration_2  (s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 50, 2, 3);  %  no-opt
@@ -42,7 +43,8 @@ algo_o = @(s_r) approx_policy_iteration_13f(s_1, s_a, s_r, v_b, trans_pst, trans
 algo_p = @(s_r) approx_policy_iteration_13g(s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 50, 5, 3); %  no-opt
 
 algo_q = @(s_r) approx_policy_iteration_13h(s_1, s_a, s_r, @v_basii_4_4, trans_pst, trans_pre, 0.9*1.0, 30, 90, 3, 4); %  no-opt
-algo_r = @(s_r) approx_policy_iteration_13i(s_1, s_a, s_r, @v_basii_4_5, trans_pst, trans_pre, 0.9*1.0, 30, 90, 3, 4); %  no-opt
+algo_r = @(s_r) approx_policy_iteration_13i(s_1, s_a, s_r, @v_basii_4_8, trans_pst, trans_pre, 0.9*1.0, 30, 90, 3, 4); %  no-opt
+algo_s = @(s_r) approx_policy_iteration_13i(s_1, s_a, s_r, @v_basii_4_9, trans_pst, trans_pre, 0.9*1.0, 30, 90, 3, 4); %  no-opt
 
 algos = {
 %   algo_a, 'algorithm_2  (G=0.9, L=1.0, N=30, M=50 , S=2, W=3)';
@@ -53,8 +55,9 @@ algos = {
 %   algo_o, 'algorithm_13f(G=0.9, L=1.0, N=10, M=200, S=7, W=3)';
 %   algo_p, 'algorithm_13g(G=0.9, L=1.0, N=30, M=50 , S=5, W=3)';
 
-%   algo_q, 'algorithm_13h(G=0.9, L=1.0, N=30, M=70 , S=3, W=3)';
-   algo_r, 'algorithm_13i(G=0.9, L=1.0, N=30, M=70 , S=3, W=3)';
+   %algo_q, 'algorithm_13h(G=0.9, L=1.0, N=30, M=90 , S=3, W=4)';
+   algo_r, 'algorithm_13i(G=0.9, L=1.0, N=30, M=90 , S=3, W=4)';
+   algo_s, 'algorithm_13i(G=0.9, L=1.0, N=30, M=90 , S=3, W=4)';
 };
 
 states_c = cell(1, rewd_count);
@@ -96,8 +99,10 @@ for a_i = 1:size(algos,1)
         d_results_3(algos{a_i,2}, Vs);
     end
     
-    p_results(algos{a_i,2}, fT, bT, vT, aT, Pv);
+    p_results(algos{a_i,2}, fT, bT, vT, aT, Pv);    
 end
+
+fprintf('\n');
 
 function s = state_init()
     s = {

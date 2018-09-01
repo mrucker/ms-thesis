@@ -7,7 +7,7 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
     a_start = tic;
     
     [v_i, v_p, v_b] = value_basii();
-
+    
     v_v = 3*ones(1,size(v_p,2));
     
     g_row = [gamma.^(0:T-1), zeros(1,W-1)];
@@ -74,10 +74,12 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
 
             %0.28
             post_states = trans_post(init_states{m}, actions(init_states{m}));
-
+            
             post_v_is   = v_i(post_states);
             post_basii  = v_b(post_states);
             post_values = v_v(post_v_is  );
+            
+            %assert(all(all(v_p(:,post_v_is) == post_basii)), 'something is wrong with v_basii');
 
             if ~isempty(X)
                %post_val_se      = mean(S) * ones(1, size(post_states,2));
