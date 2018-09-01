@@ -4,7 +4,7 @@ var _prerender_n_touch = _renderer.prerender(_renderer.allGray150, _renderer.all
 var _prerender_y_touch = _renderer.prerender(_renderer.allGray90 , _renderer.allBlack , _renderer.evenFill, _renderer.heavyStroke , _renderer.evenOpacity);
 
 function Targets(mouse, rewardId) {
-    var radius     = 150;
+    var radius     = 200;
     var targets    = [];    
 	var effectiveA = 0;
     var effectiveR = 0;

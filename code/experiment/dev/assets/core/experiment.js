@@ -69,7 +69,12 @@ function Experiment(canvas, participantId, rewardId)
         //I do likely want to store feature weights still though. Perhaps I need to make a comprehensive list of features and use these.
         
         //Measurements to add: feature weights
-        saveData({"startTime":new Date().toUTCString(), "dimensions": canvas.getDimensions(), "resolution": canvas.getResolution()});
+        saveData({
+			"startTime" :new Date().toUTCString()
+			, "dimensions": canvas.getDimensions()
+			, "resolution": canvas.getResolution()
+			, "rewarId"   : rewardId
+		});
     }
 
     function stopExperiment() {

@@ -46,7 +46,7 @@ $(document).ready( function () {
 
         var participant = new Participant();
         var experiment1 = new Experiment(canvas, participant.getId(), getRewardId(0) || 1);
-        var experiment2 = new Experiment(canvas, participant.getId(), getRewardId(1) || 2);
+        var experiment2 = new Experiment(canvas, participant.getId(), getRewardId(1) || 1);
 
 		var functions = [
 			,(showModalContent("welcome"   , true ))
@@ -68,14 +68,13 @@ $(document).ready( function () {
 			}
 			functions.unshift(showModalContent("demo"      , true ));
 		}
-		
+
 		if(querystring.exists("id")) {
 			functions.unshift(showParticipantId(participant.getId()));
         }
-		
+
 		var chainStart = $.Deferred().resolve();		
 		var eventChain = functions.reduce(function(chain, nextFunction) { return chain.then(nextFunction) }, chainStart);
-		
     }
 
 	function showParticipantId(participantId) {
