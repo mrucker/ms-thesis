@@ -43,11 +43,11 @@ function rf = r_feats(levels)
     d_l = levels(5,:) .* is_touched;
 
     rf = [
-        val_to_rad(x_l-1, LEVELS_N(1)-1, 0.0);
-        val_to_rad(y_l-1, LEVELS_N(2)-1, 0.0);
-        val_to_rad(v_l-1, LEVELS_N(3)*2, 0.0);
-        val_to_rad(a_l-1, LEVELS_N(4)*2, 0.0);
-        val_to_rad(d_l-1, LEVELS_N(5)/2, 4.5);
+        val_to_rad(x_l-1, LEVELS_N(1)-1, 0.0) * 1/01;
+        val_to_rad(y_l-1, LEVELS_N(2)-1, 0.0) * 1/01;
+        val_to_rad(v_l-1, LEVELS_N(3)*2, 0.0) * 1/01;
+        val_to_rad(a_l-1, LEVELS_N(4)*2, 0.0) * 1/01;
+        val_to_rad(d_l-1, LEVELS_N(5)/2, 4.5) * 4/10;
         4 * (levels(end,:) == 1);
     ];
 
@@ -78,7 +78,7 @@ function rp = r_perms()
         v(:,v_c(:));
         a(:,a_c(:));
         d(:,d_c(:));
-        z(:,z_c(:))
+        z(:,z_c(:));
     ]);
 
     rp = horzcat(touch_0, touch_1);
@@ -214,7 +214,8 @@ end
 
 function l = LEVELS_N(i) 
     l = [3, 3, 8, 6, 8];
-
+    %l = [3, 3, 8, 6, 16];
+    
     if(nargin ~= 0)
         l = l(i);
     end

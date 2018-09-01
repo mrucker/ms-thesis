@@ -33,7 +33,7 @@ function irl_result = algorithm4run(episodes, params, verbosity)
     %seemed important that this wasn't less than 1 (aka, randomly pick 
     %a subset of episode starts) while anything greater than 1 didn't add
     %much accuracy but greatly increased execution time.
-    EVAL_N = 1;    
+    EVAL_N = 2;    
 
     [r_i, r_p, r_b] = r_basii();
 

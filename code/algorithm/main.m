@@ -15,7 +15,7 @@ close all
 
 %a3cb0e1e586811391.json stayed entirely on the right third of the screen, otherwise normal.
 
-trajectory_observations = jsondecode(fileread('../../data/entries/observations/1ff40e9f5818b8978.json'));
+trajectory_observations = jsondecode(fileread('../../data/entries/observations/a3cb0e1e586811391.json'));
 trajectory_states       = huge_states_from(trajectory_observations);
 
 trajectory_episodes_count  = 380; %we finish at (380+10+30) to trim the last second in case of noise
