@@ -1,12 +1,13 @@
-function [v_i, v_p, v_b] = v_basii_4_9()
+function [v_i, v_p, v_b, v_l] = v_basii_4_9()
     
     LEVELS_N = [3 3 3 3 3 3 3 6];
            
     v_I = I(LEVELS_N);
 
-    v_p = v_perms();
-    v_i = @(states) 1 + v_I'*(statesfun(@v_levels, states)-1);
-    v_b = @(states) v_feats(statesfun(@v_levels, states));
+    v_p = @v_perms;
+    v_i = @(levels) 1 + v_I'*(levels-1);
+    v_b = @(levels) v_feats(levels);
+    v_l = @(states) statesfun(states);
 end
 
 function vl = v_levels(states)
@@ -23,37 +24,18 @@ function [vf] = v_feats(levels)
 
     LEVELS_N = [3 3 3 3 3 3 3 6];
 
-    val_to_d = @(val,den      ) val/den;
-    val_to_e = @(val,  n      ) double(1:n == val')';
-    val_to_r = @(val, den, trn) [cos(trn*pi/den + val*pi/den); sin(trn*pi/den + val*pi/den)];
-
-    p_x_n = LEVELS_N(1);
-    p_y_n = LEVELS_N(2);
-    v_x_n = LEVELS_N(3);
-    v_y_n = LEVELS_N(4);
-    a_x_n = LEVELS_N(5);
-    a_y_n = LEVELS_N(6);
-    t_t_n = LEVELS_N(7);
-    t_n_n = LEVELS_N(8);
-
-    p_x_l = levels(1,:);
-    p_y_l = levels(2,:);
-    v_x_l = levels(3,:);
-    v_y_l = levels(4,:);
-    a_x_l = levels(5,:);
-    a_y_l = levels(6,:);
-    t_t_l = levels(7,:);
-    t_n_l = levels(8,:);
+    val_to_d = @(val,den) val/den;
+    val_to_e = @(val,  n) double(1:n == val')';
 
     vf = [
-        val_to_d(p_x_l-1,p_x_n-1     );
-        val_to_d(p_y_l-1,p_y_n-1     );
-        val_to_d(v_x_l-1,v_x_n-1     );
-        val_to_d(v_y_l-1,v_y_n-1     );
-        val_to_d(a_x_l-1,a_x_n-1     );
-        val_to_d(a_y_l-1,a_y_n-1     );
-        val_to_e(t_t_l-0,t_t_n-0     );
-        val_to_d(t_n_l-1,t_n_n-1     );
+        val_to_d(levels(1,:)-1, LEVELS_N(1)-1);
+        val_to_d(levels(2,:)-1, LEVELS_N(2)-1);
+        val_to_d(levels(3,:)-1, LEVELS_N(3)-1);
+        val_to_d(levels(4,:)-1, LEVELS_N(4)-1);
+        val_to_d(levels(5,:)-1, LEVELS_N(5)-1);
+        val_to_d(levels(6,:)-1, LEVELS_N(6)-1);
+        val_to_e(levels(7,:)-0, LEVELS_N(7)-0);
+        val_to_d(levels(8,:)-1, LEVELS_N(8)-1);
     ];
 
 end
@@ -62,23 +44,14 @@ function vp = v_perms()
 
     LEVELS_N = [3 3 3 3 3 3 3 6];
 
-    p_x_n = LEVELS_N(1);
-    p_y_n = LEVELS_N(2);
-    v_x_n = LEVELS_N(3);
-    v_y_n = LEVELS_N(4);
-    a_m_n = LEVELS_N(5);
-    a_d_n = LEVELS_N(6);
-    t_t_n = LEVELS_N(7);
-    t_n_n = LEVELS_N(8);
-
-    p_x_i = 1:p_x_n;
-    p_y_i = 1:p_y_n;
-    v_x_i = 1:v_x_n;
-    v_y_i = 1:v_y_n;
-    a_x_i = 1:a_m_n;
-    a_y_i = 1:a_d_n;
-    t_t_i = 1:t_t_n;
-    t_n_i = 1:t_n_n;
+    p_x_i = 1:LEVELS_N(1);
+    p_y_i = 1:LEVELS_N(2);
+    v_x_i = 1:LEVELS_N(3);
+    v_y_i = 1:LEVELS_N(4);
+    a_x_i = 1:LEVELS_N(5);
+    a_y_i = 1:LEVELS_N(6);
+    t_t_i = 1:LEVELS_N(7);
+    t_n_i = 1:LEVELS_N(8);
 
     [t_n_c, t_t_c, a_d_c, a_m_c, v_d_c, v_m_c, p_y_c, p_x_c] = ndgrid(t_n_i, t_t_i, a_y_i, a_x_i, v_y_i, v_x_i, p_y_i, p_x_i);
 
@@ -95,48 +68,43 @@ function vp = v_perms()
 end
 
 function lp = cursor_p_levels(states)
-    LEVELS_N = [3 3 3 3 3 3 3 6];
+    LEVELS_N_x = 3;
+    LEVELS_N_y = 3;
 
-    min_x_level = 1;
-    max_x_level = LEVELS_N(1);
-    bin_x_size  = states(9,1)/max_x_level;
-
-    min_y_level = 1;
-    max_y_level = LEVELS_N(2);
-    bin_y_size  = states(10,1)/max_y_level;
-
-    l_x = bin_levels(states(1,:), bin_x_size, min_x_level, max_x_level);
-    l_y = bin_levels(states(2,:), bin_y_size, min_y_level, max_y_level);
+    l_x = bin_levels(states(1,:), states(9,1)/LEVELS_N_x, 1, LEVELS_N_x);
+    l_y = bin_levels(states(2,:), states(9,1)/LEVELS_N_y, 1, LEVELS_N_y);
 
     lp = [l_x;l_y];
 end
 
 function lv = cursor_v_levels(states)
-    LEVELS_N = [3 3 3 3 3 3 3 6];
-
+    LEVELS_N_x = 3;
+    LEVELS_N_y = 3;
+    
     bin_x_size = 50;
     bin_y_size = 50;
 
-    v_x = states(3,:) + bin_x_size*LEVELS_N(3)/2;
-    v_y = states(4,:) + bin_y_size*LEVELS_N(4)/2;
+    v_x = states(3,:) + bin_x_size*LEVELS_N_x/2;
+    v_y = states(4,:) + bin_y_size*LEVELS_N_y/2;
 
-    l_x = bin_levels(v_x, bin_x_size, 1, LEVELS_N(3));
-    l_y = bin_levels(v_y, bin_y_size, 1, LEVELS_N(4));
+    l_x = bin_levels(v_x, bin_x_size, 1, LEVELS_N_x);
+    l_y = bin_levels(v_y, bin_y_size, 1, LEVELS_N_y);
 
     lv = [l_x;l_y];
 end
 
 function la = cursor_a_levels(states)
-    LEVELS_N = [3 3 3 3 3 3 3 6];
+    LEVELS_N_x = 3;
+    LEVELS_N_y = 3;
 
     bin_x_size = 50;
     bin_y_size = 50;
 
-    a_x = states(5,:) + bin_x_size*LEVELS_N(5)/2;
-    a_y = states(6,:) + bin_y_size*LEVELS_N(6)/2;
+    a_x = states(5,:) + bin_x_size*LEVELS_N_x/2;
+    a_y = states(6,:) + bin_y_size*LEVELS_N_y/2;
 
-    l_x = bin_levels(a_x, bin_x_size, 1, LEVELS_N(5));
-    l_y = bin_levels(a_y, bin_y_size, 1, LEVELS_N(6));
+    l_x = bin_levels(a_x, bin_x_size, 1, LEVELS_N_x);
+    l_y = bin_levels(a_y, bin_y_size, 1, LEVELS_N_y);
 
     la = [l_x;l_y];
 
@@ -144,7 +112,8 @@ end
 
 function lt = target_t_levels(states)
     
-    LEVELS_N = [3 3 3 3 3 3 3 6];
+    LEVELS_N_t = 3;
+    LEVELS_N_n = 6;
     
     r2 = states(11, 1).^2;
     
@@ -159,8 +128,8 @@ function lt = target_t_levels(states)
 
     approach_n = sum(cd < pd,1);
 
-    tt = (1:LEVELS_N(7)) * [ (~enter_target & ~leave_target); (enter_target); (~enter_target & leave_target ); ];
-    tn = bin_levels(approach_n, 1, 1, LEVELS_N(8));
+    tt = (1:LEVELS_N_t) * [ (~enter_target & ~leave_target); (enter_target); (~enter_target & leave_target ); ];
+    tn = bin_levels(approach_n, 1, 1, LEVELS_N_n);
     
     lt = [tt; tn];
 end
@@ -171,11 +140,11 @@ function v = I(n)
     v = arrayfun(@(i) prod(n(i:end)), 2:numel(n))';
 end
 
-function sf = statesfun(func, states)
+function sf = statesfun(states)
     if iscell(states)
-        sf = cell2mat(cellfun(func, states, 'UniformOutput',false));
+        sf = cell2mat(cellfun(@v_levels, states, 'UniformOutput',false));
     else
-        sf = func(states);
+        sf = v_levels(states);
     end
 end
 

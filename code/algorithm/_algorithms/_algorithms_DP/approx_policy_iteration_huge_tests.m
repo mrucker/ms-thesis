@@ -2,7 +2,7 @@ clear
 close all
 try run('../../paths.m'); catch; end
 
-rewd_count = 30;
+rewd_count = 1;
 eval_steps = 10;
 
 trans_pre = @(s,a) huge_trans_pre (s,a);
@@ -43,8 +43,8 @@ algo_o = @(s_r) approx_policy_iteration_13f(s_1, s_a, s_r, v_b, trans_pst, trans
 algo_p = @(s_r) approx_policy_iteration_13g(s_1, s_a, s_r, v_b, trans_pst, trans_pre, 0.9*1.0, 30, 50, 5, 3); %  no-opt
 
 algo_q = @(s_r) approx_policy_iteration_13h(s_1, s_a, s_r, @v_basii_4_4, trans_pst, trans_pre, 0.9*1.0, 30, 90, 3, 4); %  no-opt
-algo_r = @(s_r) approx_policy_iteration_13i(s_1, s_a, s_r, @v_basii_4_8, trans_pst, trans_pre, 0.9*1.0, 30, 90, 3, 4); %  no-opt
-algo_s = @(s_r) approx_policy_iteration_13i(s_1, s_a, s_r, @v_basii_4_9, trans_pst, trans_pre, 0.9*1.0, 30, 90, 3, 4); %  no-opt
+algo_r = @(s_r) approx_policy_iteration_13i(s_1, s_a, s_r, @v_basii_4_9, trans_pst, trans_pre, 0.9*1.0, 30, 90, 3, 4); %  no-opt
+algo_s = @(s_r) approx_policy_iteration_13j(s_1, s_a, s_r, @v_basii_4_9, trans_pst, trans_pre, 0.9*1.0, 30, 90, 3, 4); %  no-opt
 
 algos = {
 %   algo_a, 'algorithm_2  (G=0.9, L=1.0, N=30, M=50 , S=2, W=3)';
@@ -57,7 +57,6 @@ algos = {
 
    %algo_q, 'algorithm_13h(G=0.9, L=1.0, N=30, M=90 , S=3, W=4)';
    algo_r, 'algorithm_13i(G=0.9, L=1.0, N=30, M=90 , S=3, W=4)';
-   algo_s, 'algorithm_13i(G=0.9, L=1.0, N=30, M=90 , S=3, W=4)';
 };
 
 states_c = cell(1, rewd_count);

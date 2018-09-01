@@ -1,8 +1,9 @@
-paths;
+clear
+paths
+close all
+
 
 %all these observations are in the trial 1 dataset
-
-%4460e5ee57d6e87e2.json absolutely no touches (radius = 0) (but also impossible to get touches, so it is meaningless)
 
 %1ff40e9f5818b8978.json super back and forth, seems to work well. (RewardId = 2)
 
@@ -14,7 +15,7 @@ paths;
 
 %a3cb0e1e586811391.json stayed entirely on the right third of the screen, otherwise normal.
 
-trajectory_observations = jsondecode(fileread('../../data/entries/observations/a3cb0e1e586811391.json'));
+trajectory_observations = jsondecode(fileread('../../data/entries/observations/1ff40e9f5818b8978.json'));
 trajectory_states       = huge_states_from(trajectory_observations);
 
 trajectory_episodes_count  = 380; %we finish at (380+10+30) to trim the last second in case of noise
@@ -34,28 +35,37 @@ end
 params = struct ('epsilon',.0001, 'gamma',.9, 'seed',0, 'kernel', 5);
 result = algorithm4run(trajectory_episodes, params, 1);
 
-cleaned_result = result_clean_2(result);
+cleaned_result_1 = result_clean_1(result);
+cleaned_result_2 = result_clean_2(result);
 
-fprintf('%s\n\n', jsonencode(cleaned_result));
-                    hist(cleaned_result);
+fprintf('%s\n\n', jsonencode(cleaned_result_1));
+fprintf('%s\n\n', jsonencode(cleaned_result_2));
+
+figure('NumberTitle', 'off', 'Name', 'histogram of state rewards');
+
+subplot(2,1,1);
+hist(cleaned_result_1);
+title('empty state set to 0')
+
+subplot(2,1,2);
+hist(cleaned_result_2);
+title('top 3% states set to 1')
 
 function rc = result_clean_1(result)
-    sorted_result = sort(result);
+    %result(result > prctile(result,97)) = prctile(result,97);
 
-    lower = sorted_result(10);
-    upper = sorted_result(end-9);
+    epsilon_result = result - result(1);
 
-    epsilon_result = result;
+    if(max(epsilon_result) == 0)
+        epsilon_result(epsilon_result == 0) = 1;
+    end
 
-    epsilon_result(result < lower) = lower;
-    epsilon_result(result > upper) = upper;
+    epsilon_result(epsilon_result<0) = 0;
 
     min_result = min(epsilon_result);
     max_result = max(epsilon_result);
 
-    normal_epsilon_result = round((epsilon_result - min_result)/(max_result-min_result),2);
-
-    rc = normal_epsilon_result;
+    rc = round((epsilon_result - min_result)/(max_result-min_result),2);
 end
 
 function rc = result_clean_2(result)

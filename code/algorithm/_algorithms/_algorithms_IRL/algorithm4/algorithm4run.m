@@ -4,7 +4,7 @@ function irl_result = algorithm4run(episodes, params, verbosity)
 
     s_a           = s_act_4_2();
     v_b           = @v_basii_4_9;
-    r_basii       = @r_basii_4_9;
+    r_basii       = @r_basii_4_10;
     adp_algorithm = @approx_policy_iteration_13i;
 
     N = 30;%30;
@@ -177,7 +177,7 @@ end
 function k = k(x1, x2, kernel)
     p = 2;
     c = 1;
-    s = .5;
+    s = .6;
 
     switch kernel
         case 1

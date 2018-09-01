@@ -6,9 +6,11 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
 
     a_start = tic;
     
-    [v_i, v_p, v_b] = value_basii();
+    [v_i, v_p, v_b, v_l] = value_basii();
     
-    v_v = 3*ones(1,size(v_p,2));
+    v_p = v_p();
+    v_n = size(v_p,2);    
+    v_v = 3*ones(1,v_n);
     
     g_row = [gamma.^(0:T-1), zeros(1,W-1)];
     g_mat = zeros(W,size(g_row,2));
@@ -75,9 +77,10 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
             %0.28
             post_states = trans_post(init_states{m}, actions(init_states{m}));
             
-            post_v_is   = v_i(post_states);
-            post_basii  = v_b(post_states);
-            post_values = v_v(post_v_is  );
+            post_v_ls   = v_l(post_states);
+            post_v_is   = v_i(post_v_ls);
+            post_basii  = v_b(post_v_ls);
+            post_values = v_v(post_v_is);
             
             %assert(all(all(v_p(:,post_v_is) == post_basii)), 'something is wrong with v_basii');
 
@@ -96,36 +99,38 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
             a_i = a_i(randi(length(a_i)));
             s_a = post_states(:,a_i);
             s_t = trans_pre(s_a, []);
-            X_b_m{m} = [];
-            X_r_m{m} = [];
-            X_s_m{m}      = {s_t};
+            
+            X_b_m{m} = zeros(10,W    );
+            X_r_m{m} = zeros( 1,T+W-1);
+            X_s_m{m} = cell ( 1,T+W-1);
+            
+            X_s_m{m}{1}   = s_t;
+            X_r_m{m}(1)   = reward(s_t);
             X_b_m{m}(:,1) = post_basii(:,a_i);
-            X_r_m{m}(:,1) = reward(s_t);
+            
 
             for t = 1:((T-1)+(W-1))
 
                 post_states = trans_post(s_t, actions(s_t));
-                post_v_is   = v_i(post_states);
-                post_values = v_v(post_v_is);
                 
+                post_v_ls   = v_l(post_states);
+                post_v_is   = v_i(post_v_ls);
+                post_values = v_v(post_v_is);
 
                 %.04
                 a_m = max(post_values);
                 a_i = find(post_values == a_m);
                 a_i = a_i(randi(length(a_i)));
+                
                 s_a = post_states(:,a_i);
-
-                %.42
                 s_t = trans_pre(s_a, []);
-
-                %.15
-                X_s_m{m}        = horzcat(X_s_m{m}, s_t);
-
-                %.06
-                X_b_m{m}(:,t+1) = v_b(s_a);
-
-                %.8
-                X_r_m{m}(:,t+1) = reward(s_t);
+                
+                X_s_m{m}{t+1} = s_t;
+                X_r_m{m}(t+1) = reward(s_t);
+                
+                if(t < W)
+                    X_b_m{m}(:,t+1) = v_b(post_v_ls(:,a_i));
+                end
             end
         end
         f_time = f_time + toc(t_start);
@@ -249,10 +254,19 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
             
             model = fitrsvm(vertcat(X, J)',Y','KernelFunction','rbf', 'BoxConstraint', box_constraint, 'Solver', 'SMO', 'Standardize',true);
 
-            v_v = predict(model, vertcat(v_p, n*ones(1,size(v_p,2)))')';
-            
-            Vf{n+1} = @(ss) v_v(v_i(ss));
-            Pf{n+1} = policy_function(actions, Vf{n+1}, trans_post);
+            v_v = predict(model, vertcat(v_p, n*ones(1,v_n))')';
+                        
+            if(n == N)
+                %Vf{n+1} = @(ss) v_v(v_i(ss));
+            else
+                %Vf{n+1} = @(ss) predict(model, vertcat(v_b(ss), n*ones(1,size(ss,2)))');
+            end
+
+            if(n == N)
+                Pf{n+1} = policy_function(actions, @(ss) v_v(v_i(v_l(ss))), trans_post);
+            else
+                Pf{n+1} = policy_function(actions, @(ss) predict(model, vertcat(v_b(v_l(ss)), n*ones(1,size(ss,2)))'), trans_post);
+            end
 
         m_time = m_time + toc(t_start);
     end
