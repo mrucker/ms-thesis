@@ -3,8 +3,8 @@ var fs  = require('fs');
 
 AWS.config.region = 'us-east-1'
 
-if(!process.argv[2] || !process.argv[3]) {
-	console.log('please enter a path to write to and a date time to update from');
+if(!process.argv[2] || !process.argv[3] || !process.argv[3]) {
+	console.log('please enter a destination directory, a date time to update from and a study id');
 	return;
 }
 
@@ -15,6 +15,7 @@ if(isNaN(Date.parse(process.argv[3]))) {
 
 var dataDir = process.argv[2];
 var dateISO = new Date(process.argv[3]).toISOString();
+var studyId = String(process.argv[4]);
 
 DownloadAllFilesToPathAfterDate();
 
@@ -35,9 +36,11 @@ function QueryParticipants() {
 		 TableName                : 'ThesisParticipants'
 		,ConsistentRead           : false
 		,KeyConditionExpression   : 'StudyId = :study_id and InsertTimeStamp > :last_update_time'
-		,ExpressionAttributeValues: {':study_id' : '1', ':last_update_time' : dateISO }
+		,ExpressionAttributeValues: {':study_id' : studyId, ':last_update_time' : dateISO }
 	};
 
+	//console.log(JSON.stringify(params));
+	
 	return QueryDynamoPromise(params).catch(err => {console.log(err)});	
 }
 

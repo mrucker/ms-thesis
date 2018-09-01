@@ -49,7 +49,7 @@ function Target(mouse, radius, x_pct, y_pct, fixed_age, rewardId) {
 
 	var self = this;
 
-	var reward = 0;
+	var reward = '';
 	
 	x_pct = x_pct || Math.random();
 	y_pct = y_pct || Math.random();
@@ -106,7 +106,10 @@ function Target(mouse, radius, x_pct, y_pct, fixed_age, rewardId) {
     };
 	
 	this.getReward = function() {
-		reward = 7/9 * reward + 2/9 * self.getReward_4_10();
+		
+		var newReward = self.getReward_4_10();
+		
+		reward = (reward === '') ? newReward :(7/9 * reward) + (2/9 * newReward);
 		
 		return reward;
 	}   
