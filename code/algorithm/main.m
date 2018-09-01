@@ -5,17 +5,19 @@ close all
 
 %all these observations are in the trial 1 dataset
 
-%1ff40e9f5818b8978.json super back and forth, seems to work well. (RewardId = 2)
+%study_1 -- 1ff40e9f5818b8978.json super back and forth, seems to work well. (RewardId = 2)
 
-%1a92ecaf5864960f1.json very few touches but with correct radius so RL can get touches (RewardId = 3)
+%study_1 -- 1a92ecaf5864960f1.json very few touches but with correct radius so RL can get touches (RewardId = 3)
     %this works well but brings up an interesting conundrum. It scores all the targets highly 
     %but the dead space higher... This is broken by the way I handle the "top 10" since it makes 
     %several states equal to empty space perhaps a solution to this is to subtract empty space 
     %from targets making the majority of targets show 0 value instaed of majority showing .98
 
-%a3cb0e1e586811391.json stayed entirely on the right third of the screen, otherwise normal.
+%study_1 -- a3cb0e1e586811391.json stayed entirely on the right third of the screen, otherwise normal.
 
-trajectory_observations = jsondecode(fileread('../../data/entries/observations/a3cb0e1e586811391.json'));
+%study_2 -- 1b37aabe5971bcc6c.json a normal test where I attempted to touch as many targets as I could
+
+trajectory_observations = jsondecode(fileread('../../data/entries/study_2/observations/1b37aabe5971bcc6c.json'));
 trajectory_states       = huge_states_from(trajectory_observations);
 
 trajectory_episodes_count  = 380; %we finish at (380+10+30) to trim the last second in case of noise

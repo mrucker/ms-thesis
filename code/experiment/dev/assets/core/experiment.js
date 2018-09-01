@@ -68,8 +68,6 @@ function Experiment(canvas, participantId, rewardId)
         //not knowing how I may or may not want to modify opacity and color rules in the future I'm not going to guess and store
         //I do likely want to store feature weights still though. Perhaps I need to make a comprehensive list of features and use these.
         
-		console.log('rewardId: ' + rewardId);
-		
         //Measurements to add: feature weights
         saveData({
 			"startTime" :new Date().toUTCString()

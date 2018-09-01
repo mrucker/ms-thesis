@@ -62,7 +62,7 @@ $(document).ready( function () {
 			,(showThanks                           )
 		];
 
-		if(!querystring.exists("data")) {
+		if(querystring.exists("noData")) {
 			$.ajax = function(params) {
 				return $.Deferred().resolve();
 			}
