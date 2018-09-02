@@ -16,11 +16,11 @@ function Participant(canvas)
     
     this.reCAPTCHA = function(token) {
 
-        var demo = loadMemory();
+        var demographics = loadMemory();
         
-        demo["token"] = token;
+        demographics["token"] = token;
         
-        saveData(demo);
+        saveData(demographics);
     }
     
     function saveData(data) {

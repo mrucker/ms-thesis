@@ -1,7 +1,4 @@
-clear
-paths
-close all
-
+clear; paths; close all
 
 %all these observations are in the trial 1 dataset
 
@@ -17,7 +14,9 @@ close all
 
 %study_2 -- 1b37aabe5971bcc6c.json a normal test where I attempted to touch as many targets as I could
 
-trajectory_observations = jsondecode(fileread('../../data/entries/study_2/observations/1b37aabe5971bcc6c.json'));
+%study_2 -- 452515135984d0d0d.json the T_N field for this experiment is extremely high in the ThesisExperiments table.
+
+trajectory_observations = jsondecode(fileread('../../data/entries/study_2/observations/452515135984d0d0d.json'));
 trajectory_states       = huge_states_from(trajectory_observations);
 
 trajectory_episodes_count  = 380; %we finish at (380+10+30) to trim the last second in case of noise

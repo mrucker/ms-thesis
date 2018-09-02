@@ -51,15 +51,20 @@ function irl_result = algorithm4run(episodes, params, verbosity)
     end
 
     E = 0;
+    C = 0;
 
     for i = 1:numel(episodes)
         for t = 1:size(episodes{i},2)
             assert(all(r_p * r_e(episodes{i}{t}) == r_b(episodes{i}{t})), 'something is wrong with the reward basii');
+            C = C + (r_i(episodes{i}{t}) ~= 1);
             E = E + params.gamma^(t-1) * r_e(episodes{i}{t});
         end
-    end
+    end    
 
     E = E./numel(episodes);
+    C = C./numel(episodes);
+    
+    fprintf('Features Expectations Finished. There were an average of %.3f touches per episode. \n',C);
 
     ff = k(r_p,r_p,params.kernel);
 
