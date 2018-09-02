@@ -47,7 +47,7 @@ function rf = r_feats(levels)
         val_to_rad(y_l-1, LEVELS_N(2)-1, 0.0) * 1/01;
         val_to_rad(v_l-1, LEVELS_N(3)*2, 0.0) * 1/01;
         val_to_rad(a_l-1, LEVELS_N(4)*2, 0.0) * 1/01;
-        val_to_rad(d_l-1, LEVELS_N(5)/2, 4.5) * 4/10;
+        val_to_rad(d_l-1, LEVELS_N(5)/2, 4.5) * 6/10;
         4 * (levels(end,:) == 1);
     ];
 
@@ -132,9 +132,9 @@ function cd = cursor_d_levels(states)
 end
 
 %% Probably don't need to change %%
-function v = I(n)
-    n = [n, 1]; %add one for easier computing
-    v = arrayfun(@(i) prod(n(i:end)), 2:numel(n))';
+function i = I(L)
+    L = [L, 1]; %add one for easier computing
+    i = arrayfun(@(l) prod(L(l:end)), 2:numel(L))';
 end
 
 function sf = statesfun(func, states)
@@ -214,7 +214,6 @@ end
 
 function l = LEVELS_N(i) 
     l = [3, 3, 8, 6, 8];
-    %l = [3, 3, 8, 6, 16];
     
     if(nargin ~= 0)
         l = l(i);

@@ -25,10 +25,12 @@ $(document).ready( function () {
 		var xs = 10;
 		var ys = 05;
 
+		_renderer.setBaseRadius(100);
+		
 		for(x = 1; x <= xs; x++) {
 			for(y = 1; y <= ys; y++) {
 				//x = 9; y = 4;
-				targets.push(new Target(mouse, 100, x/(xs+1), y/(ys+1), 100, getRewardId(1) || 2))
+				targets.push(new Target(mouse, x/(xs+1), y/(ys+1), 100, getRewardId(1) || 2))
 			}
 		}
 
