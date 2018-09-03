@@ -19,7 +19,7 @@ s_1 = @state_rand;
 s_a = act_methd();
 
 algos = {
-    @approx_policy_iteration_13i, 'algorithm_13i';
+    @approx_policy_iteration_13k, 'algorithm_13i';
 };
 
 states_c = cell(1, rewd_count);

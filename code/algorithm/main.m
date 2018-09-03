@@ -16,7 +16,7 @@ clear; paths; close all
 
 %study_2 -- 452515135984d0d0d.json the T_N field for this experiment is extremely high in the ThesisExperiments table.
 
-trajectory_observations = jsondecode(fileread('../../data/entries/study_2/observations/452515135984d0d0d.json'));
+trajectory_observations = jsondecode(fileread('../../data/entries/study_1/observations/1ff40e9f5818b8978.json'));
 trajectory_states       = huge_states_from(trajectory_observations);
 
 trajectory_episodes_count  = 380; %we finish at (380+10+30) to trim the last second in case of noise

@@ -74,11 +74,20 @@ $(document).ready( function () {
 		if(querystring.exists("id")) {
 			functions.unshift(showParticipantId(participant.getId()));
         }
+		
+		if(querystring.exists("AMT")) {
+			functions.unshift(showAMT_ParticipantId(participant.getId()));
+		}
 
 		var chainStart = $.Deferred().resolve();		
 		var eventChain = functions.reduce(function(chain, nextFunction) { return chain.then(nextFunction) }, chainStart);
     }
 
+	function showAMT_ParticipantId(participantId) {
+		$("#AMT_participantId strong").append(participantId);
+		return showModalContent("AMT_participantId", true);
+	}
+	
 	function showParticipantId(participantId) {
 		
 		$("#participantId").append("<h2>" + participantId + "</h2>");
