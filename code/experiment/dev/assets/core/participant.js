@@ -1,7 +1,8 @@
-function Participant(canvas)
+function Participant(studyId)
 {
     var id     = Id.generate();
     var memory = {};
+	var study  = 
     
     this.getId = function() {
         return id; 
@@ -10,15 +11,16 @@ function Participant(canvas)
     this.saveDemographics = function() {
         //we save in memory now because by the time the
         //recaptcha finishes the browser form will be erased
-        saveMemory(getDemographicsData());
+        saveInMemory(getDemographicsData());
         grecaptcha.execute();
     }
     
     this.reCAPTCHA = function(token) {
 
-        var demographics = loadMemory();
+        var demographics = loadFromMemory();
         
-        demographics["token"] = token;
+        demographics.token   = token;
+		demographics.studyId = studyId;
         
         saveData(demographics);
     }
@@ -31,11 +33,11 @@ function Participant(canvas)
         });
     }
     
-    function saveMemory(data) {
+    function saveInMemory(data) {
         memory = data;
     }
     
-    function loadMemory() {
+    function loadFromMemory() {
         return memory;
     }
     

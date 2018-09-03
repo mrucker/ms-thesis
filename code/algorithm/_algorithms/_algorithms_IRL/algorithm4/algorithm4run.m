@@ -7,16 +7,11 @@ function irl_result = algorithm4run(episodes, params, verbosity)
     r_basii       = @r_basii_4_10;
     adp_algorithm = @approx_policy_iteration_13k;
 
-    N = 30;%30;
-    M = 90;%90;
-    S = 3;
+    N = 50;%30
+    M = 90;%90
+    S = 4; %03
     W = 4;
-
-    %N = 30;
-    %M = 70;
-    %S = 3;
-    %W = 3;
-
+    
     T = 10;
 
     p_time = 0;

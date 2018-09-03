@@ -8,7 +8,7 @@ $(document).ready( function () {
             return $.Deferred().resolve();
         }
 		
-		var experiment1 = new Experiment(canvas, "testOnly", getRewardId(1) || 2);
+		var experiment1 = new Experiment(canvas, "testOnly", getRewardId() || 2);
 		
         $.Deferred().resolve()
             .then(showModalContent("demo"      , true ))
@@ -30,7 +30,7 @@ $(document).ready( function () {
 		for(x = 1; x <= xs; x++) {
 			for(y = 1; y <= ys; y++) {
 				//x = 9; y = 4;
-				targets.push(new Target(mouse, x/(xs+1), y/(ys+1), 100, getRewardId(1) || 2))
+				targets.push(new Target(mouse, x/(xs+1), y/(ys+1), 100, getRewardId() || 2))
 			}
 		}
 
@@ -46,9 +46,9 @@ $(document).ready( function () {
 	}	
 	else {
 
-        var participant = new Participant();
-        var experiment1 = new Experiment(canvas, participant.getId(), getRewardId(0) || 1);
-        var experiment2 = new Experiment(canvas, participant.getId(), getRewardId(1) || 1);
+        var participant = new Participant(getStudyId() || "anonymous");
+        var experiment1 = new Experiment(canvas, participant.getId(), 1                 );
+        var experiment2 = new Experiment(canvas, participant.getId(), getRewardId() || 1);
 
 		var functions = [
 			,(showModalContent("welcome"   , true ))
@@ -68,7 +68,7 @@ $(document).ready( function () {
 			$.ajax = function(params) {
 				return $.Deferred().resolve();
 			}
-			functions.unshift(showModalContent("demo"      , true ));
+			functions.unshift(showModalContent("demo" , true ));
 		}
 
 		if(querystring.exists("id")) {
@@ -182,19 +182,23 @@ $(document).ready( function () {
             $("#modalButton").html($content.data('btnTxt'));
     }
 
-	function getRewardId(index) {
-         if(querystring.exists("rewards")) {
-             var rewards = JSON.parse(querystring.value("rewards"));
+	function getRewardId() {
+         if(querystring.exists("reward")) {
+             var reward = JSON.parse(querystring.value("reward"));
 			 
-			 if(typeof rewards == "number") {
-				 return [undefined, rewards][index];
-			 }
-			 
-			 if(Array.isArray(rewards)) {
-				 return rewards[index];
+			 if(typeof reward == "number") {
+				 return reward;
 			 }
 		 }
 		 
 		 return undefined;
      }
-});
+
+	function getStudyId() {
+		if(querystring.exists("study")) {
+			return querystring.value("study");
+		}
+			
+		return undefined;
+	}
+ });

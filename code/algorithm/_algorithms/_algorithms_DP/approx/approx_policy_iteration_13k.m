@@ -44,6 +44,8 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
             init_states = arrayfun(@(m) s_1(), 1:M, 'UniformOutput', false);
         end
 
+        t_start = tic;
+        
         init = init_states(randperm(numel(init_states), M)); 
         stdY = std(Y(~isnan(Y)));
 
@@ -55,7 +57,7 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
 
         init_se = cellfun(@(s_t) temp_SE(v_i(v_l(trans_post(s_t, actions(s_t))))), init, 'UniformOutput', false);
 
-        t_start = tic;
+        
         parfor m = 1:M
 
             s_t = init{m};
