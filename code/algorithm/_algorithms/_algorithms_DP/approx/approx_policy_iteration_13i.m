@@ -1,7 +1,7 @@
 function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_policy_iteration_13i(s_1, actions, reward, value_basii, trans_post, trans_pre, gamma, N, M, T, W, production)
 
     if(nargin < 12)
-        production = true;
+        production = false;
     end
 
     a_start = tic;

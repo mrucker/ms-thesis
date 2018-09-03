@@ -1,6 +1,10 @@
-function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_policy_iteration_13k(s_1, actions, reward, value_basii, trans_post, trans_pre, gamma, N, M, T, W)
+function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_policy_iteration_13k(s_1, actions, reward, value_basii, trans_post, trans_pre, gamma, N, M, T, W, production)
 
     a_start = tic;
+
+    if(nargin < 12)
+        production = false;
+    end
 
     [v_i, v_p, v_b, v_l] = value_basii();
 
@@ -23,9 +27,7 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
     
     Y = NaN  (1, v_n); %observed value
     K = zeros(1, v_n); %visitation count
-    A = NaN  (1, v_n); %step size
-    S = NaN  (1, v_n); %error variance
-    J = NaN  (1, v_n); %iteration visit    
+    J = NaN  (1, v_n); %iteration visit
 
     %one for every value_basii updated for entire life of program
     epsilon = NaN(1, v_n);
@@ -48,13 +50,13 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
         X_b_m = arrayfun(@(i) zeros(1,T+W-1), 1:M, 'UniformOutput', false);
         X_s_m = arrayfun(@(i) cell (1,T+W-1), 1:M, 'UniformOutput', false);
 
-        temp_SE                 = sqrt(S);
+        temp_SE                 = sqrt(sig_sq);
         temp_SE(isnan(temp_SE)) = stdY;
 
         init_se = cellfun(@(s_t) temp_SE(v_i(v_l(trans_post(s_t, actions(s_t))))), init, 'UniformOutput', false);
 
         t_start = tic;
-        for m = 1:M
+        parfor m = 1:M
 
             s_t = init{m};
 
@@ -124,8 +126,6 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
 
                         Y(i) = (1-alpha(i))*Y(i) + alpha(i)*y;
                         K(i) = k + 1;
-                        A(i) = alpha(i);
-                        S(i) = sig_sq(i);
                         J(i) = 1/3*J(i) + 2/3*n;
 
                         l = ((1-alpha(i))^2)*lambda(i) + alpha(i)^2;
@@ -155,8 +155,6 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
                     else
                         Y(i) = y;
                         K(i) = 1;
-                        A(i) = 1;
-                        S(i) = 2;
                         J(i) = n;
 
                         %this is the "initialization" step from the algorithm
@@ -190,8 +188,9 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
 
             if(n == N)
                 Pf{n+1} = policy_function(actions, @(ss) v_v(v_i(v_l(ss))), trans_post);
-            else
-                Pf{n+1} = policy_function(actions, @(ss) predict(model, vertcat(v_b(v_l(ss)), n*ones(1,size(ss,2)))'), trans_post);
+            elseif (~production)
+                Pf{n+1} = policy_function(actions, @(ss) v_v(v_i(v_l(ss))), trans_post);
+                %Pf{n+1} = policy_function(actions, @(ss) predict(model, vertcat(v_b(v_l(ss)), n*ones(1,size(ss,2)))'), trans_post);
             end
 
         m_time = m_time + toc(t_start);

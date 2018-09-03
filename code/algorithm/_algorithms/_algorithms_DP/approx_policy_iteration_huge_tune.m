@@ -19,7 +19,7 @@ s_1 = @state_rand;
 s_a = act_methd();
 
 algos = {
-    @approx_policy_iteration_13k, 'algorithm_13i';
+    @approx_policy_iteration_13k, 'algorithm_13k';
 };
 
 states_c = cell(1, rewd_count);
@@ -55,8 +55,8 @@ for a_i = 1:size(algos,1)
             W = tuning(5);
 
             algo_s = @(s_r) approx_policy_iteration_13i(s_1, s_a, s_r, @v_basii_4_9, trans_pst, trans_pre, 0.9*1.0, 30, 90, 3, 4); %  no-opt
-                        
-            [Pf, ~, ~, ~, ~, ~, fT(r_i), bT(r_i), mT(r_i), aT(r_i)] = algos{a_i,1}(s_1, s_a, reward_f{r_i}, v_b, trans_pst, trans_pre, G*L, N, M, S, W);
+
+            [Pf, ~, ~, ~, ~, ~, fT(r_i), bT(r_i), mT(r_i), aT(r_i)] = algos{a_i,1}(s_1, s_a, reward_f{r_i}, v_b, trans_pst, trans_pre, G*L, N, M, S, W, false);
 
             eval_states = states_c{r_i};
             eval_reward = reward_f{r_i};

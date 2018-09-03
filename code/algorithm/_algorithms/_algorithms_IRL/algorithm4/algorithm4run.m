@@ -5,7 +5,7 @@ function irl_result = algorithm4run(episodes, params, verbosity)
     s_a           = s_act_4_2();
     v_b           = @v_basii_4_9;
     r_basii       = @r_basii_4_10;
-    adp_algorithm = @approx_policy_iteration_13i;
+    adp_algorithm = @approx_policy_iteration_13k;
 
     N = 30;%30;
     M = 90;%90;
@@ -80,7 +80,7 @@ function irl_result = algorithm4run(episodes, params, verbosity)
     s_r   = @(s) rs{i}(r_i(s));
 
     t_start = tic;
-        Pf    = adp_algorithm(s_1, s_a, s_r, v_b, @huge_trans_post, @huge_trans_pre, params.gamma, N, M, S, W);
+        Pf = adp_algorithm(s_1, s_a, s_r, v_b, @huge_trans_post, @huge_trans_pre, params.gamma, N, M, S, W, true);
     np_time = toc(t_start);
 
     t_start = tic;
@@ -105,7 +105,7 @@ function irl_result = algorithm4run(episodes, params, verbosity)
         s_r   = @(s) rs{i}(r_i(s));
 
         t_start = tic;
-            Pf    = adp_algorithm(s_1, s_a, s_r, v_b, @huge_trans_post, @huge_trans_pre, params.gamma, N, M, S, W);
+            Pf = adp_algorithm(s_1, s_a, s_r, v_b, @huge_trans_post, @huge_trans_pre, params.gamma, N, M, S, W, true);
         np_time = toc(t_start);
 
         t_start = tic;
