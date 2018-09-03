@@ -97,7 +97,7 @@ function Target(mouse, x_pct, y_pct, fixed_age, rewardId) {
 		
 		var newReward = self.getReward_4_10();
 		
-		reward = (reward === '') ? newReward :(7/9 * reward) + (2/9 * newReward);
+		reward = (reward === '') ? newReward :(13/18 * reward) + (5/18 * newReward);
 		
 		return reward;
 	}   

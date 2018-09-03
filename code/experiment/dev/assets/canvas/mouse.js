@@ -143,7 +143,7 @@ function Mouse(canvas)
 		
 		acceleration.x = 2/6 * acceleration.x + 4/6 * newAccelerationX;
 		acceleration.y = 2/6 * acceleration.y + 4/6 * newAccelerationY;
-		acceleration.m = 5/6 * acceleration.m + 1/6 * newAccelerationM;
+		acceleration.m = 2/6 * acceleration.m + 4/6 * newAccelerationM;
 		//acceleration.d = 2/6 * acceleration.d + 4/6 * newAccelerationD;
 	}
 }
