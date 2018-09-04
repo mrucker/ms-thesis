@@ -57,25 +57,21 @@ function run_irl_on_single_experiment(study_id, experiment_id)
     write_results_to_screen(results, experiment_id);
 end
 
-function write_results_to_file(results, path, experiment_id)
-    file_id = fopen([path, experiment_id, '.json'], 'w');
+function write_results_to_file(results, res_path, experiment_id)
+    file_id = fopen([res_path, experiment_id, '.json'], 'w');
     fprintf(file_id, '%s', jsonencode(results));
     fclose(file_id);
     
     cleaned_rewards_1 = rewards_clean_1(results.rewards);
     cleaned_rewards_2 = rewards_clean_2(results.rewards);
-
-    h = figure('NumberTitle', 'off', 'Name', ['rewards for ' experiment_id], 'Visible', 'off');   
+   
+    fig = rewards_figure(experiment_id, cleaned_rewards_1, cleaned_rewards_2);
     
-    subplot(2,1,1);
-    hist(cleaned_rewards_1);
-    title('empty state set to 0')
-
-    subplot(2,1,2);
-    hist(cleaned_rewards_2);
-    title('top 3% states set to 1')
+    %this line is necessary. See the link below for an explanation.
+    %https://www.mathworks.com/matlabcentral/answers/382806-how-can-i-save-an-invisible-figure-in-matlab-but-make-the-figure-visible-when-reopened
+    set(fig, 'CreateFcn', 'set(gcbo,''Visible'',''on'')'); 
     
-    savefig(h,[experiment_id '.fig'],'compact')
+    savefig(fig,[res_path experiment_id '.fig'])
 end
 
 function write_results_to_screen(results, experiment_id)
@@ -91,7 +87,7 @@ function write_results_to_screen(results, experiment_id)
     fprintf('%s\n\n', jsonencode(cleaned_rewards_1));
     fprintf('%s\n\n', jsonencode(cleaned_rewards_2));
     
-    openfig([experiment_id '.fig'], 'visible');
+    figure(rewards_figure(experiment_id, cleaned_rewards_1, cleaned_rewards_2));
 end
 
 function te = read_trajectory_episodes_from_file(path, experiment_id)
@@ -149,4 +145,16 @@ function rc = rewards_clean_2(rewards)
     normal_epsilon_result = round((epsilon_result - min_result)/(max_result-min_result),2);
 
     rc = normal_epsilon_result;
+end
+
+function rf = rewards_figure(experiment_id, cleaned_rewards_1, cleaned_rewards_2)
+    rf = figure('NumberTitle', 'off', 'Name', ['rewards for ' experiment_id], 'Visible', 'off');   
+    
+    subplot(2,1,1);
+    hist(cleaned_rewards_1);
+    title('empty state set to 0')
+
+    subplot(2,1,2);
+    hist(cleaned_rewards_2);
+    title('top 3% states set to 1')    
 end

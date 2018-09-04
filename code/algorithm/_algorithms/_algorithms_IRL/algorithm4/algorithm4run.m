@@ -7,10 +7,10 @@ function results = algorithm4run(episodes, params, verbosity)
     r_basii       = @r_basii_4_10;
     adp_algorithm = @approx_policy_iteration_13k;
 
-    N = 50;%30
-    M = 90;%90
-    S = 4; %03
-    W = 4;
+    N = 50; %30
+    M = 90; %90
+    S = 04; %03
+    W = 04; %04
     
     T = 10;
 
