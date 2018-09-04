@@ -16,9 +16,9 @@ clear; paths; close all
 
 %study 2 -- 452515135984d0d0d.json the T_N field for this experiment is extremely high in the ThesisExperiments table.
 
-%run_irl_on_single_experiment('2', '452515135984d0d0d');
+run_irl_on_single_experiment('2', '452515135984d0d0d');
 
-run_irl_on_every_experiment('3');
+%run_irl_on_every_experiment('3');
 
 function run_irl_on_every_experiment(study_id)
     obs_path = ['../../data/studies/', study_id, '/observations/'];
@@ -63,6 +63,21 @@ function write_results_to_file(results, path, experiment_id)
     file_id = fopen([path, experiment_id, '.json'], 'w');
     fprintf(file_id, '%s', jsonencode(results));
     fclose(file_id);
+    
+    cleaned_rewards_1 = rewards_clean_1(results.rewards);
+    cleaned_rewards_2 = rewards_clean_2(results.rewards);
+
+    h = figure('NumberTitle', 'off', 'Name', ['rewards for ' experiment_id], 'Visible', 'off');   
+    
+    subplot(2,1,1);
+    hist(cleaned_rewards_1);
+    title('empty state set to 0')
+
+    subplot(2,1,2);
+    hist(cleaned_rewards_2);
+    title('top 3% states set to 1')
+    
+    savefig(h,[experiment_id '.fig'],'compact')
 end
 
 function write_results_to_screen(results, experiment_id)
@@ -77,16 +92,8 @@ function write_results_to_screen(results, experiment_id)
 
     fprintf('%s\n\n', jsonencode(cleaned_rewards_1));
     fprintf('%s\n\n', jsonencode(cleaned_rewards_2));
-
-    figure('NumberTitle', 'off', 'Name', ['rewards for ', experiment_id]);
-
-    subplot(2,1,1);
-    hist(cleaned_rewards_1);
-    title('empty state set to 0')
-
-    subplot(2,1,2);
-    hist(cleaned_rewards_2);
-    title('top 3% states set to 1')
+    
+    openfig([experiment_id '.fig']);
 end
 
 function te = read_trajectory_episodes_from_file(path, experiment_id)
