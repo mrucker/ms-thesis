@@ -48,8 +48,6 @@ function run_irl_on_single_experiment(study_id, experiment_id)
     obs_path = ['../../data/studies/', study_id, '/observations/'];
     res_path = ['../../data/studies/', study_id, '/results/'];
 
-    
-    
     trajectory_episodes = read_trajectory_episodes_from_file(obs_path, experiment_id);
 
     params  = struct ('epsilon',.0001, 'gamma',.9, 'seed',0, 'kernel', 5);
@@ -93,7 +91,7 @@ function write_results_to_screen(results, experiment_id)
     fprintf('%s\n\n', jsonencode(cleaned_rewards_1));
     fprintf('%s\n\n', jsonencode(cleaned_rewards_2));
     
-    openfig([experiment_id '.fig']);
+    openfig([experiment_id '.fig'], 'visible');
 end
 
 function te = read_trajectory_episodes_from_file(path, experiment_id)
