@@ -1,4 +1,4 @@
-function irl_result = algorithm4run(episodes, params, verbosity)
+function results = algorithm4run(episodes, params, verbosity)
 
     a_start = tic;
 
@@ -128,7 +128,7 @@ function irl_result = algorithm4run(episodes, params, verbosity)
         sb{i-1}  = sb{i-2} + sc*(ss{i-1}-sb{i-2});
     end
 
-    [m,i] = min(diag((E-cell2mat(ss))'*ff*(E-cell2mat(ss))));
+    [m,m_i] = min(diag((E-cell2mat(ss))'*ff*(E-cell2mat(ss))));
 
     a_time = toc(a_start);
     
@@ -136,13 +136,22 @@ function irl_result = algorithm4run(episodes, params, verbosity)
         fprintf('\n');
         fprintf(1,'FINISHED IRL,i=%d, t=%f \n',i,ts{i});
         fprintf(1,'p_time=%.2f; s_time=%.2f; a_time=%.2f \n',[p_time, s_time, a_time]);
-    end
-
-    m
-    [r_p*E, r_p*ss{i}]'
-
-    %irl_result = r_p * (E-sb{i-1});
-    irl_result = rs{i};
+    end    
+    
+    results = struct(...        
+          'rewards'          , rs{i}     ...
+        , 'feature_distance' , m         ...
+        , 'expert_touches'   , C         ...
+        , 'expert_visits'    , E         ...
+        , 'learned_visits'   , ss{i}     ... 
+        , 'expert_features'  , r_p*E     ...
+        , 'learned_features' , r_p*ss{i} ...
+        , 'sb'               , sb{i-1}   ...
+        , 'a_time'           , a_time    ...
+        , 'm_index'          , m_i       ...
+        , 'iterations'       , i         ...
+    );
+    
 end
 
 function p = setDefaults(params)
