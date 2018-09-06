@@ -184,11 +184,7 @@ $(document).ready( function () {
 
 	function getRewardId() {
          if(querystring.exists("reward")) {
-             var reward = JSON.parse(querystring.value("reward"));
-			 
-			 if(typeof reward == "number") {
-				 return reward;
-			 }
+			 return querystring.value("reward");
 		 }
 		 
 		 return undefined;

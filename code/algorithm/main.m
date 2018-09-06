@@ -16,11 +16,13 @@ clear; paths; close all
 
 %study 2 -- 452515135984d0d0d.json the T_N field for this experiment is extremely high in the ThesisExperiments table.
 
-run_irl_on_single_experiment('2', '452515135984d0d0d');
+%run_irl_on_one_experiment('c45a', '110e53fe5a585b7b1');
+%run_irl_on_all_experiments('c45a');
+%run_irl_on_new_experiments('c45a');
 
-%run_irl_on_every_experiment('3');
+run_irl_on_two_experiments('c45a', '1eafe9a45a58678af', '5cbf004e5a58678ae');
 
-function run_irl_on_every_experiment(study_id)
+function run_irl_on_all_experiments(study_id)
     obs_path = ['../../data/studies/', study_id, '/observations/'];
 
     yn = input(['Are you sure you want to run irl on every experiment in study ', study_id, '? [y,n] ' ], 's');
@@ -39,22 +41,73 @@ function run_irl_on_every_experiment(study_id)
         experiment_id = files(i).name(1:end-5);
         
         fprintf(['processing ' experiment_id ' (%.0f/%.0f)... \n\n'], [i,numel(files)]);
-        run_irl_on_single_experiment(study_id, experiment_id);
+        run_irl_on_one_experiment(study_id, experiment_id);
     end
 end
 
-function run_irl_on_single_experiment(study_id, experiment_id)
+function run_irl_on_new_experiments(study_id)
+    obs_path = ['../../data/studies/', study_id, '/observations/'];
+
+    yn = input(['Are you sure you want to run irl on every experiment in study ', study_id, '? [y,n] ' ], 's');
+    
+    if(yn == 'n') 
+        fprintf('aborting...\n\n');
+        return;
+    end
+    
+    fprintf('\n\n');
+    
+    files = dir([obs_path, '*.json']);
+    
+    for i = 1:numel(files)
+        
+        if exist(['../../data/studies/', study_id, '/results/' files(i).name], 'file') == 2
+            
+            fprintf([files(i).name(1:end-5) ' (%.0f/%.0f) already existed. Continuing to next file...\n\n'],[i,numel(files)]);
+            
+            continue;
+        end
+        
+        experiment_id = files(i).name(1:end-5);
+        
+        fprintf(['processing ' experiment_id ' (%.0f/%.0f)... \n\n'], [i,numel(files)]);
+        run_irl_on_one_experiment(study_id, experiment_id);
+    end
+end
+
+function run_irl_on_one_experiment(study_id, experiment_id)
 
     obs_path = ['../../data/studies/', study_id, '/observations/'];
-    res_path = ['../../data/studies/', study_id, '/results/'];
+    res_path = ['../../data/studies/', study_id, '/results 4_10_1/'];
 
     trajectory_episodes = read_trajectory_episodes_from_file(obs_path, experiment_id);
 
     params  = struct ('epsilon',.0001, 'gamma',.9, 'seed',0, 'kernel', 5);
     results = algorithm4run(trajectory_episodes, params, 1);
 
+    results.('episode_count') = numel(trajectory_episodes);
+        
     write_results_to_file(results, res_path, experiment_id);
     write_results_to_screen(results, experiment_id);
+end
+
+function run_irl_on_two_experiments(study_id, experiment_id_1, experiment_id_2)
+
+    obs_path = ['../../data/studies/', study_id, '/observations/'];
+    res_path = ['../../data/studies/', study_id, '/results 4_10_2/'];
+
+    trajectory_episodes_1 = read_trajectory_episodes_from_file(obs_path, experiment_id_1);
+    trajectory_episodes_2 = read_trajectory_episodes_from_file(obs_path, experiment_id_2);
+
+    trajectory_episodes = horzcat(trajectory_episodes_1, trajectory_episodes_2);
+    
+    params  = struct ('epsilon',.000001, 'gamma',.9, 'seed',0, 'kernel', 5);
+    results = algorithm4run(trajectory_episodes, params, 1);
+
+    results.('episode_count') = numel(trajectory_episodes);
+        
+    write_results_to_file(results, res_path, [experiment_id_1, '-', experiment_id_2]);
+    write_results_to_screen(results, [experiment_id_1, '-', experiment_id_2]);
 end
 
 function write_results_to_file(results, res_path, experiment_id)
@@ -86,24 +139,27 @@ function write_results_to_screen(results, experiment_id)
 
     fprintf('%s\n\n', jsonencode(cleaned_rewards_1));
     fprintf('%s\n\n', jsonencode(cleaned_rewards_2));
-    
-    figure(rewards_figure(experiment_id, cleaned_rewards_1, cleaned_rewards_2));
+
+    %figure(rewards_figure(experiment_id, cleaned_rewards_1, cleaned_rewards_2));
 end
 
 function te = read_trajectory_episodes_from_file(path, experiment_id)
-    
+
     trajectory_observations = jsondecode(fileread([path, experiment_id, '.json']));
     trajectory_states       = huge_states_from(trajectory_observations);
 
-    trajectory_episodes_count  = 380; %we finish at (380+10+30) to trim the last second in case of noise
-    trajectory_episodes_steps  = 1;   %we only do steps of 1 in order to make sure we don't miss important features
-    trajectory_epsiodes_start  = 30;  %we start at 30 to trim the first second in case of noise
-    trajectory_episodes_length = 10;  %this was arbitrarily chosen, but it seems to subjectively work well 
+    trajectory_state_trim_count   = 30; %we trim 30 from beginning and end because of noise
+    trajectory_episodes_length    = 10; %this is approximately how much time it takes between each touch
+    trajectory_episodes_step_size = 1;  %we only do steps of 1 in order to make sure we don't miss important features
+
+    trajectory_epsiodes_start  = trajectory_state_trim_count;
+    trajectory_epsiodes_finish = numel(trajectory_states) - trajectory_state_trim_count - trajectory_episodes_length;
+    trajectory_episodes_count  = floor((trajectory_epsiodes_finish - trajectory_epsiodes_start)/trajectory_episodes_step_size);
 
     te = cell(1,trajectory_episodes_count);
 
     for e = 1:trajectory_episodes_count
-       episode_start = trajectory_epsiodes_start + (e-1)*(trajectory_episodes_steps);
+       episode_start = trajectory_epsiodes_start + (e-1)*(trajectory_episodes_step_size);
        episode_stop  = episode_start + trajectory_episodes_length - 1;
 
        te{e} = trajectory_states(episode_start:episode_stop); 
