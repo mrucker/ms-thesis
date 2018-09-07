@@ -141,7 +141,7 @@ function write_results_to_screen(results, experiment_id)
     fprintf('%s\n\n', jsonencode(cleaned_rewards_1));
     fprintf('%s\n\n', jsonencode(cleaned_rewards_2));
 
-    %figure(rewards_figure(experiment_id, cleaned_rewards_1, cleaned_rewards_2));
+    figure(rewards_figure(experiment_id, cleaned_rewards_1, cleaned_rewards_2));
 end
 
 function te = read_trajectory_episodes_from_file(path, experiment_id)
