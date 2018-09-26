@@ -1,4 +1,4 @@
-function [r_i, r_p, r_b] = r_basii_4_10()
+function [r_i, r_p, r_b, r_l] = r_basii_4_10()
 
     r_p = r_perms();
 
@@ -6,6 +6,7 @@ function [r_i, r_p, r_b] = r_basii_4_10()
 
     r_i = @(states) 1 + r_I'*(statesfun(@r_levels, states)-1);
     r_b = @(states) r_feats(statesfun(@r_levels, states));
+    r_l = @(states) statesfun(@r_levels, states);
 end
 
 function rl = r_levels(states)

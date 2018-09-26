@@ -20,8 +20,8 @@ clear; paths; close all
 %run_irl_on_all_experiments('c45a');
 %run_irl_on_new_experiments('c45a');
 
-%run_irl_on_two_experiments('c45a', '1eafe9a45a58678af', '5cbf004e5a58678ae');
-run_irl_on_two_experiments('c45a', '214803d35a5897ace', '1c29e0b85a5897ace');
+run_irl_on_two_experiments('c45a', '1eafe9a45a58678af', '5cbf004e5a58678ae');
+%run_irl_on_two_experiments('c45a', '214803d35a5897ace', '1c29e0b85a5897ace');
 
 function run_irl_on_all_experiments(study_id)
     obs_path = ['../../data/studies/', study_id, '/observations/'];

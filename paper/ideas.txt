@@ -1,0 +1,57 @@
+Abstract
+Introduction
+Relevant Review
+Algorithm
+Experiment
+Discussion/Conclusions
+
+What figures do I need?
+How many pages? (25-30)
+
+IRL for large state spaces
+IRL for human behavior modification
+
+* There's a difference between the person who aces a test after pulling an all-nighter and the person who aces a test without an all-nighter.
+
+ANSWERABLE VIA CURRENT TECHNIQUES
+	> Interval Estimation
+	> Post-Decision State
+	> Basis Function Value Approximation
+	> Bias Adjusted Kalman Filter
+	> Bootstrapped observations vs un-biased estimates
+	> kernel trick for IRL
+	> n-step q-learning + w-steps
+
+
+ANSWERABLE WITH CURRENT EXPERIMENTS
+
+	- How did we modify reward to make it more human interpretable?
+		> affine translation
+		> less than 0 to 0
+		> top 3 percentile to 1 to lowest of top 3 percentile
+		> scale to 0->1	
+		
+	- What is the relationship between the points a person earned and their touch count?
+
+	- How much did participant's ... shift in experiments vs control?
+		> reward
+		> feature expectation
+
+	- Does it appear that some rewards helped (hurt) certain groups more than others?
+		> Based on first experiment touches?
+		> Based on first experiment feature expectations?
+		
+	- Reward doesn't necessarily translate to discovery of new behavior
+		> Doesn't seem to help with touch screen???
+
+REQUIRE MORE EXPERIMENTS
+
+	- What is better with people, reward or value? (in theory reward should be invariant to changes in transition probabilities)
+
+	- How do people interpret reward (are they rational?)
+		> Loss averse?
+		> Logarithmic gain?
+		
+	- Is it better to think of reward as information or motivation?
+		> Would this work better as an intervention in a population that wants to do right but doesn't know how to?
+		> Would this work better as an intervention in a population that knows how to do right but doesn't want to?

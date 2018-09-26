@@ -31,14 +31,16 @@ $participant_experiment_stats = $experiments | Group 'ParticipantId' | Select `
 
 $participant_experiment_stats = $participant_experiment_stats | % { $_ | Add-Member @{"Machine"=($participant_hash.$($_.P_ID)).Machine} -PassThru }
 $participant_experiment_stats = $participant_experiment_stats | % { $_ | Add-Member @{"Age"=($participant_hash.$($_.P_ID)).Age}  -PassThru }
+$participant_experiment_stats = $participant_experiment_stats | % { $_ | Add-Member @{"Gender"=($participant_hash.$($_.P_ID)).Gender}  -PassThru }
 $participant_experiment_stats = $participant_experiment_stats | % { $_ | Add-Member @{"First"=($participant_hash.$($_.P_ID)).First} -PassThru }
 $participant_experiment_stats = $participant_experiment_stats | % { $_ | Add-Member @{"Input"=($participant_hash.$($_.P_ID)).Device} -PassThru }
 $participant_experiment_stats = $participant_experiment_stats | % { $_ | Add-Member @{"Browser"=($participant_hash.$($_.P_ID)).Browser} -PassThru }
 $participant_experiment_stats = $participant_experiment_stats | % { $_ | Add-Member @{"System"=($participant_hash.$($_.P_ID)).System} -PassThru }
+$participant_experiment_stats = $participant_experiment_stats | % { $_ | Add-Member @{"Study"=$study} -PassThru }
 
 #$avg_machine_area_hash = $participant_experiment_stats | group 'Machine' | select Name, @{Name='Area_AVG';Expression={ $_.Group | sort 'Area' | select -skip 1 | sort 'Area' -Descending | select -skip 1 | Measure 'Area' -average | select -expandproperty 'average' }} | % { @{$_.Name = [math]::Round($_.Area_AVG) } }
 #$participant_experiment_stats = $participant_experiment_stats | % { $_ | Add-Member @{"Area_AVG"=($avg_machine_area_hash.$($_.Machine))} -PassThru }
 
-$participant_experiment_stats | sort 'AVG_T' | format-table 'AVG_T', 'ONE_T', 'TWO_T', 'E_CNT', 'ONE_E', 'TWO_E', 'Area', 'Machine', 'Age', 'First', 'Input'	| Out-String |% {Write-Host $_}
+$participant_experiment_stats | sort 'AVG_T' | format-table 'AVG_T', 'ONE_T', 'TWO_T', 'E_CNT', 'ONE_E', 'TWO_E', 'Area', 'Machine', 'Age', 'Gender', 'First', 'Input', 'Study'	| Out-String |% {Write-Host $_}
 
 $participant_experiment_stats

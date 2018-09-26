@@ -28,7 +28,7 @@ function results = algorithm4run(episodes, params, verbosity)
     %seemed important that this wasn't less than 1 (aka, randomly pick 
     %a subset of episode starts) while anything greater than 1 didn't add
     %much accuracy but greatly increased execution time.
-    EVAL_N = 2;    
+    EVAL_N = 2;
 
     [r_i, r_p, r_b] = r_basii();
 
@@ -54,7 +54,7 @@ function results = algorithm4run(episodes, params, verbosity)
             C = C + (r_i(episodes{i}{t}) ~= 1);
             E = E + params.gamma^(t-1) * r_e(episodes{i}{t});
         end
-    end    
+    end
 
     E = E./numel(episodes);
     C = C./numel(episodes);
