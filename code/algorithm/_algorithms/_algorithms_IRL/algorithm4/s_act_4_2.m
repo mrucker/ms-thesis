@@ -16,6 +16,10 @@ end
 
 function a = actions_valid(s, a)
 
+    if(isempty(s))
+        return;
+    end
+
     %huge_states_assert(s);
     assert(size(s,2) == 1 || (iscell(s) && numel(s)==1), 'This function wasn`t designed for multiple states');
     

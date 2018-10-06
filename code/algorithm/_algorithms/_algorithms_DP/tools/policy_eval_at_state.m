@@ -2,7 +2,7 @@ function V = policy_eval_at_state(Pf, state, eval_statistic, gamma, T, transitio
 
     V = cell(1, sample_count);
     
-    for n = 1:sample_count
+    parfor n = 1:sample_count
 
         v = zeros(size(eval_statistic(state),1), T);
         s = state;

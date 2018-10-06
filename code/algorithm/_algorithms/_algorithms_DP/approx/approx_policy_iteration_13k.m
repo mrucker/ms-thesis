@@ -6,7 +6,7 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
         production = false;
     end
 
-    [v_i, v_p, v_b, v_l] = value_basii();
+    [v_i, v_p, ~, v_l] = value_basii();
 
     v_p = v_p();
     v_n = size(v_p,2);
@@ -21,7 +21,7 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
 
     f_time = 0;
     b_time = 0;
-    m_time = 0;
+    m_time = num2cell(zeros(1,N+1));
 
     Pf = cell(1, N+1);
     
@@ -40,6 +40,8 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
 
     for n = 1:N
 
+        i_start = tic;
+        
         if mod(n-1,4) == 0
             init_states = arrayfun(@(m) s_1(), 1:M, 'UniformOutput', false);
         end
@@ -171,7 +173,7 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
         end
         b_time = b_time + toc(t_start);
 
-        t_start = tic;
+        %t_start = tic;
 
             %https://www.mathworks.com/help/stats/fitrsvm.html#busljl4-BoxConstraint
             if iqr(Y) < .0001
@@ -195,7 +197,9 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
                 %Pf{n+1} = policy_function(actions, @(ss) predict(model, vertcat(v_b(v_l(ss)), n*ones(1,size(ss,2)))'), trans_post);
             end
 
-        m_time = m_time + toc(t_start);
+        m_time{n+1} = m_time{n} + toc(i_start);
+            
+        %m_time = m_time + toc(t_start);
     end
 
     %here for backwards compatibility

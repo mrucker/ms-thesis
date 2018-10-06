@@ -48,7 +48,11 @@ function x2 = create_new_targets(x1, width, height, radius)
     
     new_targets_point = new_targets_scale * new_targets_rands;
     new_targets_age   = 10 * ones(1, targets_to_create); %we make age 10 because 10+(33*30) = 1000
-    
-    %we assume there is only ever one state for this method
-    x2 = vertcat(x2, reshape([new_targets_point;new_targets_age],[],1));
+            
+    if(size(x2,2) >  1)
+        x3 = vertcat(x2, repmat(reshape([new_targets_point;new_targets_age],[],1), 1, size(x2,2)));
+    else 
+        x3 = vertcat(x2, reshape([new_targets_point;new_targets_age],[],1));
+    end
+    x2 = x3;
 end
