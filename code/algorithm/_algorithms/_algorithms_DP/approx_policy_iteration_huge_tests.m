@@ -46,9 +46,9 @@ algo_q = @(s_r) approx_policy_iteration_13h(s_1, s_a, s_r, @v_basii_4_4, trans_p
 
 algo_r = @(s_r) approx_policy_iteration_13i (s_1, s_a, s_r, @v_basii_4_9, trans_pst, trans_pre, 0.9*1.0, 30, 90, 3, 4); %  no-opt
 
-algo_s = @(s_r) approx_policy_iteration_13k (s_1, s_a, s_r, @v_basii_4_9    , trans_pst, trans_pre, 0.9*1.0, 30 , 90, 3 , 4); %  no-opt
-algo_t = @(s_r) approx_policy_iteration_lspi(s_1, s_a, s_r, 'huge_basis_3_1', trans_pst, trans_pre, 0.9*1.0, 30, 200, 10, 4); %  no-opt
-algo_u = @(s_r) approx_policy_iteration_kspi(s_1, s_a, s_r, 'huge_basis_5'  , trans_pst, trans_pre, 0.9*1.0, 30,  75, 10, 4); %  no-opt
+algo_s = @(s_r) approx_policy_iteration_13k (s_1, s_a, s_r, @v_basii_4_9    , trans_pst, trans_pre, 0.9*1.0, 30 , 30,  5, 2); %  no-opt
+algo_t = @(s_r) approx_policy_iteration_lspi(s_1, s_a, s_r, 'huge_basis_3_1', trans_pst, trans_pre, 0.9*1.0, 30, 200, 10, 0); %  no-opt
+algo_u = @(s_r) approx_policy_iteration_kspi(s_1, s_a, s_r, 'huge_basis_5'  , trans_pst, trans_pre, 0.9*1.0, 30,  75, 10, 0); %  no-opt
 
 algo_v = @(s_r) approx_policy_iteration_lspi(s_1, s_a, s_r, 'huge_basis_3_1', trans_pst, trans_pre, 0.9*1.0, 10, 200, 10, 4); %  no-opt
 
@@ -78,6 +78,28 @@ for i = 1:rewd_count
     states_c{i} = state_init();
 end
 
+i = 0;
+
+
+while true
+    i         = i + 1;
+    R         = reward_theta(size(r_p,1))' * r_p;
+    reward_f  = @(s) R(r_i(s));
+    states_c  = {state_rand(), state_rand(), state_rand(), state_rand(), state_rand()};
+
+    
+    for a_i = 1:1
+        [Pf, ~, ~, ~, ~, ~, fT, bT, Tf, aT] = algos{a_i,1}(reward_f);
+        
+        Vf = num2cell([0,arrayfun(@(p_i) policy_eval_at_states(Pf{p_i}, states_c, reward_f, 0.9, eval_steps, trans_pre, 30), 2:numel(Pf))]);                
+        
+        file_id = fopen('performance.csv', 'a');
+        p_results_3(file_id, algos{a_i,2}, i, Vf, Tf);
+        fclose(file_id);
+    end
+    
+end
+
 for a_i = 1:size(algos,1)
 
     fT = zeros(1,rewd_count);
@@ -90,7 +112,7 @@ for a_i = 1:size(algos,1)
     
     for r_i = 1:rewd_count
         [Pf{r_i}, ~, ~, ~, ~, ~, fT(r_i), bT(r_i), Tf{r_i}, aT(r_i)] = algos{a_i,1}(reward_f{r_i});
-    end       
+    end
     
     %Pv = arrayfun(@(r_i) policy_eval_at_states(Pf{r_i}{end}, states_c{r_i}, reward_f{r_i}, 0.9, eval_steps, trans_pre, 100), 1:rewd_count);
     %p_results_1(algos{a_i,2}, fT, bT, vT, aT, Pv);
@@ -118,6 +140,23 @@ function s = state_init()
        [1145;673;-8;-2;-1;6;-7;4;3175;1535;156;626;555;155;2249;305;60];
        [1158;673;15;0;10;0;5;0;3175;1535;156;626;555;155;2249;305;60];
        [1588;768;0;0;0;0;0;0;3175;1535;156;626;555;155;2249;305;60];
+       [980;316;-17;4;82;5;65;6;1910;929;94.5;873;286;428;1430;270;412;1009;698;252;721;409;35;838;432;29];
+       [827;479;-5;12;-5;12;-5;12;2259;1238;118.5;854;453;972;664;940;904;1608;857;604];
+       [393;392;-49;-67;10;15;39;41;1910;929;94.5;498;613;681;288;394;423;351;328;316;401;512;20];
+       [704;532;-111;100;-124;72;-46;-12;1270;684;66;725;479;535;1002;219;385;1117;534;55];
+       [1350;478;0;0;0;0;0;0;1356;662;67.5;564;371;489;310;330;304;1062;321;67;896;256;44];
+       [845;191;4;-10;2;-5;1;-7;1907;975;96;560;626;583;339;587;390;1584;784;150;221;809;105];
+       [503;265;503;265;503;265;503;265;1014;652;57];
+       [411;256;0;0;0;0;1;0;1350;631;66;1014;116;896;347;124;892;924;176;815;264;282;707;1048;190;622;422;238;607;537;284;433;352;189;32];
+       [713;479;-1;0;5;-1;-86;-14;1350;631;66;786;476;901;1282;464;872;1166;145;102;1262;422;29];
+       [1188;178;-13;0;-7;-3;-7;-5;1350;631;66;374;331;977;911;558;289;612;301;36;0;0;15];
+       [221;346;-74;0;-22;-2;28;-5;1356;652;66;912;129;556;515;120;145;770;128;119;0;0;7];
+       [543;335;0;1;2;1;-69;2;1356;652;66;608;378;744;875;260;446;166;82;265;314;279;31];
+       [694;274;-5;1;2;-1;-6;8;1356;652;66;427;456;786;680;290;682;319;105;641;491;357;311];
+       [778;755;0;0;0;0;0;0;1430;784;75;938;501;797;445;295;534;938;249;320;731;229;207;755;621;99;0;0;6];
+       [849;348;-14;2;-14;2;-14;2;1430;784;75;1304;227;905;654;556;475;321;550;471;422;422;237];
+       [552;485;0;0;0;0;-3;1;1430;784;75;540;468;779;384;279;561;947;329;545;1091;609;329;882;305;241;1214;245;200];
+       [263;80;-41;5;-30;5;-19;5;1270;573;60;174;127;728;376;264;685;956;183;548;440;98;394;166;215;341;1046;444;202;758;276;144;670;350;83];
    };
 end
 
@@ -148,6 +187,13 @@ function p_results_2(test_algo_name, Vf, Tf)
         for p_i=1:numel(Tf{1})
             fprintf('%s\t%.0f\t%.0f\t%f\t%f\n', test_algo_name, r_i, p_i, Vf{r_i}{p_i}, Tf{r_i}{p_i});
         end
+    end
+end
+
+function p_results_3(fid, test_algo_name, r_i, Vf, Tf)
+    for p_i=1:numel(Tf)
+        fprintf(1, '%s,%.0f,%.0f,%f,%f\n', test_algo_name, r_i, p_i, Vf{p_i}, Tf{p_i});
+        fprintf(fid, '%s,%.0f,%.0f,%f,%f\n', test_algo_name, r_i, p_i, Vf{p_i}, Tf{p_i});
     end
 end
 
