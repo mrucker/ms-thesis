@@ -1,5 +1,7 @@
 function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_policy_iteration_13k(s_1, actions, reward, value_basii, trans_post, trans_pre, gamma, N, M, T, W, production)
 
+    gcp; %this is here to force the parallel pool to begin before we start timing
+    
     a_start = tic;
 
     if(nargin < 12)

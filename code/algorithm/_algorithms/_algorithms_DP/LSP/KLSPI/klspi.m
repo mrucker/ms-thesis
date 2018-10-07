@@ -1,4 +1,4 @@
-function [policy, all_policies, Dic_t, para] = klspi(domain, algorithm, maxiterations, epsilon, samples, basis, discount, initial_policy, para)
+function [policy, all_policies, Dic_t, para] = klspi(domain, algorithm, maxiterations, epsilon, samples, basis, discount, initial_policy, para, M, T)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -100,6 +100,10 @@ while ( (iteration < maxiterations) & (distance > epsilon))
     policy.time = policy.time + toc(i_start);
     all_policies{iteration+1} = policy;
  
+    if(mod(iteration, 2) == 0)
+        %samples = k_collect_samples(domain, M, T, policy);
+    end
+    
     Dic_old = 0; 
     %%% Depending on the domain, print additional info if needed
     %feval([domain '_print_info'], all_policies, 1, Dic_t, Dic_old, para);

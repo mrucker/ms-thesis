@@ -1,4 +1,4 @@
-function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_policy_iteration_lspi(s_1, actions, reward, value_basii, trans_post, ~, gamma, N, M, ~, ~, ~); global INIT_STATES R;
+function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_policy_iteration_lspi(s_1, actions, reward, value_basii, trans_post, ~, gamma, N, M, T, ~, ~); global INIT_STATES R;
 
     clear huge_basis;
 
@@ -144,10 +144,10 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
       samples = [];
       %disp(['Samples in the initial set : ' num2str(length(samples))]);
 
-      maxepisodes = 50;
+      maxepisodes = M;
       %disp(['Episodes for sample collection : ' num2str(maxepisodes)]);
 
-      maxsteps = 10;
+      maxsteps = T;
       %disp(['Max steps in each episode : ' num2str(maxsteps)]);
 
       discount = gamma;
@@ -190,7 +190,7 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
       %%% Run LSPI
       %disp('*************************************************');
       %disp('Starting LSPI ...');
-      [~, all_policies] = lspi(domain, algorithm, maxiterations, epsilon, samples, basis, discount, policy);
+      [~, all_policies] = lspi(domain, algorithm, maxiterations, epsilon, samples, basis, discount, policy, M, T);
        
        v_p = feval(basis, []);       
        Vf = cellfun(@(p) v_p'*p.weights, all_policies, 'UniformOutput', false);              

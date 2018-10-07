@@ -46,9 +46,11 @@ algo_q = @(s_r) approx_policy_iteration_13h(s_1, s_a, s_r, @v_basii_4_4, trans_p
 
 algo_r = @(s_r) approx_policy_iteration_13i (s_1, s_a, s_r, @v_basii_4_9, trans_pst, trans_pre, 0.9*1.0, 30, 90, 3, 4); %  no-opt
 
-algo_s = @(s_r) approx_policy_iteration_13k (s_1, s_a, s_r, @v_basii_4_9    , trans_pst, trans_pre, 0.9*1.0, 30, 90, 3, 4); %  no-opt
-algo_t = @(s_r) approx_policy_iteration_lspi(s_1, s_a, s_r, 'huge_basis_3_1', trans_pst, trans_pre, 0.9*1.0, 30, 90, 3, 4); %  no-opt
-algo_u = @(s_r) approx_policy_iteration_kspi(s_1, s_a, s_r, 'huge_basis_5'  , trans_pst, trans_pre, 0.9*1.0, 30, 90, 3, 4); %  no-opt
+algo_s = @(s_r) approx_policy_iteration_13k (s_1, s_a, s_r, @v_basii_4_9    , trans_pst, trans_pre, 0.9*1.0, 30 , 90, 3 , 4); %  no-opt
+algo_t = @(s_r) approx_policy_iteration_lspi(s_1, s_a, s_r, 'huge_basis_3_1', trans_pst, trans_pre, 0.9*1.0, 30, 200, 10, 4); %  no-opt
+algo_u = @(s_r) approx_policy_iteration_kspi(s_1, s_a, s_r, 'huge_basis_5'  , trans_pst, trans_pre, 0.9*1.0, 30,  75, 10, 4); %  no-opt
+
+algo_v = @(s_r) approx_policy_iteration_lspi(s_1, s_a, s_r, 'huge_basis_3_1', trans_pst, trans_pre, 0.9*1.0, 10, 200, 10, 4); %  no-opt
 
 algos = {
 %   algo_a, 'algorithm_2  (G=0.9, L=1.0, N=30, M=50 , S=2, W=3)';
@@ -64,6 +66,7 @@ algos = {
    algo_s, 'algorithm_13k';
    algo_t, 'algorithm_lsp';
    algo_u, 'algorithm_ksp';
+   %algo_v, 'algorithm_lsp2';
 };
 
 states_c = cell(1, rewd_count);
@@ -81,33 +84,31 @@ for a_i = 1:size(algos,1)
     bT = zeros(1,rewd_count);
     vT = zeros(1,rewd_count);
     aT = zeros(1,rewd_count);
-    Pv = zeros(1,rewd_count);
-        
+
     Pf = cell(rewd_count, 1);
     Tf = cell(rewd_count, 1);
     
     for r_i = 1:rewd_count
         [Pf{r_i}, ~, ~, ~, ~, ~, fT(r_i), bT(r_i), Tf{r_i}, aT(r_i)] = algos{a_i,1}(reward_f{r_i});
-
-        %eval_states = states_c{r_i};
-        %eval_reward = reward_f{r_i};
-
-        %Pv(r_i) = policy_eval_at_states(Pf{r_i}{end}, eval_states, eval_reward, 0.9, eval_steps, trans_pre, 100);
-    end
-
-    %Vs = zeros(1,numel(Pf)-1);
-
-    Vf = arrayfun(@(r_i) num2cell([0,arrayfun(@(p_i) policy_eval_at_states(Pf{r_i}{p_i}, states_c{r_i}, reward_f{r_i}, 0.9, eval_steps, trans_pre, 100), 2:numel(Pf{r_i}))]), 1:numel(Pf), 'UniformOutput', false);
-        
+    end       
+    
+    %Pv = arrayfun(@(r_i) policy_eval_at_states(Pf{r_i}{end}, states_c{r_i}, reward_f{r_i}, 0.9, eval_steps, trans_pre, 100), 1:rewd_count);
+    %p_results_1(algos{a_i,2}, fT, bT, vT, aT, Pv);
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    Vf = arrayfun(@(r_i) num2cell([0,arrayfun(@(p_i) policy_eval_at_states(Pf{r_i}{p_i}, states_c{r_i}, reward_f{r_i}, 0.9, eval_steps, trans_pre, 200), 2:numel(Pf{r_i}))]), 1:numel(Pf), 'UniformOutput', false);
     p_results_2(algos{a_i,2}, Vf, Tf);
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    %Vs = zeros(1,numel(Pf)-1);
     
     %for Pf_i = 2:numel(Pf)
     %    Vs(Pf_i-1) = policy_eval_at_states(Pf{Pf_i}, eval_states, eval_reward, 0.9, eval_steps, trans_pre, 50);
     %end
 
-    %d_results_3(algos{a_i,2}, Vs);    
-        
-    %p_results_1(algos{a_i,2}, fT, bT, vT, aT, Pv);    
+    %d_results_3(algos{a_i,2}, Vs);
 end
 
 fprintf('\n');

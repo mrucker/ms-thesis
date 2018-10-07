@@ -1,4 +1,4 @@
-function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_policy_iteration_kspi(s_1, actions, reward, value_basii, trans_post, ~, gamma, N, M, ~, ~, ~); global INIT_STATES R;
+function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_policy_iteration_kspi(s_1, actions, reward, value_basii, trans_post, ~, gamma, N, M, T, ~, ~); global INIT_STATES R;
 
     clear huge_basis_5;
 
@@ -145,10 +145,10 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
         samples = [];
         %disp(['Samples in the initial set : ' num2str(length(samples))]);
 
-        maxepisodes = 100;
+        maxepisodes = M;
         %disp(['Episodes for sample collection : ' num2str(maxepisodes)]);
 
-        maxsteps = 10;
+        maxsteps = T;
         %disp(['Max steps in each episode : ' num2str(maxsteps)]);
 
         discount = gamma;
@@ -186,7 +186,7 @@ function [Pf, Vf, Xs, Ys, Ks, As, f_time, b_time, m_time, a_time] = approx_polic
         para(2)=1;   % 
         para(3)=0.3; % Mu for ALD condition in spacification 
 
-        [~, all_policies, Dic_t, para] = klspi(domain, algorithm, maxiterations, epsilon, samples, basis, discount, policy, para);              
+        [~, all_policies, Dic_t, para] = klspi(domain, algorithm, maxiterations, epsilon, samples, basis, discount, policy, para, M, T);              
        
         v_p = feval(basis, []);       
         PHI = cell2mat(arrayfun(@(c)exp(-vecnorm(v_p(:,c)-Dic_t').^2/para(1)^2)', 1:size(v_p,2), 'UniformOutput', false));

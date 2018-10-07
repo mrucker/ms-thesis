@@ -1,6 +1,6 @@
 function [policy, all_policies] = lspi(domain, algorithm, maxiterations, ...
 				       epsilon, samples, basis, ...
-				       discount, initial_policy)
+				       discount, initial_policy, M, T)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -186,6 +186,10 @@ function [policy, all_policies] = lspi(domain, algorithm, maxiterations, ...
     
     %%% Depending on the domain, print additional info if needed
     feval([domain '_print_info'], all_policies);
+    
+    if(mod(iteration, 3) == 0)
+        samples = collect_samples(domain, M, T, policy);
+    end
     
   end
   
