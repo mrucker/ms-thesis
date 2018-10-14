@@ -46,11 +46,13 @@ algo_q = @(s_r) approx_policy_iteration_13h(s_1, s_a, s_r, @v_basii_4_4, trans_p
 
 algo_r = @(s_r) approx_policy_iteration_13i (s_1, s_a, s_r, @v_basii_4_9, trans_pst, trans_pre, 0.9*1.0, 30, 90, 3, 4); %  no-opt
 
-algo_s = @(s_r) approx_policy_iteration_13k (s_1, s_a, s_r, @v_basii_4_9    , trans_pst, trans_pre, 0.9*1.0, 30 , 30,  5, 2); %  no-opt
+algo_s = @(s_r) approx_policy_iteration_13k (s_1, s_a, s_r, @v_basii_4_9    , trans_pst, trans_pre, 0.9*1.0, 30 , 90,  4, 4); %  no-opt
 algo_t = @(s_r) approx_policy_iteration_lspi(s_1, s_a, s_r, 'huge_basis_3_1', trans_pst, trans_pre, 0.9*1.0, 30, 200, 10, 0); %  no-opt
 algo_u = @(s_r) approx_policy_iteration_kspi(s_1, s_a, s_r, 'huge_basis_5'  , trans_pst, trans_pre, 0.9*1.0, 30,  75, 10, 0); %  no-opt
 
-algo_v = @(s_r) approx_policy_iteration_lspi(s_1, s_a, s_r, 'huge_basis_3_1', trans_pst, trans_pre, 0.9*1.0, 10, 200, 10, 4); %  no-opt
+algo_v = @(s_r) approx_policy_iteration_13k (s_1, s_a, s_r, @v_basii_4_9    , trans_pst, trans_pre, 0.9*1.0, 50 , 90,  4, 4); %  no-opt
+algo_w = @(s_r) approx_policy_iteration_13k (s_1, s_a, s_r, @v_basii_4_9    , trans_pst, trans_pre, 0.9*1.0, 70 , 90,  4, 4); %  no-opt
+algo_x = @(s_r) approx_policy_iteration_13k (s_1, s_a, s_r, @v_basii_4_9    , trans_pst, trans_pre, 0.9*1.0, 100, 90,  4, 4); %  no-opt
 
 algos = {
 %   algo_a, 'algorithm_2  (G=0.9, L=1.0, N=30, M=50 , S=2, W=3)';
@@ -63,10 +65,14 @@ algos = {
 
    %algo_q, 'algorithm_13h(G=0.9, L=1.0, N=30, M=90 , S=3, W=4)';
    %algo_r, 'algorithm_13i(G=0.9, L=1.0, N=30, M=90 , S=3, W=4)';
-   algo_s, 'algorithm_13k';
+   algo_s, 'algorithm_13ks';
    algo_t, 'algorithm_lsp';
    algo_u, 'algorithm_ksp';
    %algo_v, 'algorithm_lsp2';
+   %algo_v, 'algorithm_13kv';
+   %algo_w, 'algorithm_13kw';
+   algo_x, 'algorithm_13kx';
+   
 };
 
 states_c = cell(1, rewd_count);
@@ -78,22 +84,25 @@ for i = 1:rewd_count
     states_c{i} = state_init();
 end
 
-i = 0;
+i = 137;
 
 
 while true
-    i         = i + 1;
-    R         = reward_theta(size(r_p,1))' * r_p;
-    reward_f  = @(s) R(r_i(s));
-    states_c  = {state_rand(), state_rand(), state_rand(), state_rand(), state_rand()};
+    i        = i + 1;
+    R        = reward_theta(size(r_p,1))' * r_p;
+    reward_f = @(s) R(r_i(s));
+    states_c = state_init();
 
+    %R_control = [zeros(size(r_p,1)-1,1);-1/4]* r_p + 1;
     
-    for a_i = 1:1
+    for a_i = 1:size(algos,1)
         [Pf, ~, ~, ~, ~, ~, fT, bT, Tf, aT] = algos{a_i,1}(reward_f);
         
-        Vf = num2cell([0,arrayfun(@(p_i) policy_eval_at_states(Pf{p_i}, states_c, reward_f, 0.9, eval_steps, trans_pre, 30), 2:numel(Pf))]);                
-        
-        file_id = fopen('performance.csv', 'a');
+        %Pe = policy_eval_at_states(Pf{end}, states_c, @(s) r_p(:,r_i(s)), 0.9, eval_steps, trans_pre, 200);
+        %Pe'
+
+        Vf = num2cell([0,arrayfun(@(p_i) policy_eval_at_states(Pf{p_i}, states_c, reward_f, 0.9, eval_steps, trans_pre, 50), 2:numel(Pf))]);
+        file_id = fopen('performance.csv', 'at');
         p_results_3(file_id, algos{a_i,2}, i, Vf, Tf);
         fclose(file_id);
     end
@@ -167,6 +176,7 @@ function s = state_rand()
 end
 
 function rt = reward_theta(basii_count)
+    %rt = [zeros(basii_count-1,1);-1/4];
     %rt = [zeros(basii_count-1,1);1];
     rt = 2*rand(basii_count,1) - 1;
     %rt = [-.25*rand(basii_count-1,1);100];
@@ -182,7 +192,7 @@ function p_results_1(test_algo_name, f_time, b_time, m_time, a_time, P_val)
     fprintf('\n');
 end
 
-function p_results_2(test_algo_name, Vf, Tf)
+function p_results_2(~, test_algo_name, Vf, Tf)
     for r_i=1:numel(Tf)
         for p_i=1:numel(Tf{1})
             fprintf('%s\t%.0f\t%.0f\t%f\t%f\n', test_algo_name, r_i, p_i, Vf{r_i}{p_i}, Tf{r_i}{p_i});
@@ -193,7 +203,9 @@ end
 function p_results_3(fid, test_algo_name, r_i, Vf, Tf)
     for p_i=1:numel(Tf)
         fprintf(1, '%s,%.0f,%.0f,%f,%f\n', test_algo_name, r_i, p_i, Vf{p_i}, Tf{p_i});
-        fprintf(fid, '%s,%.0f,%.0f,%f,%f\n', test_algo_name, r_i, p_i, Vf{p_i}, Tf{p_i});
+        if(fid~= 1)
+            fprintf(fid, '%s,%.0f,%.0f,%f,%f\n', test_algo_name, r_i, p_i, Vf{p_i}, Tf{p_i});
+        end
     end
 end
 

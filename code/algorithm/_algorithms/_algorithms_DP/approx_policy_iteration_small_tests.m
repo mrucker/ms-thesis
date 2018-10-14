@@ -14,7 +14,7 @@ close all
 %S=2
 %W=5
 
-samples = 10;
+samples = 1;
 
 N = 10;
 M = 50;
@@ -118,8 +118,9 @@ for a = 1:size(algos,1)
     P_val = zeros(1,samples);
     
     for i = 1:samples
-        
-        [Pf, Vf, Xs, Ys, Ks, As, f_time(i), b_time(i), m_time(i), a_time(i)] = algos{a, 1}(s_1, @(s) actions, rewards{i}, v_b, trans_post, trans_pre, gamma, N, M, S, W);
+                
+        [Pf, Vf, Xs, Ys, Ks, As, f_time(i), b_time(i), m_time(i), a_time(i)] = approx_policy_iteration_13k(s_1, s_act_4_2(), rewards{i}, @v_basii_4_9, trans_post, trans_pre, gamma, N, M, S, W);
+        %[Pf, Vf, Xs, Ys, Ks, As, f_time(i), b_time(i), m_time(i), a_time(i)] = algos{a, 1}(s_1, @(s) actions, rewards{i}, v_b, trans_post, trans_pre, gamma, N, M, S, W);
         
         [V_mse(i), P_mse(i), P_val(i)] = result_statistics(states, actions, rewards{i}, gamma, T, eval_states{i}, Vf{N+1}, Pf{N+1}, exact_Vs{i}, exact_Ps{i}, trans_pre, trans_post);
 
