@@ -45,7 +45,3 @@ function [B, theta] = recursive_linear_regression(B, theta, x, y, l)
     B     = 1/l*(B - 1/g * (B * (x * x') * B));
 
 end
-
-function i = isInvertible(X)
-    i = rcond(X) > .000001;
-end

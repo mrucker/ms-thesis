@@ -1,9 +1,12 @@
 var mockContext = {};
 
 $.ajax = function(params) {
-    
+
     requestStats.totalCount++;
-    requestStats.totalSize += params.data.length;
+    
+	if(params.data) {		
+		requestStats.totalSize += params.data.length;
+	}
 
     console.log(params);
     

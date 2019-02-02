@@ -1,6 +1,7 @@
 $(document).ready( function () {
 
-    var canvas = initializeCanvas();
+    var canvas   = initializeCanvas();
+	var rewardId = getRewardId();
 
     if(querystring.exists("test")) {
 		
@@ -8,7 +9,7 @@ $(document).ready( function () {
             return $.Deferred().resolve();
         }
 		
-		var experiment1 = new Experiment(canvas, "testOnly", getRewardId() || 1);
+		var experiment1 = new Experiment(canvas, "testOnly", rewardId || 1);
 		
         $.Deferred().resolve()
             .then(showModalContent("demo"      , true ))
@@ -30,7 +31,7 @@ $(document).ready( function () {
 		for(x = 1; x <= xs; x++) {
 			for(y = 1; y <= ys; y++) {
 				//x = 9; y = 4;
-				targets.push(new Target(mouse, x/(xs+1), y/(ys+1), 100, getRewardId() || 2))
+				targets.push(new Target(mouse, x/(xs+1), y/(ys+1), 100, rewardId || 2))
 			}
 		}
 
@@ -47,8 +48,8 @@ $(document).ready( function () {
 	else {
 
         var participant = new Participant(getStudyId() || "anonymous");
-        var experiment1 = new Experiment(canvas, participant.getId(), 1                 );
-        var experiment2 = new Experiment(canvas, participant.getId(), getRewardId() || 1);
+        var experiment1 = new Experiment(canvas, participant.getId(), 1            );
+        var experiment2 = new Experiment(canvas, participant.getId(), rewardId || 1);
 
 		var functions = [
 			,(showModalContent("welcome"   , true ))
@@ -183,18 +184,35 @@ $(document).ready( function () {
     }
 
 	function getRewardId() {
-         if(querystring.exists("reward")) {
-			 return querystring.value("reward");
-		 }
-		 
-		 return undefined;
-     }
+        if(querystring.exists("reward")) {
+			return querystring.value("reward");
+		}
+
+		var potentialRewards = [
+			undefined	//All targets worth 1 point
+			, 'a3op'	//Reward taken from top performer with few touches
+			, 'b3op'	//Reward taken from top performer with many touches
+			, 'c4op'	//Reward taken from bot performer with few touches
+			, 'b4op'	//Reward taken from bot performer with many touches
+		];
+
+		var rewardId = parseInt($.ajax({
+			  url   :"https://www.random.org/integers/?num=1&min=0&max=" + (potentialRewards.length-1) + "&col=1&base=10&format=plain&rnd=new"
+			, async : false
+		}).responseText);
+
+		if(isNaN(rewardId)) {
+			rewardId = parseInt(Math.random()*potentialRewards.length)
+		}
+
+		return potentialRewards[parseInt(rewardId)];
+    }
 
 	function getStudyId() {
 		if(querystring.exists("study")) {
 			return querystring.value("study");
 		}
-			
+
 		return undefined;
 	}
  });

@@ -230,7 +230,6 @@ function Target(mouse, x_pct, y_pct, fixed_age, rewardId) {
 			return rewards[index];
 		}
 
-		
 		return 0.5;
     };
 

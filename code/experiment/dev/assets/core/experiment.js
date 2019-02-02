@@ -27,7 +27,7 @@ function Experiment(canvas, participantId, rewardId)
 				mouse  .draw(canvas);
 				self   .draw(canvas);
 			};
-			
+
 			//runCountdown()
 			canvas .startAnimating();
 			counter.startCounting();
@@ -94,7 +94,7 @@ function Experiment(canvas, participantId, rewardId)
 			, "t_n"    : touchCount
 		});
     }
-	
+
     function saveData(data) {        
         if(!post) {
             post = $.ajax({

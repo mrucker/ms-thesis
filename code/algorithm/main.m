@@ -16,11 +16,11 @@ clear; paths; close all
 
 %study 2 -- 452515135984d0d0d.json the T_N field for this experiment is extremely high in the ThesisExperiments table.
 
-%run_irl_on_one_experiment('c45a', '110e53fe5a585b7b1');
 %run_irl_on_all_experiments('c45a');
 %run_irl_on_new_experiments('c45a');
 
-run_irl_on_two_experiments('c45a', '1eafe9a45a58678af', '5cbf004e5a58678ae');
+run_irl_on_one_experiment('ccri', '234e72ea71528642c');
+%run_irl_on_two_experiments('c45a', '1eafe9a45a58678af', '5cbf004e5a58678ae');
 %run_irl_on_two_experiments('c45a', '214803d35a5897ace', '1c29e0b85a5897ace');
 
 function run_irl_on_all_experiments(study_id)
@@ -88,7 +88,7 @@ function run_irl_on_one_experiment(study_id, experiment_id)
 
     results.('episode_count') = numel(trajectory_episodes);
         
-    write_results_to_file(results, res_path, experiment_id);
+    %write_results_to_file(results, res_path, experiment_id);
     write_results_to_screen(results, experiment_id);
 end
 
