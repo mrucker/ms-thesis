@@ -91,13 +91,14 @@ function QueryObservations(experimentIds) {
 
 function WriteObservations(observations) {
 
-	var writeObservationPromises = observations.map(exp_obs => {
-		
-		var experimentId = exp_obs[1].ExperimentId;
-		var sorted       = exp_obs.sort((i1,i2) => i1.SequenceNumber - i2.SequenceNumber).map(i => i.Observations);
-		var flattened    = [].concat.apply([], sorted);
+	var writeObservationPromises = observations.map(exp_obs => {		
+		if(exp_obs[0]) {
+			var experimentId = exp_obs[0].ExperimentId;
+			var sorted       = exp_obs.sort((i1,i2) => i1.SequenceNumber - i2.SequenceNumber).map(i => i.Observations);
+			var flattened    = [].concat.apply([], sorted);
 
-		return WriteFilesPromise([flattened], observations => experimentId, "observations");
+			return WriteFilesPromise([flattened], observations => experimentId, "observations");
+		}
 	});
 
 	return Promise.all(writeObservationPromises);

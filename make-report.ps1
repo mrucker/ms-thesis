@@ -46,4 +46,6 @@ $participant_experiment_stats = $participant_experiment_stats | % { $_ | Add-Mem
 
 $participant_experiment_stats | sort 'TimeStamp' | format-table 'AVG_T', 'ONE_T', 'TWO_T', 'E_CNT', 'ONE_R', 'TWO_R', 'Area', 'Machine', 'Age', 'Gender', 'First', 'Input', 'Study', 'TimeStamp', 'P_ID', 'ONE_E', 'TWO_E' | Out-String |% {Write-Host $_}
 
+Write-Host $participant_experiment_stats.Count
+
 $participant_experiment_stats
