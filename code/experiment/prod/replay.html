@@ -1,0 +1,61 @@
+<!DOCTYPE HTML>
+
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        
+        <!--JQuery 3.3.1-->
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+                
+        <!--bootstrap (js and css)-->
+        <!-- popper.js is only required for some components, so it could be removed. See [https://getbootstrap.com/docs/4.1/getting-started/introduction/] for components that require it -->
+        <script src ="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+        <script src ="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"    integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+        <link   href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"  integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous" rel="stylesheet" >
+        
+        <!--Google Web Fonts -->
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open Sans">
+        
+        <!-- Google reCAPTCHA -->
+        <script src ="https://www.google.com/recaptcha/api.js" async defer></script>
+
+        <link   href="assets.css"   type="text/css" rel="stylesheet" />
+        <script src ="assets.js"    type="text/javascript"> </script>
+        <script src ="libraries.js" type="text/javascript"> </script>
+		
+		<script>
+			$(document).ready( function () {	
+
+				var observations = JSON.parse(prompt("Enter session data"));
+				var rewardId     = prompt("Enter reward id", "1");
+				var frameRate    = parseInt(prompt("Enter frameRate", "30"));
+
+				var canvas   = initializeCanvas();
+				var experiment = new ReplayExperiment(canvas, observations, rewardId, frameRate);
+
+				experiment.run();
+
+				function initializeCanvas() {
+					var canvas  = new Canvas(document.querySelector('#c'));
+					
+					canvas.resize($(window).width() - 10, $(window).height() - 10);
+					
+					$(window).on('resize', function() {
+						canvas.resize($(window).width() - 10, $(window).height() - 10);
+					});
+					
+					return canvas;
+				}
+			 });
+		</script>
+    </head>
+    <body>
+        <!-- all width and height settings for the canvas are handled programatically -->
+        <canvas id="c">
+            <!-- OPTION 1: leave a message here if browser doesn't support canvas -->
+            <p>Your browser doesn’t currently support HTML5 Canvas. Please check caniuse.com/#feat=canvas for information on browser support for canvas.</p>
+            <!-- OPTION 2: put fallback content (text, image, Flash, etc.) if the browser doesn't support canvas -->
+        </canvas>
+    </body>
+</html>
