@@ -3,31 +3,15 @@ library("plyr");
 library("multcomp");
 library("clinfun");
 
-studies_all        = read.csv("data/studies2.csv", header = TRUE, sep = ",")
+studies_all        = read.csv("../../../data/studies/_misc/studies2.csv", header = TRUE, sep = ",")
 
 studies_all$Reward = studies_all$TWO_R
 
 studies_all$Reward = revalue(studies_all$Reward, c("c4op" = "LL", "b4op" = "LH", "1" = "CT", "a3op" = "HL", "b3op"="HH"))
 studies_all$Reward = factor(studies_all$Reward, levels = c("LL", "LH", "CT", "HL", "HH"))
 
-studies_all$Reward = revalue(studies_all$Reward, c("c4op" = "LL", "b4op" = "LL", "null" = "CT", "a3op" = "HH", "b3op" = "HH"))
-studies_all$Reward = factor(studies_all$Reward, levels = c("LL", "CT", "HH"))
-
-studies_1st = studies_all[studies_all$First == "yes",]
-studies_2nd = studies_all[studies_all$First == "no",]
-
-#dim(studies)
-#class(studies_all)
-
-f_in = "mouse"
-f_o1 = 0;  #0
-f_o2 = 0;  #0
-f_db = -100;#-25
-f_dt = +100;#+25
-
-#f_df = studies_1st[f_in == studies_1st$Input & f_o1 <= studies_1st$ONE_T & f_o2 <= studies_1st$TWO_T & f_db <= studies_1st$DIFF & studies_1st$DIFF <= f_dt,];
-f_df = studies_1st[f_in == studies_1st$Input,];
-#f_df = studies_1st;
+#f_df = studies_all[studies_all$First == "yes",]
+f_df = studies_all[studies_all$First == "yes" & studies_all$Input == "mouse",]
 
 v1 = data.frame(T = c(f_df$ONE_T, f_df$TWO_T), S = rep(factor(c("ONE", "TWO")), each = dim(f_df)[1]), I = factor(c(as.character(f_df$Input), as.character(f_df$Input))), R = factor(c(as.character(f_df$Reward), as.character(f_df$Reward)), levels = c('LL', 'LH', 'CT', 'HL', 'HH')));
 v2 = ddply(v1, .(I, S, R), summarize, med = median(T), avg = mean(T), var = var(T));
@@ -112,10 +96,8 @@ wilcox.test((f_df$TWO_T[f_df$Reward == "LL"]), (f_df$TWO_T[f_df$Reward == "LH"])
 anova(aov(ONE_T ~ Reward, dat = f_df))
 anova(aov(TWO_T ~ Reward, dat = f_df))
 
-
-wilcox.test((f_df$ONE_T[f_df$Reward == "LH"]), (f_df$TWO_T[f_df$Reward == "LH"]), exact = FALSE, paired= TRUE)$p.value
-
-wilcox.test((f_df$TWO_T[f_df$Reward == "CT"]), (f_df$TWO_T[f_df$Reward == "HH"]), alternative = "less"   , exact = FALSE)$p.value
+wilcox.test((f_df$ONE_T[f_df$Reward == "LL"]), (f_df$ONE_T[f_df$Reward == "LH"]), alternative = "less", exact = FALSE)$p.value
+wilcox.test((f_df$TWO_T[f_df$Reward == "LL"]), (f_df$TWO_T[f_df$Reward == "LH"]), alternative = "less"   , exact = FALSE)$p.value
 wilcox.test((f_df$TWO_T[f_df$Reward == "CT"]), (f_df$TWO_T[f_df$Reward == "LL"]), alternative = "greater", exact = FALSE)$p.value
 
 #wilkoxon test shows multiple significant differences
