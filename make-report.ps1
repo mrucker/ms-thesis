@@ -44,7 +44,7 @@ $participant_experiment_stats = $participant_experiment_stats | % { $_ | Add-Mem
 #$avg_machine_area_hash = $participant_experiment_stats | group 'Machine' | select Name, @{Name='Area_AVG';Expression={ $_.Group | sort 'Area' | select -skip 1 | sort 'Area' -Descending | select -skip 1 | Measure 'Area' -average | select -expandproperty 'average' }} | % { @{$_.Name = [math]::Round($_.Area_AVG) } }
 #$participant_experiment_stats = $participant_experiment_stats | % { $_ | Add-Member @{"Area_AVG"=($avg_machine_area_hash.$($_.Machine))} -PassThru }
 
-$participant_experiment_stats | sort 'TimeStamp' | format-table 'AVG_T', 'ONE_T', 'TWO_T', 'E_CNT', 'ONE_R', 'TWO_R', 'Area', 'Machine', 'Age', 'Gender', 'First', 'Input', 'Study', 'TimeStamp', 'P_ID', 'ONE_E', 'TWO_E' | Out-String |% {Write-Host $_}
+#$participant_experiment_stats | sort 'TimeStamp' | format-table 'AVG_T', 'ONE_T', 'TWO_T', 'E_CNT', 'ONE_R', 'TWO_R', 'Area', 'Machine', 'Age', 'Gender', 'First', 'Input', 'Study', 'TimeStamp', 'P_ID', 'ONE_E', 'TWO_E' | Out-String |% {Write-Host $_}
 
 Write-Host $participant_experiment_stats.Count
 
