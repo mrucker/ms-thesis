@@ -70,6 +70,8 @@ function ReplayMouse(observations)
 		rw_ps.push({x:observations[0][0], y:observations[0][1]          });
 		sm_vs.push({x:0, y:0, m:0, d:0});
 		sm_as.push({x:0, y:0, m:0, d:0});
+		
+		zero_count = 0;
 
 		for(i = 1; i < 450; i++) {
 			
@@ -83,7 +85,7 @@ function ReplayMouse(observations)
 
 			raw_p_at_i.x = observations[i][0];
 			raw_p_at_i.y = observations[i][1];
-
+						
 			raw_v_at_i.x = raw_p_at_i.x - rw_ps[i-1].x;
 			raw_v_at_i.y = raw_p_at_i.y - rw_ps[i-1].y;
 			raw_v_at_i.m = Math.sqrt(Math.pow(raw_v_at_i.x,2) + Math.pow(raw_v_at_i.y,2));
@@ -95,16 +97,37 @@ function ReplayMouse(observations)
 
 			rw_p_at_i.x = raw_p_at_i.x;
 			rw_p_at_i.y = raw_p_at_i.y;
-			
-			sm_v_at_i.x = 2/6 * sm_vs[i-1].x + 4/6 * raw_v_at_i.x;
-			sm_v_at_i.y = 2/6 * sm_vs[i-1].y + 4/6 * raw_v_at_i.y;
-			sm_v_at_i.m = 2/6 * sm_vs[i-1].m + 4/6 * raw_v_at_i.m;
-			sm_v_at_i.d = 2/6 * sm_vs[i-1].d + 4/6 * raw_v_at_i.d;
 
-			sm_a_at_i.x = 2/6 * sm_as[i-1].x + 4/6 * raw_a_at_i.x;
-			sm_a_at_i.y = 2/6 * sm_as[i-1].y + 4/6 * raw_a_at_i.y;
-			sm_a_at_i.m = 2/6 * sm_as[i-1].m + 4/6 * raw_a_at_i.m;
-			
+			if(raw_v_at_i.m != 0) {				
+				zero_count = 0;
+				
+				sm_v_at_i.x = 2/6 * sm_vs[i-1].x + 4/6 * raw_v_at_i.x;
+				sm_v_at_i.y = 2/6 * sm_vs[i-1].y + 4/6 * raw_v_at_i.y;
+				sm_v_at_i.m = 2/6 * sm_vs[i-1].m + 4/6 * raw_v_at_i.m;
+				sm_v_at_i.d = 2/6 * sm_vs[i-1].d + 4/6 * raw_v_at_i.d;
+
+				sm_a_at_i.x = 2/6 * sm_as[i-1].x + 4/6 * raw_a_at_i.x;
+				sm_a_at_i.y = 2/6 * sm_as[i-1].y + 4/6 * raw_a_at_i.y;
+				sm_a_at_i.m = 2/6 * sm_as[i-1].m + 4/6 * raw_a_at_i.m;
+				
+			}
+			else {
+				zero_count++;
+
+				sm_v_at_i = sm_vs[i-1];
+				sm_a_at_i = sm_as[i-1]
+
+				if(zero_count > 10) {
+					sm_v_at_i.x *= Math.pow(12/13,3);
+					sm_v_at_i.y *= Math.pow(12/13,3);
+					sm_v_at_i.m *= Math.pow(12/13,3);
+
+					sm_a_at_i.x *= Math.pow(12/13,3);
+					sm_a_at_i.y *= Math.pow(12/13,3);
+					sm_a_at_i.m *= Math.pow(12/13,3);
+				}
+			}
+
 			rw_ps.push(rw_p_at_i);
 			sm_vs.push(sm_v_at_i);
 			sm_as.push(sm_a_at_i);
