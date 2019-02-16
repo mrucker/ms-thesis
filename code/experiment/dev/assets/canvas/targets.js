@@ -1,6 +1,7 @@
 function Targets(mouse, rewardId) {
     var targets = [];
-	
+	var myRewardEarned = 0;
+
 	_renderer.setBaseRadius(150);
 
     //if you change this 200 value be sure to remember to also change the matlab huge_trans_pre function as well
@@ -24,15 +25,24 @@ function Targets(mouse, rewardId) {
         
         //this is a little janky, but because the targets are positioned relative to the canvas they don't have a position until the next 
         //time the canvas is redrawn. Therefore it is possible for the target to exist and not have a position so we ignore it until it does.       
-        var ts = targets.filter(function(target) { return target.getX() != null && target.getY() != null; });
+        var ts = targets.filter(function(target) { return target.getX() != 0 && target.getY() != 0; });
         var ds = ts.map(function(target) { return target.getData().map(Math.round); });
         
-        return [_renderer.getEffectiveRadius()].concat(ds.toFlat());
+        return [Math.round(_renderer.getEffectiveRadius(),0)].concat(ds.toFlat());
     }
 
     this.touchCount = function() {
-        return targets.filter(function(target) { return target.isNewTouch(); }).length;
+        
+		var touchedTargets = targets.filter(function(target) { return target.isNewTouch(); });
+		
+		myRewardEarned = touchedTargets.map(function(target) { return target.getReward() }).reduce(function(a, b) { a + b }, 0)
+		
+		return touchedTargets.length;
     }
+	
+	this.rewardEarned = function () {
+		return myRewardEarned;
+	}
 }
 
 function Target(mouse, x_pct, y_pct, fixed_age, rewardId) {
@@ -63,9 +73,10 @@ function Target(mouse, x_pct, y_pct, fixed_age, rewardId) {
 
     this.getData = function() {
         return [
-            Math.round(self.getX()     ,0),
-            Math.round(self.getY()     ,0),
-            Math.round(self.getAge()   ,0),
+            Math.round(self.getX()         ,0),
+            Math.round(self.getY()         ,0),
+			Math.round(self.getReward()*100,0),
+            Math.round(self.getAge()       ,0),
         ];
     };
 
@@ -89,6 +100,10 @@ function Target(mouse, x_pct, y_pct, fixed_age, rewardId) {
         var targetY = effectiveY;
         var mouseX = mouse.getX();
         var mouseY = mouse.getY();
+
+		if(effectiveX == 0 && effectiveY == 0) {
+			return false;
+		}
 
         return dist(targetX,targetY,mouseX,mouseY) <= _renderer.getEffectiveRadius();
     };

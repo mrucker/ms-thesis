@@ -86,7 +86,7 @@ function Experiment(canvas, participantId, rewardId)
 		
         //Measurements to add: touch count, observation count,
         saveData({
-			"stopTime" :new Date().toUTCString()
+			"stopTime" : new Date().toUTCString()
 			, "fps"    : fps.getHz()
 			, "ops"    : obs.getHz()
 			, "errors" : errors.concat(obs.getErrors()).toDistinct()

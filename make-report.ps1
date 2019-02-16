@@ -20,16 +20,18 @@ $participant_experiment_stats = $experiments | Group 'ParticipantId' | Select `
 	 @{Name="E_CNT"      ;Expression={ $_.Count } } `
 	,@{Name="P_ID"       ;Expression={ $_.Name } } `
 	,@{Name="AVG_T"      ;Expression={ $_.Group | Measure 'T_N' -Average | select -ExpandProperty 'Average' }} `
-	,@{Name="ONE_T"      ;Expression={ $_.Group | Sort InsertTimeStamp             | Select -First 1 -ExpandProperty 'T_N' }} `
-	,@{Name="TWO_T"      ;Expression={ $_.Group | Sort InsertTimeStamp -Descending | Select -First 1 -ExpandProperty 'T_N' }} `
-	,@{Name="ONE_O"      ;Expression={ $_.Group | Sort InsertTimeStamp             | Select -First 1 -ExpandProperty 'O_N' }} `
-	,@{Name="TWO_O"      ;Expression={ $_.Group | Sort InsertTimeStamp -Descending | Select -First 1 -ExpandProperty 'O_N' }} `
-	,@{Name="ONE_E"      ;Expression={ $_.Group | Sort InsertTimeStamp             | Select -First 1 -ExpandProperty 'Id' }} `
-	,@{Name="TWO_E"      ;Expression={ $_.Group | Sort InsertTimeStamp -Descending | Select -First 1 -ExpandProperty 'Id' }} `
-	,@{Name="ONE_R"      ;Expression={ $_.Group | Sort InsertTimeStamp             | Select -First 1 -ExpandProperty 'RewardId' }} `
-	,@{Name="TWO_R"      ;Expression={ $_.Group | Sort InsertTimeStamp -Descending | Select -First 1 -ExpandProperty 'RewardId' }} `
-	,@{Name="TimeStamp"  ;Expression={ $_.Group                                    | select -First 1 -ExpandProperty 'InsertTimeStamp' }} `
-	,@{Name="Resolution" ;Expression={ $_.Group                                    | select -First 1 -ExpandProperty 'Resolution' }} `
+	,@{Name="ONE_T"      ;Expression={ $_.Group | Sort StopTime             | Select -First 1 -ExpandProperty 'T_N' }} `
+	,@{Name="TWO_T"      ;Expression={ $_.Group | Sort StopTime -Descending | Select -First 1 -ExpandProperty 'T_N' }} `
+	,@{Name="ONE_O"      ;Expression={ $_.Group | Sort StopTime             | Select -First 1 -ExpandProperty 'O_N' }} `
+	,@{Name="TWO_O"      ;Expression={ $_.Group | Sort StopTime -Descending | Select -First 1 -ExpandProperty 'O_N' }} `
+	,@{Name="ONE_E"      ;Expression={ $_.Group | Sort StopTime             | Select -First 1 -ExpandProperty 'Id' }} `
+	,@{Name="TWO_E"      ;Expression={ $_.Group | Sort StopTime -Descending | Select -First 1 -ExpandProperty 'Id' }} `
+	,@{Name="ONE_R"      ;Expression={ $_.Group | Sort StopTime             | Select -First 1 -ExpandProperty 'RewardId' }} `
+	,@{Name="TWO_R"      ;Expression={ $_.Group | Sort StopTime -Descending | Select -First 1 -ExpandProperty 'RewardId' }} `
+	,@{Name="ONE_F"      ;Expression={ $_.Group | Sort StopTime             | Select -First 1 -ExpandProperty 'FPS' }} `
+	,@{Name="TWO_F"      ;Expression={ $_.Group | Sort StopTime -Descending | Select -First 1 -ExpandProperty 'FPS' }} `
+	,@{Name="TimeStamp"  ;Expression={ $_.Group                              | select -First 1 -ExpandProperty 'StopTime' }} `
+	,@{Name="Resolution" ;Expression={ $_.Group                              | select -First 1 -ExpandProperty 'Resolution' }} `
 	,@{Name="Area"       ;Expression={($_.Group | select -First 1 -ExpandProperty 'Resolution' | select -First 1) * ($_.Group | select -First 1 -ExpandProperty 'Resolution' | select -Last 1) } }
 
 $participant_experiment_stats = $participant_experiment_stats | % { $_ | Add-Member @{"Machine"=($participant_hash.$($_.P_ID)).Machine} -PassThru }

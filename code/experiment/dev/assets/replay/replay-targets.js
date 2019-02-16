@@ -1,5 +1,5 @@
 function ReplayTargets(observations, mouse, rewardId) {	
-
+	
 	_renderer.setBaseRadius(150);
 
 	var o_i = 0;
@@ -9,7 +9,9 @@ function ReplayTargets(observations, mouse, rewardId) {
 	}
 	
     this.draw = function(canvas){
-				
+
+		_renderer.setBaseRadius(observations[o_i][4]/_renderer.getAreaPctSqrt())
+	
 		for(i = 5; i < observations[o_i].length; i+=3) {
 
 			var x_pct = observations[o_i][i+0]/observations[o_i][2];
@@ -17,12 +19,42 @@ function ReplayTargets(observations, mouse, rewardId) {
 			var age   = observations[o_i][i+2];
 
 			if(x_pct != 0 && y_pct != 0) {
-				
+
 				var target = new ReplayTarget(mouse, x_pct, y_pct, age, rewardId);
 
 				target.draw(canvas);
 			}
 		}
+    }
+	
+	this.touchCount = function() {
+		
+		var count = 0;
+		
+		if(o_i > 0) {		
+			for(i = 5; i < observations[o_i].length; i+=3) {
+
+				var target_x = observations[o_i][i+0];
+				var target_y = observations[o_i][i+1];
+				var age   = observations[o_i][i+2];
+
+				if(target_x != 0 && target_y != 0) {
+
+					var old_mouse_x = observations[o_i-1][0]
+					var old_mouse_y = observations[o_i-1][1]
+					var now_mouse_x = observations[o_i  ][0]
+					var now_mouse_y = observations[o_i  ][1] 
+
+					var target = new ReplayTarget(mouse, 0, 0, age, rewardId);
+
+					if(target.isNewTouch(old_mouse_x, old_mouse_y, now_mouse_x, now_mouse_y, target_x, target_y)) {
+						count ++;
+					}
+				}
+			}
+		}
+		
+		return count;
     }
 }
 
@@ -49,28 +81,23 @@ function ReplayTarget(mouse, x_pct, y_pct, fixed_age, rewardId) {
     this.getAge = function() { return fixed_age || (Date.now() - creationTime); };
     this.isDead = function() { return self.getAge() >= 100 && _renderer.yOffset(self.getAge()) == 0;};
 
-    this.isNewTouch = function() {
-
-		if(self.isTouched() && isNextTouchNew) {
-			isNextTouchNew = false;
-			return true;
-		}
-
-		if(!self.isTouched()) {
-			isNextTouchNew = true;
-		}
-
-		return false;
+    this.isNewTouch = function(old_mouse_x, old_mouse_y, now_mouse_x, now_mouse_y, target_x, target_y) {
+	
+		var wasTouchedPrev = dist(target_x, target_y, old_mouse_x, old_mouse_y) <= _renderer.getEffectiveRadius()
+		var isTouchedNow   = dist(target_x, target_y, now_mouse_x, now_mouse_y) <= _renderer.getEffectiveRadius()
+	
+		return isTouchedNow && !wasTouchedPrev;// && fixed_age > 30;
     }
 
-    this.isTouched  = function() {
+	
+    this.isTouched = function() {
 
         var targetX = effectiveX;
         var targetY = effectiveY;
         var mouseX = mouse.getX();
         var mouseY = mouse.getY();
 
-        return dist(targetX,targetY,mouseX,mouseY) <= _renderer.getEffectiveRadius();
+        return dist(targetX, targetY, mouseX, mouseY) <= _renderer.getEffectiveRadius();
     };
 	
 	this.getReward = function() {

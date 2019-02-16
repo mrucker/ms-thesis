@@ -6,6 +6,7 @@ function Observations(participantId, experimentId, mouse, targets, canvas)
     var errors  = [];
     
 	var touchCount = 0;
+	var rewardEarned = 0;
 	
     var payloadSize  = 30;
     var obsInQueue   = [];
@@ -74,6 +75,9 @@ function Observations(participantId, experimentId, mouse, targets, canvas)
             //25% reduction in data transmission if I send observation as array of arrays rather than key/values
             var observation = mouse.getData().concat(canvas.getData()).concat(targets.getData());
             
+			touchCount   += targets.touchCount();
+			rewardEarned += targets.rewardEarned();
+			
             obsInMemory.push(observation);
             obsInQueue .push(observation);
 
@@ -81,8 +85,6 @@ function Observations(participantId, experimentId, mouse, targets, canvas)
                 save(obsInQueue.slice(0, payloadSize));
                 obsInQueue = obsInQueue.slice(payloadSize);
             }
-
-            touchCount += targets.touchCount();
 
             setTimeout(observe, 1000/ops.correctedHz(1,ops_Hz));
         }
@@ -93,7 +95,7 @@ function Observations(participantId, experimentId, mouse, targets, canvas)
         if(obsToSave.length == 0) {
             return;
         }
-    
+
         attempt = attempt || 1;
 
         if(!obsToSave) {

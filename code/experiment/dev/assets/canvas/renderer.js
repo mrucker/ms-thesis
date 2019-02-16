@@ -46,6 +46,10 @@ function TargetRenderer() {
 		return height; 
 	}
 
+	this.getAreaPctSqrt = function() {
+		return areaPctSqrt;
+	}
+	
 	this.getEffectiveRadius = function() {
 		return baseRadius * areaPctSqrt;
 	}

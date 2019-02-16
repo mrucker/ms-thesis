@@ -9,6 +9,7 @@ function ReplayExperiment(canvas, observations, rewardId, frameRate)
 	var fps_Hz = frameRate;
 
 	var currentObservation = 0;
+	var touchCount         = 0;
 
     this.run = function() {
         if(!canvas.getContext2d()) {
@@ -42,6 +43,7 @@ function ReplayExperiment(canvas, observations, rewardId, frameRate)
 	
     this.draw = function(canvas) {
         fps.cycle();
+		
     }
 
 	function play(deferred) {				
@@ -49,11 +51,13 @@ function ReplayExperiment(canvas, observations, rewardId, frameRate)
 		self.showObservation(currentObservation);
 		
 		currentObservation++;
+		touchCount += targets.touchCount()
 		
 		if(currentObservation < 450) {
 			setTimeout(function() { play(deferred) }, 1000/fps.correctedHz(1,fps_Hz));
 		}
 		else {
+			console.log(touchCount)
 			deferred.resolve();
 		}
 	}
