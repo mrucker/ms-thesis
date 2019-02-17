@@ -16,37 +16,32 @@ $experiments  = Get-ChildItem ".\data\studies\$study\experiments\*.json"  -recur
 $participant_hash = $participants | % { @{"$($_.id)" = $_ } }
 
 #touch statistics between all experiments for a participant
-$participant_experiment_stats = $experiments | Group 'ParticipantId' | Select `
+$participant_experiment_stats = $experiments | Sort InsertTimeStamp | Group 'ParticipantId' | Select `
 	 @{Name="E_CNT"      ;Expression={ $_.Count } } `
-	,@{Name="P_ID"       ;Expression={ $_.Name } } `
-	,@{Name="AVG_T"      ;Expression={ $_.Group | Measure 'T_N' -Average | select -ExpandProperty 'Average' }} `
-	,@{Name="ONE_T"      ;Expression={ $_.Group | Sort StopTime             | Select -First 1 -ExpandProperty 'T_N' }} `
-	,@{Name="TWO_T"      ;Expression={ $_.Group | Sort StopTime -Descending | Select -First 1 -ExpandProperty 'T_N' }} `
-	,@{Name="ONE_O"      ;Expression={ $_.Group | Sort StopTime             | Select -First 1 -ExpandProperty 'O_N' }} `
-	,@{Name="TWO_O"      ;Expression={ $_.Group | Sort StopTime -Descending | Select -First 1 -ExpandProperty 'O_N' }} `
-	,@{Name="ONE_E"      ;Expression={ $_.Group | Sort StopTime             | Select -First 1 -ExpandProperty 'Id' }} `
-	,@{Name="TWO_E"      ;Expression={ $_.Group | Sort StopTime -Descending | Select -First 1 -ExpandProperty 'Id' }} `
-	,@{Name="ONE_R"      ;Expression={ $_.Group | Sort StopTime             | Select -First 1 -ExpandProperty 'RewardId' }} `
-	,@{Name="TWO_R"      ;Expression={ $_.Group | Sort StopTime -Descending | Select -First 1 -ExpandProperty 'RewardId' }} `
-	,@{Name="ONE_F"      ;Expression={ $_.Group | Sort StopTime             | Select -First 1 -ExpandProperty 'FPS' }} `
-	,@{Name="TWO_F"      ;Expression={ $_.Group | Sort StopTime -Descending | Select -First 1 -ExpandProperty 'FPS' }} `
-	,@{Name="TimeStamp"  ;Expression={ $_.Group                              | select -First 1 -ExpandProperty 'StopTime' }} `
-	,@{Name="Resolution" ;Expression={ $_.Group                              | select -First 1 -ExpandProperty 'Resolution' }} `
-	,@{Name="Area"       ;Expression={($_.Group | select -First 1 -ExpandProperty 'Resolution' | select -First 1) * ($_.Group | select -First 1 -ExpandProperty 'Resolution' | select -Last 1) } }
+	,@{Name="P_ID"       ;Expression={ $_.Name  } } `
+	,@{Name="AVG_T"      ;Expression={ $_.Group | Measure 'T_N' -Average | Select -ExpandProperty 'Average' }} `
+	,@{Name="ONE_T"      ;Expression={ $_.Group | Select -Skip 0 -First 1 -ExpandProperty 'T_N' }} `
+	,@{Name="TWO_T"      ;Expression={ $_.Group | Select -Skip 1 -First 1 -ExpandProperty 'T_N' }} `
+	,@{Name="ONE_O"      ;Expression={ $_.Group | Select -Skip 0 -First 1 -ExpandProperty 'O_N' }} `
+	,@{Name="TWO_O"      ;Expression={ $_.Group | Select -Skip 1 -First 1 -ExpandProperty 'O_N' }} `
+	,@{Name="ONE_E"      ;Expression={ $_.Group | Select -Skip 0 -First 1 -ExpandProperty 'Id' }} `
+	,@{Name="TWO_E"      ;Expression={ $_.Group | Select -Skip 1 -First 1 -ExpandProperty 'Id' }} `
+	,@{Name="ONE_R"      ;Expression={ $_.Group | Select -Skip 0 -First 1 -ExpandProperty 'RewardId' }} `
+	,@{Name="TWO_R"      ;Expression={ $_.Group | Select -Skip 1 -First 1 -ExpandProperty 'RewardId' }} `
+	,@{Name="ONE_F"      ;Expression={ $_.Group | Select -Skip 0 -First 1 -ExpandProperty 'FPS' }} `
+	,@{Name="TWO_F"      ;Expression={ $_.Group | Select -Skip 1 -First 1 -ExpandProperty 'FPS' }} `
+	,@{Name="ONE_TS"     ;Expression={ $_.Group | Select -Skip 0 -First 1 -ExpandProperty 'InsertTimeStamp' }} `
+	,@{Name="TWO_TS"     ;Expression={ $_.Group | Select -Skip 1 -First 1 -ExpandProperty 'InsertTimeStamp' }} `
+	,@{Name="Resolution" ;Expression={ $_.Group | Select -Skip 0 -First 1 -ExpandProperty 'Resolution' }} `
 
 $participant_experiment_stats = $participant_experiment_stats | % { $_ | Add-Member @{"Machine"=($participant_hash.$($_.P_ID)).Machine} -PassThru }
-$participant_experiment_stats = $participant_experiment_stats | % { $_ | Add-Member @{"Age"=($participant_hash.$($_.P_ID)).Age}  -PassThru }
-$participant_experiment_stats = $participant_experiment_stats | % { $_ | Add-Member @{"Gender"=($participant_hash.$($_.P_ID)).Gender}  -PassThru }
-$participant_experiment_stats = $participant_experiment_stats | % { $_ | Add-Member @{"First"=($participant_hash.$($_.P_ID)).First} -PassThru }
-$participant_experiment_stats = $participant_experiment_stats | % { $_ | Add-Member @{"Input"=($participant_hash.$($_.P_ID)).Device} -PassThru }
+$participant_experiment_stats = $participant_experiment_stats | % { $_ | Add-Member @{"Age"    =($participant_hash.$($_.P_ID)).Age    } -PassThru }
+$participant_experiment_stats = $participant_experiment_stats | % { $_ | Add-Member @{"Gender" =($participant_hash.$($_.P_ID)).Gender } -PassThru }
+$participant_experiment_stats = $participant_experiment_stats | % { $_ | Add-Member @{"First"  =($participant_hash.$($_.P_ID)).First  } -PassThru }
+$participant_experiment_stats = $participant_experiment_stats | % { $_ | Add-Member @{"Input"  =($participant_hash.$($_.P_ID)).Device } -PassThru }
 $participant_experiment_stats = $participant_experiment_stats | % { $_ | Add-Member @{"Browser"=($participant_hash.$($_.P_ID)).Browser} -PassThru }
-$participant_experiment_stats = $participant_experiment_stats | % { $_ | Add-Member @{"System"=($participant_hash.$($_.P_ID)).System} -PassThru }
-$participant_experiment_stats = $participant_experiment_stats | % { $_ | Add-Member @{"Study"=$study} -PassThru }
-
-#$avg_machine_area_hash = $participant_experiment_stats | group 'Machine' | select Name, @{Name='Area_AVG';Expression={ $_.Group | sort 'Area' | select -skip 1 | sort 'Area' -Descending | select -skip 1 | Measure 'Area' -average | select -expandproperty 'average' }} | % { @{$_.Name = [math]::Round($_.Area_AVG) } }
-#$participant_experiment_stats = $participant_experiment_stats | % { $_ | Add-Member @{"Area_AVG"=($avg_machine_area_hash.$($_.Machine))} -PassThru }
-
-#$participant_experiment_stats | sort 'TimeStamp' | format-table 'AVG_T', 'ONE_T', 'TWO_T', 'E_CNT', 'ONE_R', 'TWO_R', 'Area', 'Machine', 'Age', 'Gender', 'First', 'Input', 'Study', 'TimeStamp', 'P_ID', 'ONE_E', 'TWO_E' | Out-String |% {Write-Host $_}
+$participant_experiment_stats = $participant_experiment_stats | % { $_ | Add-Member @{"System" =($participant_hash.$($_.P_ID)).System } -PassThru }
+$participant_experiment_stats = $participant_experiment_stats | % { $_ | Add-Member @{"Study"  =($participant_hash.$($_.P_ID)).StudyId} -PassThru }
 
 Write-Host $participant_experiment_stats.Count
 

@@ -72,9 +72,10 @@ function ReplayMouse(observations)
 		sm_as.push({x:0, y:0, m:0, d:0});
 		
 		zero_count = 0;
+		avg_mouse_move = 0;
 
 		for(i = 1; i < 450; i++) {
-			
+
 			raw_p_at_i = {x:undefined, y:undefined                          };
 			raw_v_at_i = {x:undefined, y:undefined, m:undefined, d:undefined};
 			raw_a_at_i = {x:undefined, y:undefined, m:undefined, d:undefined};
@@ -131,6 +132,14 @@ function ReplayMouse(observations)
 			rw_ps.push(rw_p_at_i);
 			sm_vs.push(sm_v_at_i);
 			sm_as.push(sm_a_at_i);
+
+			avg_mouse_move = (i-1)/i * avg_mouse_move + 1/i * dist(rw_ps[i-1].x, rw_ps[i-1].y, rw_ps[i].x, rw_ps[i].y)
 		}
+		
+		console.log(avg_mouse_move)
 	}
+
+	function dist(x1,y1,x2,y2) {
+        return Math.sqrt(Math.pow(x1-x2,2)+Math.pow(y1-y2,2));
+    }
 }

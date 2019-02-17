@@ -12,11 +12,11 @@ function ReplayTargets(observations, mouse, rewardId) {
 
 		_renderer.setBaseRadius(observations[o_i][4]/_renderer.getAreaPctSqrt())
 	
-		for(i = 5; i < observations[o_i].length; i+=3) {
+		for(i = 5; i < observations[o_i].length; i+=4) {
 
 			var x_pct = observations[o_i][i+0]/observations[o_i][2];
 			var y_pct = observations[o_i][i+1]/observations[o_i][3];
-			var age   = observations[o_i][i+2];
+			var age   = observations[o_i][i+3];
 
 			if(x_pct != 0 && y_pct != 0) {
 
@@ -32,11 +32,11 @@ function ReplayTargets(observations, mouse, rewardId) {
 		var count = 0;
 		
 		if(o_i > 0) {		
-			for(i = 5; i < observations[o_i].length; i+=3) {
+			for(i = 5; i < observations[o_i].length; i+=4) {
 
 				var target_x = observations[o_i][i+0];
 				var target_y = observations[o_i][i+1];
-				var age   = observations[o_i][i+2];
+				var age      = observations[o_i][i+3];
 
 				if(target_x != 0 && target_y != 0) {
 
@@ -49,6 +49,7 @@ function ReplayTargets(observations, mouse, rewardId) {
 
 					if(target.isNewTouch(old_mouse_x, old_mouse_y, now_mouse_x, now_mouse_y, target_x, target_y)) {
 						count ++;
+						console.log( "(" + now_mouse_x + "," + now_mouse_y + ")" +  "(" + target_x + "," + target_y + ")")
 					}
 				}
 			}
