@@ -7,11 +7,11 @@ library("effsize");
 studies_all = read.csv("../../../data/studies/_misc/studies1.csv", header = TRUE, sep = ",")
 
 studies_all$TWO_R = revalue(studies_all$TWO_R, c("c4op" = "LL", "b4op" = "LH", "1" = "CT", "a3op" = "HL", "b3op"="HH"))
-studies_all$TWO_R = factor(studies_all$TWO_R, levels = c("HH", "LH", "HL", "CT", "LL"))
+studies_all$TWO_R = factor(studies_all$TWO_R, levels = c("HH", "HL", "CT", "LH", "LL"))
 
 f_df = studies_all[studies_all$First == "yes" & studies_all$Input == "mouse",]
 
-v1 = data.frame(T = c(f_df$ONE_T, f_df$TWO_T), S = rep(factor(c("ONE", "TWO")), each = dim(f_df)[1]), I = factor(c(as.character(f_df$Input), as.character(f_df$Input))), R = factor(c(as.character(f_df$TWO_R), as.character(f_df$TWO_R)), levels = c("HH", "LH", "HL", "CT", "LL")));
+v1 = data.frame(T = c(f_df$ONE_T, f_df$TWO_T), S = rep(factor(c("ONE", "TWO")), each = dim(f_df)[1]), I = factor(c(as.character(f_df$Input), as.character(f_df$Input))), R = factor(c(as.character(f_df$TWO_R), as.character(f_df$TWO_R)), levels = c("HH", "HL", "CT", "LH", "LL")));
 v2 = ddply(v1, .(I, S, R), summarize, med = median(T), avg = mean(T), var = var(T));
 
 ggplot(v2[v2$I == "mouse" | v2$I == "touchscreen" | v2$I == "touchpad",], aes(S, med, colour = R)) +
@@ -23,7 +23,7 @@ ggplot(v2[v2$I == "mouse" | v2$I == "touchscreen" | v2$I == "touchpad",], aes(S,
     labs(title="Median Game Touches", legend="Reward", y="Game", x="median touches", shape="Reward", color="Reward");
 
 par(mfrow = c(1, 3))
-plot(ONE_T ~ TWO_R, data = f_df, ylim = c(0, 90))
+plot(TWO_R ~ Age, data = f_df, ylim = c(0, 90))
 plot(TWO_T ~ TWO_R, data = f_df, ylim = c(0, 90))
 plot(DIFF  ~ TWO_R, data = f_df)
 par(mfrow = c(1, 1))
@@ -57,18 +57,19 @@ kruskal.test(ONE_T ~ TWO_R, data = f_df[f_df$TWO_R != "LL" & f_df$TWO_R != "LH",
 kruskal.test(ONE_T ~ TWO_R, data = f_df[f_df$TWO_R != "HH" & f_df$TWO_R != "HL",])
 
 #wilkoxon test shows multiple significant differences
-w1_ps = c(
-      wilcox.test((f_df$TWO_T[f_df$TWO_R == "LL"]), (f_df$TWO_T[f_df$TWO_R == "CT"]), alternative = "less", exact = FALSE, paired = FALSE)$p.value
-    , wilcox.test((f_df$TWO_T[f_df$TWO_R == "LH"]), (f_df$TWO_T[f_df$TWO_R == "CT"]), alternative = "less", exact = FALSE, paired = FALSE)$p.value
+wh_ps = c(
+      wilcox.test((f_df$TWO_T[f_df$TWO_R == "HH"]), (f_df$TWO_T[f_df$TWO_R == "CT"]), alternative = "greater", exact = FALSE, paired = FALSE)$p.value
+    , wilcox.test((f_df$TWO_T[f_df$TWO_R == "HL"]), (f_df$TWO_T[f_df$TWO_R == "CT"]), alternative = "greater", exact = FALSE, paired = FALSE)$p.value
+    
 );
 
-w2_ps = c(
-      wilcox.test((f_df$TWO_T[f_df$TWO_R == "HL"]), (f_df$TWO_T[f_df$TWO_R == "CT"]), alternative = "greater", exact = FALSE, paired = FALSE)$p.value
-    , wilcox.test((f_df$TWO_T[f_df$TWO_R == "HH"]), (f_df$TWO_T[f_df$TWO_R == "CT"]), alternative = "greater", exact = FALSE, paired = FALSE)$p.value
+wl_ps = c(      
+      wilcox.test((f_df$TWO_T[f_df$TWO_R == "LH"]), (f_df$TWO_T[f_df$TWO_R == "CT"]), alternative = "less", exact = FALSE, paired = FALSE)$p.value
+    , wilcox.test((f_df$TWO_T[f_df$TWO_R == "LL"]), (f_df$TWO_T[f_df$TWO_R == "CT"]), alternative = "less", exact = FALSE, paired = FALSE)$p.value
 );
 
-p.adjust(w1_ps, method = "holm", n = 2)
-p.adjust(w2_ps, method = "holm", n = 2)
+p.adjust(wh_ps, method = "holm", n = 2)
+p.adjust(wl_ps, method = "holm", n = 2)
 
 jonckheere.test(f_df$ONE_T, as.numeric(f_df$TWO_R), alternative = "decreasing")
 cliff.delta(f_df[f_df$TWO_R == "LL","TWO_T"], f_df[f_df$TWO_R == "CT","TWO_T"])
