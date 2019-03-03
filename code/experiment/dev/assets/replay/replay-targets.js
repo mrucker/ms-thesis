@@ -1,7 +1,5 @@
 function ReplayTargets(observations, mouse, rewardId) {	
 	
-	_renderer.setBaseRadius(150);
-
 	var o_i = 0;
 
 	this.showObservation = function(i) {

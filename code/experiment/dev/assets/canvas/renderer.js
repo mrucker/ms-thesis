@@ -5,7 +5,7 @@ function TargetRenderer() {
 	var self = this;
 
 	var areaPctSqrt = 1;
-	var baseRadius  = 100;
+	var baseRadius  = 150;
 	
 	var lifespan = 1000;
 	
@@ -33,6 +33,22 @@ function TargetRenderer() {
 	}
 	
 	this.setAreaPctSqrt = function(new_areaPctSqrt) {
+		
+		//     baseRadius = 150
+		//new_areaPctSqrt = Math.sqrt( (canvas.width*canvas.height) / (3000 * 1500) )
+		//    areaPctSqrt = Math.round( new_areaPctSqrt * 100) / 100
+		//  target_radius = baseRadius * areaPctSqrt
+		
+		//so, radius = 150 * areaPctSqrt
+		//           = 150 * new_areaPctSqrt * 100 / 100
+		//           = 150 * new_areaPctSqrt
+		//           = 150 * Math.sqrt(          (canvas.width*canvas.height) / (3000 * 1500) )
+		//           =       Math.sqrt( 150^2 *  (canvas.width*canvas.height) / (3000 * 1500) )
+		//           =       Math.sqrt( 150^2 *  (canvas.width*canvas.height) / (3000 * 1500) )
+		//           =       Math.sqrt( 150^2 *  (canvas.width*canvas.height) / (3000 * 1500) )
+		
+		//so, pct_area = (150^2 * Math.PI) / (3000 * 1500)
+		
 		areaPctSqrt = Math.round(new_areaPctSqrt * 100) / 100;
 
 		rerender();
@@ -147,7 +163,7 @@ function TargetRenderer() {
 		return "0,0,0";
 	}
 
-	function allGray90(rewStep) {
+	function allGray50(rewStep) {
 		return "50,50,50";
 	}
 

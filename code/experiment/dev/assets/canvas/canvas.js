@@ -6,7 +6,7 @@ function Canvas(canvas)
     var started     = undefined;
     var stopped     = undefined;
     var fps         = new Frequency("fps", false);
-	var areaPctSqrt = Math.sqrt(canvas.width * canvas.height / (1000 * 3000));
+	var areaPctSqrt = Math.sqrt(canvas.width * canvas.height / (3000 * 1500));
 
     this.getData = function() {
         return self.getResolution();

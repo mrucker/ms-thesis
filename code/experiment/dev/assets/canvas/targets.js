@@ -2,8 +2,6 @@ function Targets(mouse, rewardId) {
     var targets = [];
 	var myRewardEarned = 0;
 
-	_renderer.setBaseRadius(150);
-
     //if you change this 200 value be sure to remember to also change the matlab huge_trans_pre function as well
     var process = poissonProcess.create(200, function () { targets.push(new Target(mouse, 0, 0, 0, rewardId))} );
 

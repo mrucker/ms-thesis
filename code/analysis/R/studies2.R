@@ -40,6 +40,11 @@ ggplot(studies_all, aes(Input, ONE_T, colour = Input)) +
     theme(axis.text.x = element_blank(), axis.ticks.x = element_blank()) +
     labs(x = "Devices", y = "Game 1 Touches", title = "Game 1 Touches By Device (n=2,161)", fill = "")
 
+ggplot(f_df, aes(TWO_R, ONE_T, color = Age)) + geom_boxplot()
+
+ggplot(data = f_df) + geom_boxplot(aes(x = TWO_R, y = ONE_T, color = TWO_R))
+ggplot(data = f_df) + geom_boxplot(aes(x = TWO_R, y = TWO_T, color = TWO_R))
+ggplot(data = f_df) + geom_boxplot(aes(x = TWO_R, y = TWO_T-ONE_T, color = TWO_R))
 
 ggplot(f_df, aes(x = Gender)) + geom_bar() + facet_grid(~TWO_R)
 ggplot(f_df, aes(x = Age)) + geom_bar() + facet_grid(~TWO_R)
@@ -51,10 +56,27 @@ kruskal.test(TWO_T ~ TWO_R, data = f_df)
 ggplot(f_df, aes(sample = (ONE_T))) + stat_qq() + stat_qq_line() + facet_grid(~TWO_R)
 ggplot(f_df, aes(sample = (TWO_T))) + stat_qq() + stat_qq_line() + facet_grid(~TWO_R)
 
+median(f_df$ONE_T[f_df$TWO_R == "HH"])
+median(f_df$ONE_T[f_df$TWO_R == "LH"])
+median(f_df$ONE_T[f_df$TWO_R == "CT"])
+
+wilcox.test(f_df$ONE_T[f_df$TWO_R == "HH"], f_df$TWO_T[f_df$TWO_R == "HH"], alternative = "two.sided", exact = FALSE, paired = TRUE)$p.value
+wilcox.test(f_df$ONE_T[f_df$TWO_R == "HL"], f_df$TWO_T[f_df$TWO_R == "HL"], alternative = "two.sided", exact = FALSE, paired = TRUE)$p.value
+wilcox.test(f_df$ONE_T[f_df$TWO_R == "LH"], f_df$TWO_T[f_df$TWO_R == "LH"], alternative = "two.sided", exact = FALSE, paired = TRUE)$p.value
+wilcox.test(f_df$ONE_T[f_df$TWO_R == "CT"], f_df$TWO_T[f_df$TWO_R == "CT"], alternative = "two.sided", exact = FALSE, paired = TRUE)$p.value
+wilcox.test(f_df$ONE_T[f_df$TWO_R == "LL"], f_df$TWO_T[f_df$TWO_R == "LL"], alternative = "two.sided", exact = FALSE, paired = TRUE)$p.value
+
+wilcox.test(f_df$ONE_T[f_df$TWO_R == "HH"], f_df$ONE_T[f_df$TWO_R == "CT"], alternative = "two.sided", exact = FALSE, paired = FALSE)$p.value
+wilcox.test(f_df$ONE_T[f_df$TWO_R == "HL"], f_df$ONE_T[f_df$TWO_R == "CT"], alternative = "two.sided", exact = FALSE, paired = FALSE)$p.value
+wilcox.test(f_df$ONE_T[f_df$TWO_R == "LH"], f_df$ONE_T[f_df$TWO_R == "CT"], alternative = "two.sided", exact = FALSE, paired = FALSE)$p.value
+wilcox.test(f_df$ONE_T[f_df$TWO_R == "LL"], f_df$ONE_T[f_df$TWO_R == "CT"], alternative = "two.sided", exact = FALSE, paired = FALSE)$p.value
+
 wilcox.test((f_df$TWO_T[f_df$TWO_R == "HH"]), (f_df$TWO_T[f_df$TWO_R == "CT"]), alternative = "greater", exact = FALSE, paired = FALSE)$p.value
 wilcox.test((f_df$TWO_T[f_df$TWO_R == "HL"]), (f_df$TWO_T[f_df$TWO_R == "CT"]), alternative = "greater", exact = FALSE, paired = FALSE)$p.value
 wilcox.test((f_df$TWO_T[f_df$TWO_R == "LH"]), (f_df$TWO_T[f_df$TWO_R == "CT"]), alternative = "greater", exact = FALSE, paired = FALSE)$p.value
 wilcox.test((f_df$TWO_T[f_df$TWO_R == "LL"]), (f_df$TWO_T[f_df$TWO_R == "CT"]), alternative = "less"   , exact = FALSE, paired = FALSE)$p.value
+
+wilcox.test((f_df$TWO_T[f_df$TWO_R == "HH" | f_df$TWO_R == "LH" | f_df$TWO_R == "HL"]), (f_df$TWO_T[f_df$TWO_R == "CT"]), alternative = "greater", exact = FALSE, paired = FALSE)$p.value
 
 jonckheere.test(f_df$ONE_T, as.numeric(f_df$TWO_R), alternative = "decreasing")
 cliff.delta(f_df[f_df$TWO_R == "LL", "TWO_T"], f_df[f_df$TWO_R == "CT", "TWO_T"])

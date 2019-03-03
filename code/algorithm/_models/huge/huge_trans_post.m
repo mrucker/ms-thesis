@@ -15,7 +15,7 @@ function s2 = huge_trans_post(s1, a, should_update_targets)
     window_state = s1(9:11  ,1);
     target_state = s1(12:end,1);
 
-    cursor_state = update_cursor_state(cursor_state,a);
+    cursor_state = update_cursor_state(cursor_state, a);
 
     if(should_update_targets)
         target_state = update_target_states(target_state);

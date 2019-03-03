@@ -46,6 +46,9 @@ ggplot(studies_all, aes(Input, ONE_T, colour = Input)) +
     theme(axis.text.x = element_blank(), axis.ticks.x = element_blank()) +
     labs(x = "Devices", y = "Game 1 Touches",  title = "Game 1 Touches By Device (n=2,161)", fill = "")
 
+ggplot(f_df, aes(TWO_R, ONE_T, color = Age)) + geom_boxplot()
+ggplot(f_df, aes(Gender, ONE_T, color = TWO_R)) + geom_boxplot()
+
 ggplot(f_df, aes(sample = (ONE_T))) + stat_qq() + stat_qq_line() + facet_grid(~TWO_R) 
 ggplot(f_df, aes(sample = (TWO_T))) + stat_qq() + stat_qq_line() + facet_grid(~TWO_R)
 
@@ -60,10 +63,9 @@ kruskal.test(ONE_T ~ TWO_R, data = f_df[f_df$TWO_R != "HH" & f_df$TWO_R != "HL",
 wh_ps = c(
       wilcox.test((f_df$TWO_T[f_df$TWO_R == "HH"]), (f_df$TWO_T[f_df$TWO_R == "CT"]), alternative = "greater", exact = FALSE, paired = FALSE)$p.value
     , wilcox.test((f_df$TWO_T[f_df$TWO_R == "HL"]), (f_df$TWO_T[f_df$TWO_R == "CT"]), alternative = "greater", exact = FALSE, paired = FALSE)$p.value
-    
 );
 
-wl_ps = c(      
+wl_ps = c(
       wilcox.test((f_df$TWO_T[f_df$TWO_R == "LH"]), (f_df$TWO_T[f_df$TWO_R == "CT"]), alternative = "less", exact = FALSE, paired = FALSE)$p.value
     , wilcox.test((f_df$TWO_T[f_df$TWO_R == "LL"]), (f_df$TWO_T[f_df$TWO_R == "CT"]), alternative = "less", exact = FALSE, paired = FALSE)$p.value
 );
