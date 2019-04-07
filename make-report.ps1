@@ -19,7 +19,6 @@ $participant_hash = $participants | % { @{"$($_.id)" = $_ } }
 $participant_experiment_stats = $experiments | Sort InsertTimeStamp | Group 'ParticipantId' | Select `
 	 @{Name="E_CNT"      ;Expression={ $_.Count } } `
 	,@{Name="P_ID"       ;Expression={ $_.Name  } } `
-	,@{Name="AVG_T"      ;Expression={ $_.Group | Measure 'T_N' -Average | Select -ExpandProperty 'Average' }} `
 	,@{Name="ONE_T"      ;Expression={ $_.Group | Select -Skip 0 -First 1 -ExpandProperty 'T_N' }} `
 	,@{Name="TWO_T"      ;Expression={ $_.Group | Select -Skip 1 -First 1 -ExpandProperty 'T_N' }} `
 	,@{Name="ONE_O"      ;Expression={ $_.Group | Select -Skip 0 -First 1 -ExpandProperty 'O_N' }} `
