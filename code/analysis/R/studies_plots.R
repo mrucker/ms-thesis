@@ -1,8 +1,8 @@
 library("ggplot2");
 library("plyr");
 
-a_df = a1_df
-f_df = f1_df
+a_df = a2_df
+f_df = f2_df
 
 count_title <- function(title, f_df) {
     return(paste(title, " ", "(n=", prettyNum(dim(f_df)[1], big.mark = ","), ")", sep = ""))
@@ -18,10 +18,14 @@ median_summary <- function(f_df) {
 ggplot(median_summary(f_df), aes(S, med, colour = R)) +
     geom_point(aes(shape = R), size = 3) +
     geom_line(aes(group = R)) +
-    scale_shape_manual(values = c(17, 16, 8, 18, 15)) +
-    facet_grid(~I) +
+    scale_shape_manual(values = c(17, 16, 8, 18, 15)) +    
     scale_color_grey() +
-    labs(title="Median Game Touches", y="Median Touches", x="Game", shape="Treatment", color="Group");
+    labs(title = count_title("Median Game Touches", f_df), y = "Median Touches", x = "Game", shape = "Group", color = "Group");
+
+ggplot(f_df, aes(x = TWO_R, y = TWO_T)) +
+    geom_boxplot() +
+    labs(x = "Group", y = "Touch Quartiles", title = count_title("Participant Count by Pre-Test Touches", f_df))
+
 
 ggplot(a_df, aes(Input, ONE_T, colour = Input)) +
     geom_boxplot() +
@@ -74,8 +78,9 @@ ggplot(f_df, aes(x = Clean_System, fill = TWO_R)) +
     facet_grid(rows = vars(TWO_R)) +
     labs(x = "System", y = "Participants", title = count_title("Participant Count by System", f_df), fill = "Group")
 
+
 ggplot(f_df, aes(TWO_R, ONE_T, color = Age)) + geom_boxplot()
 ggplot(f_df, aes(Gender, ONE_T, color = TWO_R)) + geom_boxplot()
 
-ggplot(f_df, aes(sample = (ONE_T))) + stat_qq() + stat_qq_line() + facet_grid(~TWO_R) 
-ggplot(f_df, aes(sample = (TWO_T))) + stat_qq() + stat_qq_line() + facet_grid(~TWO_R)
+ggplot(f_df, aes(sample = (ONE_T))) + stat_qq() + stat_qq_line() + facet_grid(~TWO_R) + labs(title = count_title("Game 1 QQ-Plot Against Normal", f_df))
+ggplot(f_df, aes(sample = (TWO_T))) + stat_qq() + stat_qq_line() + facet_grid(~TWO_R) + labs(title = count_title("Game 2 QQ-Plot Against Normal", f_df))

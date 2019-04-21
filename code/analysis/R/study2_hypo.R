@@ -32,7 +32,7 @@ wilcox.test((f2_df$TWO_T[f2_df$TWO_R == "HH" | f2_df$TWO_R == "LH" | f2_df$TWO_R
 
 jonckheere.test(f2_df$ONE_T, as.numeric(f2_df$TWO_R), alternative = "decreasing")
 
-cliff.delta(f2_df$TWO_T[f2_df$TWO_R == "HH"], f2_df$TWO_T[f2_df$TWO_R == "CT"])
-cliff.delta(f2_df$TWO_T[f2_df$TWO_R == "HL"], f2_df$TWO_T[f2_df$TWO_R == "CT"])
-cliff.delta(f2_df$TWO_T[f2_df$TWO_R == "LH"], f2_df$TWO_T[f2_df$TWO_R == "CT"])
-cliff.delta(f2_df$TWO_T[f2_df$TWO_R == "LL"], f2_df$TWO_T[f2_df$TWO_R == "CT"])
+cliff.delta(f2_df$TWO_T[f2_df$TWO_R == "HH"], f2_df$TWO_T[f2_df$TWO_R == "CT"])$estimate
+cliff.delta(f2_df$TWO_T[f2_df$TWO_R == "HL"], f2_df$TWO_T[f2_df$TWO_R == "CT"])$estimate
+cliff.delta(f2_df$TWO_T[f2_df$TWO_R == "LH"], f2_df$TWO_T[f2_df$TWO_R == "CT"])$estimate
+cliff.delta(f2_df$TWO_T[f2_df$TWO_R == "LL"], f2_df$TWO_T[f2_df$TWO_R == "CT"])$estimate
