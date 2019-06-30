@@ -2,6 +2,8 @@ library("plyr"); #for revalue()
 
 figs_path = "C:/Users/Mark/Desktop"
 
+source("theme.R");
+
 #study results
 a1_df = read.csv("../../../data/studies/_misc/studies1.csv", header = TRUE, sep = ",")
 a2_df = read.csv("../../../data/studies/_misc/studies2.csv", header = TRUE, sep = ",")
