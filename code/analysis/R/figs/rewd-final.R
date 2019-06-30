@@ -1,7 +1,7 @@
 library("ggplot2");
 library("gridExtra");
 
-file = sprintf("%s/rewd-final.png", figs_path)
+file = sprintf("%s/rewdfinal.png", figs_path)
 
 plot1 <- function(r_f, name) {
 

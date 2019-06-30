@@ -5,7 +5,7 @@ file1 = sprintf("%s/diff-exp1-age-gender.png", figs_path)
 
 plot1 <- function(f_df) {
     return(
-        ggplot(f_df, aes(x = Age, fill = TWO_R)) +
+        ggplot(f_df, aes(x = Age)) +
             geom_bar() +
             scale_fill_grey() +
             facet_grid(rows = vars(TWO_R)) +
@@ -15,7 +15,7 @@ plot1 <- function(f_df) {
 
 plot2 <- function(f_df) {
     return(
-        ggplot(f_df[f_df$Gender != "other",], aes(x = Gender, fill = TWO_R)) +
+        ggplot(f_df[f_df$Gender != "other",], aes(x = Gender)) +
             geom_bar() +
             scale_fill_grey() +
             facet_grid(~TWO_R) +

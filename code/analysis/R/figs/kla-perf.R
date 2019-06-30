@@ -46,14 +46,14 @@ plot3 <- function(kla) {
     )
 }
 
-png(file = file2, width = 1215, height = 475)
+png(file = file2, width = 1215, height = 300)
 grid.arrange(plot1(kla2), plot2(kla2), ncol = 2)
 dev.off()
 
-png(file = file3, width = 1215, height = 475)
+png(file = file3, width = 1215, height = 300)
 grid.arrange(plot1(kla3), plot2(kla3), ncol = 2)
 dev.off()
 
-png(file = file4, width = 1215, height = 475)
+png(file = file4, width = 1215, height = 300)
 grid.arrange(plot1(kla4), plot3(kla4), ncol = 2)
 dev.off()

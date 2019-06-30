@@ -5,7 +5,7 @@ file1 = sprintf("%s/diff-exp1-resolution-browser.png", figs_path)
 
 plot1 <- function(f_df) {
     return(
-        ggplot(f_df[f_df$Area < 2500000,], aes(x = Area, fill = TWO_R)) +
+        ggplot(f_df[f_df$Area < 2500000,], aes(x = Area)) +
             geom_histogram(bins = 60) +
             scale_fill_grey() +
             facet_grid(rows = vars(TWO_R)) +
@@ -15,7 +15,7 @@ plot1 <- function(f_df) {
 
 plot2 <- function(f_df) {
     return(
-        ggplot(f_df[f_df$Clean_Browser != "chrome mobile" & f_df$Clean_Browser != "firefox for ios" & f_df$Clean_Browser != "opera",], aes(x = Clean_Browser, fill = TWO_R)) +
+        ggplot(f_df[f_df$Clean_Browser != "chrome mobile" & f_df$Clean_Browser != "firefox for ios" & f_df$Clean_Browser != "opera",], aes(x = Clean_Browser)) +
             geom_bar() +
             scale_fill_grey() +
             facet_grid(rows = vars(TWO_R)) +

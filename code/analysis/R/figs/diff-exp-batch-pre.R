@@ -6,7 +6,7 @@ file2 = sprintf("%s/diff-exp2-batch-pre.png", figs_path)
 
 plot1 <- function(f_df) {
     return(
-        ggplot(f_df, aes(x = ONE_DT, fill = TWO_R)) +
+        ggplot(f_df, aes(x = ONE_DT)) +
             geom_histogram(bins = 60) +
             scale_fill_grey() +
             scale_x_datetime(date_breaks = "1 day", date_labels = "%b %d") +
@@ -17,7 +17,7 @@ plot1 <- function(f_df) {
 
 plot2 <- function(f_df) {
     return(
-        ggplot(f_df, aes(x = ONE_T, fill = TWO_R)) +
+        ggplot(f_df, aes(x = ONE_T)) +
             geom_bar() +
             geom_vline(aes(xintercept = median(ONE_T), col = TWO_R), size = 1, linetype = "dotted") +
             scale_fill_grey() +

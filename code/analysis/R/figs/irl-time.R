@@ -29,6 +29,6 @@ plot2 <- function(n_expert_trajectories) {
     )
 }
 
-png(file = file, width = 1215, height = 475)
+png(file = file, width = 1215, height = 300)
 grid.arrange(plot1(15), plot2(50), plot2(100), ncol = 3)
 dev.off()
