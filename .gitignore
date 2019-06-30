@@ -4,6 +4,7 @@
 
 ##Ignore Visual Studio temp files
 *.vs
+*.rxproj.user
 
 ##Ignore Matlab temp files
 *.m~
