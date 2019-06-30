@@ -1,8 +1,8 @@
 library("ggplot2");
 library("plyr");
 
-a_df = a2_df
-f_df = f2_df
+a_df = a1_df
+f_df = f1_df
 
 count_title <- function(title, f_df) {
     return(paste(title, " ", "(n=", prettyNum(dim(f_df)[1], big.mark = ","), ")", sep = ""))
