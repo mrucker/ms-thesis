@@ -9,7 +9,7 @@ my_theme <- function() {
     my_theme_color  = scale_color_grey()
     my_theme_fill   = scale_fill_grey()
     my_theme_shape  = scale_shape_manual(values = c(15, 16, 17, 18, 8))
-    my_theme_tweaks = theme(axis.text = text_16, axis.title = text_18, legend.text = text_16, legend.title = text_18)
+    my_theme_tweaks = theme(axis.text = text_16, axis.title = text_18, legend.text = text_16, legend.title = text_18, strip.text = text_18)
 
     return(list(my_theme_base, my_theme_color, my_theme_fill, my_theme_shape, my_theme_tweaks))
 }

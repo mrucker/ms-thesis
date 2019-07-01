@@ -6,7 +6,7 @@ plot1 <- function(kla) {
     v = ddply(kla, .(iteration, algorithm), summarize, med = median(time), avg = mean(time), var = var(time), se = sd(time) / sqrt(length(time)))
 
     return(
-    ggplot(v, aes(iteration, avg)) +
+    ggplot(v, aes(iteration, avg, colour = algorithm)) +
         my_theme() +
         geom_point(aes(shape = algorithm), size = 3) +
         geom_line(aes(group = algorithm)) +
@@ -19,12 +19,12 @@ plot2 <- function(kla) {
     v = ddply(kla, .(iteration, algorithm), summarize, med = median(value), avg = mean(value), var = var(time), se = sd(value) / sqrt(length(time)))
 
     return(
-        ggplot(v, aes(iteration, avg)) +
+        ggplot(v, aes(iteration, avg, colour = algorithm)) +
             my_theme() +
             geom_point(aes(shape = algorithm), size = 3) +
             geom_line(aes(group = algorithm)) +
             #geom_errorbar(aes(ymin = avg - se, ymax = avg + se)) +
-            labs(x = "Iteration", y = "Avg Value", title = sprintf("Average Runtime By Iteration (n=%i)", n))
+            labs(x = "Iteration", y = "Avg Value", title = sprintf("Average Runtime By Iteration (n=%i)", n), color = "Algorithm", shape = "Algorithm")
     )
 }
 
@@ -37,7 +37,7 @@ plot3 <- function(kla) {
             my_theme() +
             geom_point(aes(shape = algorithm), size = 3) +
             geom_line(aes(group = algorithm)) +
-            labs(x = "Iteration", y = "Avg Value", title = sprintf("Average Runtime By Iteration (n=%i)", n))
+            labs(x = "Iteration", y = "Avg Value", title = sprintf("Average Runtime By Iteration (n=%i)", n), color = "Algorithm", shape="Algorithm")
     )
 }
 
