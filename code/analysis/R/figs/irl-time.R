@@ -2,15 +2,15 @@ library("ggplot2");
 library("gridExtra");
 
 plot1 <- function(n_one_dim_states) {
-    v = ddply(p_irl[p_irl$n == n_one_dim_states,], .(s, algorithm), summarize, med = median(time), avg = mean(time), var = var(time), se = sd(time) / sqrt(length(time)))
+    v = ddply(p_irl[(p_irl$n == n_one_dim_states) & (p_irl$s <= 100),], .(s, algorithm), summarize, med = median(time), avg = mean(time), var = var(time), se = sd(time) / sqrt(length(time)))
 
     return(
         ggplot(v, aes(s, avg, colour = algorithm)) +
-            my_theme +
+            my_theme() +
             geom_point(aes(shape = algorithm), size = 3) +
             geom_line(aes(group = algorithm)) +
             geom_errorbar(aes(ymin = avg - se, ymax = avg + se)) +
-            labs(x = "Trajectory Count", y = "Avg Runtime (sec)", title = sprintf("Runtime By Trajectory Count (%i States)", n_one_dim_states ^ 2), colour = "Algorithm", shape = "Algorithm")
+            labs(x = "Trajectory Count", y = "Avg Runtime (sec)", title = sprintf("Runtime By Trajectory Count\n(With %i State MDP)", n_one_dim_states ^ 2), colour = "Algorithm", shape = "Algorithm")
     )
 }
 
@@ -19,11 +19,11 @@ plot2 <- function(n_expert_trajectories) {
 
     return(
         ggplot(v, aes(n ^ 2, avg, colour = algorithm)) +
-            my_theme +
+            my_theme() +
             geom_point(aes(shape = algorithm), size = 3) +
             geom_line(aes(group = algorithm)) +
             geom_errorbar(aes(ymin = avg - se, ymax = avg + se)) +
-            labs(x = "State Space Size", y = "Avg Runtime (sec)", title = sprintf("Runtime By State Space Size (%i Expert Trajectories)", n_expert_trajectories), colour = "Algorithm", shape = "Algorithm")
+            labs(x = "State Space Size", y = "Avg Runtime (sec)", title = sprintf("Runtime By State Space Size\n(With %i Expert Trajectories)", n_expert_trajectories), colour = "Algorithm", shape = "Algorithm")
     )
 }
 

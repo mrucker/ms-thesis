@@ -1,4 +1,7 @@
-figs_path = "C:/Users/Mark/Desktop/figs1"
+source("prep.R");
+source("theme.R");
+
+figs_path = "C:/Users/Mark/Desktop/figs"
 
 source("figs/diff-exp-age-gender.R");
 source("figs/diff-exp-batch-pre.R");

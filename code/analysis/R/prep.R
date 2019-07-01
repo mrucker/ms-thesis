@@ -2,8 +2,6 @@ library("plyr"); #for revalue()
 
 figs_path = "C:/Users/Mark/Desktop"
 
-source("theme.R");
-
 #study results
 a1_df = read.csv("../../../data/studies/_misc/studies1.csv", header = TRUE, sep = ",")
 a2_df = read.csv("../../../data/studies/_misc/studies2.csv", header = TRUE, sep = ",")
@@ -103,7 +101,7 @@ count_title <- function(title, f_df) {
 }
 
 median_summary <- function(f_df) {
-    v1 = data.frame(T = c(f_df$ONE_T, f_df$TWO_T), S = rep(factor(c("Game 1", "Game 2")), each = dim(f_df)[1]), I = factor(c(as.character(f_df$Input), as.character(f_df$Input))), R = factor(c(as.character(f_df$TWO_R), as.character(f_df$TWO_R)), levels = c("HH", "HL", "CT", "LH", "LL")));
+    v1 = data.frame(T = c(f_df$ONE_T, f_df$TWO_T), S = rep(factor(c("Pre-Test", "Post-Test"), levels = c("Pre-Test", "Post-Test")), each = dim(f_df)[1]), I = factor(c(as.character(f_df$Input), as.character(f_df$Input))), R = factor(c(as.character(f_df$TWO_R), as.character(f_df$TWO_R)), levels = c("HH", "HL", "CT", "LH", "LL")));
     v2 = ddply(v1, .(I, S, R), summarize, med = median(T), avg = mean(T), var = var(T));
     return(v2)
 }

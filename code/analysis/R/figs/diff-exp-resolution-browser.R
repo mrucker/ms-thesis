@@ -4,20 +4,20 @@ library("gridExtra");
 plot1 <- function(f_df) {
     return(
         ggplot(f_df[f_df$Area < 2500000,], aes(x = Area)) +
-            my_theme +
+            my_theme() +
             geom_histogram(bins = 60) +
             facet_grid(rows = vars(TWO_R)) +
-            labs(x = expression(paste("Area (pixels" ^ "2", ")")), y = "Participants", title = count_title("Participant Count by Resolution", f_df), fill = "Group")
+            labs(x = expression(paste("Area (pixels" ^ "2", ")")), y = "Participants", title = count_title("Participant Count by Screen Resolution", f_df), fill = "Group")
     )
 }
 
 plot2 <- function(f_df) {
     return(
         ggplot(f_df[f_df$Clean_Browser != "chrome mobile" & f_df$Clean_Browser != "firefox for ios" & f_df$Clean_Browser != "opera",], aes(x = Clean_Browser)) +
-            my_theme +
+            my_theme() +
             geom_bar() +
             facet_grid(rows = vars(TWO_R)) +
-            labs(x = "Browser", y = "Participants", title = count_title("Participant Count by Browser", f_df), fill = "Group")
+            labs(x = "Browser", y = "Participants", title = count_title("Participant Count by Web Browser", f_df), fill = "Group")
     )
 }
 
