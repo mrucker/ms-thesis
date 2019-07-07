@@ -23,10 +23,10 @@ plot2 <- function(f_df) {
     )
 }
 
-my_dev(file = "exp1-date-pre", width = 1215, height = 475)
+my_dev(file = "exp1-date-prehist", width = 1215, height = 475)
 grid.arrange(plot1(f1_df), plot2(f1_df), ncol = 2)
 dev.off()
 
-my_dev(file = "exp2-date-pre", width = 1215, height = 475)
+my_dev(file = "exp2-date-prehist", width = 1215, height = 475)
 grid.arrange(plot1(f2_df), plot2(f2_df), ncol = 2)
 dev.off()

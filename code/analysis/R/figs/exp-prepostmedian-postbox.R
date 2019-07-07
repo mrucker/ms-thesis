@@ -29,10 +29,10 @@ plot3 <- function(f_df) {
     )
 }
 
-my_dev(file = "exp1-median-post", width = 1215, height = 475)
+my_dev(file = "exp1-prepostmedian-postbox", width = 1215, height = 475)
 grid.arrange(plot1(f1_df), plot3(f1_df), ncol = 2)
 dev.off()
 
-my_dev(file = "exp2-median-post", width = 1215, height = 475)
+my_dev(file = "exp2-prepostmedian-postbox", width = 1215, height = 475)
 grid.arrange(plot1(f2_df), plot3(f2_df), ncol = 2)
 dev.off()

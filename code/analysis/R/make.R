@@ -5,7 +5,7 @@ figs_path = "C:/Users/Mark/Desktop/figs"
 
 source("figs/exp-age-gender.R");
 source("figs/exp-date-prehist.R");
-source("figs/exp-median-postbox.R");
+source("figs/exp-prepostmedian-postbox.R");
 source("figs/exp-qq-normal.R");
 source("figs/exp-resolution-browser.R");
 source("figs/exp-prepostbox-prepostqq.R");
