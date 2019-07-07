@@ -105,4 +105,23 @@ median_summary <- function(f_df) {
     v2 = ddply(v1, .(I, S, R), summarize, med = median(T), avg = mean(T), var = var(T));
     return(v2)
 }
+
+qq_dataframe_against_reward <- function(theoretical_reward, game, f_df) {
+
+    result = setNames(data.frame(matrix(ncol = 3, nrow = 0)), c("theoretical", "sample", "reward"))
+    theoretical = f_df[f_df$TWO_R == theoretical_reward, game]
+
+    for (reward in levels(f_df$TWO_R)) {
+
+        if (reward == theoretical_reward) next
+
+        sample = f_df[f_df$TWO_R == reward, game]
+
+        dd = as.data.frame(qqplot(theoretical, sample, plot.it = FALSE))
+
+        result = rbind(result, data.frame(theoretical = dd$x, sample = dd$y, reward = reward))
+    }
+
+    return(result)
+}
 #utility functions used for making plots

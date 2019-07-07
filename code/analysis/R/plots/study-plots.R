@@ -1,19 +1,8 @@
 library("ggplot2");
 library("plyr");
 
-a_df = a1_df
+a_df = a2_df
 f_df = f1_df
-
-count_title <- function(title, f_df) {
-    return(paste(title, " ", "(n=", prettyNum(dim(f_df)[1], big.mark = ","), ")", sep = ""))
-}
-
-median_summary <- function(f_df) {
-    v1 = data.frame(T = c(f_df$ONE_T, f_df$TWO_T), S = rep(factor(c("Game 1", "Game 2")), each = dim(f_df)[1]), I = factor(c(as.character(f_df$Input), as.character(f_df$Input))), R = factor(c(as.character(f_df$TWO_R), as.character(f_df$TWO_R)), levels = c("HH", "HL", "CT", "LH", "LL")));
-    v2 = ddply(v1, .(I, S, R), summarize, med = median(T), avg = mean(T), var = var(T));
-
-    return (v2)
-}
 
 ggplot(median_summary(f_df), aes(S, med, colour = R)) +
     geom_point(aes(shape = R), size = 3) +
@@ -25,7 +14,6 @@ ggplot(median_summary(f_df), aes(S, med, colour = R)) +
 ggplot(f_df, aes(x = TWO_R, y = TWO_T)) +
     geom_boxplot() +
     labs(x = "Group", y = "Touch Quartiles", title = count_title("Participant Count by Pre-Test Touches", f_df))
-
 
 ggplot(a_df, aes(Input, ONE_T, colour = Input)) +
     geom_boxplot() +
@@ -84,3 +72,20 @@ ggplot(f_df, aes(Gender, ONE_T, color = TWO_R)) + geom_boxplot()
 
 ggplot(f_df, aes(sample = (ONE_T))) + stat_qq() + stat_qq_line() + facet_grid(~TWO_R) + labs(title = count_title("Game 1 QQ-Plot Against Normal", f_df))
 ggplot(f_df, aes(sample = (TWO_T))) + stat_qq() + stat_qq_line() + facet_grid(~TWO_R) + labs(title = count_title("Game 2 QQ-Plot Against Normal", f_df))
+
+v = rbind(setNames(cbind(f_df[, c("ONE_T", "TWO_R")], "Pre-test"), c("Touches", "Reward", "Test")), setNames(cbind(f_df[, c("TWO_T", "TWO_R")], "Post-test"), c("Touches", "Reward", "Test")))
+ggplot(v, aes(x = Reward, y = Touches)) +
+    geom_boxplot(aes(fill = Test)) +
+    labs(x = "Reward", y = "Touches", title = count_title("Distribution of Touches by Treatment", f_df))
+
+v = rbind(setNames(cbind(f_df[, c("ONE_T", "TWO_R")], "Pre-test"), c("Touches", "Reward", "Test")), setNames(cbind(f_df[, c("TWO_T", "TWO_R")], "Post-test"), c("Touches", "Reward", "Test")))
+ggplot(v, aes(x = Touches, color = Test, fill = Test)) +
+    geom_density(alpha = .25) +
+    facet_grid(rows = vars(Reward)) +
+    labs(x = "Touches", y = "Density", title = count_title("Distribution of Touches by Test", f_df))
+
+v <- qq_dataframe_against_reward("CT", "TWO_T", f_df)
+ggplot(v) +
+    geom_point(aes(x = theoretical, y = sample, color = sample > theoretical)) +
+    geom_abline(intercept = 0, slope = 1) +
+    facet_grid(rows = vars(reward))

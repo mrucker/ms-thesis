@@ -21,6 +21,6 @@ plot2 <- function(f_df) {
     )
 }
 
-my_dev(file = "diff-exp1-resolution-browser", width = 1215, height = 475)
+my_dev(file = "exp1-resolution-browser", width = 1215, height = 475)
 grid.arrange(plot1(f1_df), plot2(f1_df), ncol = 2)
 dev.off()

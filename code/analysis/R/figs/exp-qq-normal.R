@@ -13,6 +13,6 @@ plot2 <- function(f_df) {
     )
 }
 
-my_dev(file = "diff-exp1-qq-plot", width = 1215, height = 475)
+my_dev(file = "exp1-qq-normal", width = 1215, height = 475)
 grid.arrange(plot1(f1_df), plot2(f1_df), nrow = 2)
 dev.off()
