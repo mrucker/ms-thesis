@@ -2,7 +2,7 @@ library("ggplot2");
 library("gridExtra");
 
 plot1 <- function(n_one_dim_states) {
-    v = ddply(p_irl[(p_irl$n == n_one_dim_states) & (p_irl$s <= 100),], .(s, algorithm), summarize, med = median(time), avg = mean(time), var = var(time), se = sd(time) / sqrt(length(time)))
+    v = ddply(irl[(irl$n == n_one_dim_states) & (irl$s <= 100),], .(s, algorithm), summarize, med = median(time), avg = mean(time), var = var(time), se = sd(time) / sqrt(length(time)))
 
     return(
         ggplot(v, aes(s, avg, colour = algorithm)) +
@@ -15,7 +15,7 @@ plot1 <- function(n_one_dim_states) {
 }
 
 plot2 <- function(n_expert_trajectories) {
-    v = ddply(p_irl[p_irl$s == n_expert_trajectories,], .(n, algorithm), summarize, med = median(time), avg = mean(time), var = var(time), se = sd(time) / sqrt(length(time)))
+    v = ddply(irl[irl$s == n_expert_trajectories,], .(n, algorithm), summarize, med = median(time), avg = mean(time), var = var(time), se = sd(time) / sqrt(length(time)))
 
     return(
         ggplot(v, aes(n ^ 2, avg, colour = algorithm)) +

@@ -52,39 +52,27 @@ f3_df = filter_a_df(a3_df)
 #study results
 
 #irl performance
-p_irl = read.csv("../../../data/algorithm/perf-irl.csv", header = TRUE, sep = ",")
+irl = read.csv("../../../data/algorithm/irl.csv", header = TRUE, sep = ",")
 
-clean_p_irl <- function(p_irl) {
-    p_irl$algorithm = revalue(p_irl$algorithm, c("an" = "PIRL", "algorithm5" = "KPIRL", "gpirl" = "GPIRL"))
+clean_irl <- function(irl) {
+    irl$algorithm = revalue(irl$algorithm, c("an" = "PIRL", "algorithm5" = "KPIRL", "gpirl" = "GPIRL"))
 
-    return (p_irl)
+    return (irl)
 }
 
-filter_p_irl <- function(p_irl) {
-    p_irl = p_irl[p_irl$algorithm != "algorithm9",]
+filter_irl <- function(irl) {
+    irl = irl[irl$algorithm != "algorithm9",]
 
-    return (p_irl)
+    return (irl)
 }
 
-p_irl = clean_p_irl(p_irl)
-p_irl = filter_p_irl(p_irl)
+irl = clean_irl(irl)
+irl = filter_irl(irl)
 #irl performance
 
 #kla performance
-
-#perf-adp1.csv is a comparison of KLA, LSPI and KLSPI with KLA set to 30 30 5 2 and using state_init = 20
-#perf-adp2.csv is a comparison of KLA, LSPI and KLSPI with KLA set to 30 90 3 4 and using state_init = 3
-#perf-adp3.csv is a comparison of KLA, LSPI and KLSPI with KLA set to 30 90 3 4 and using state_init = 20
-#perf-adp4.csv is a comparison of KLA, LSPI and KLSPI with KLA set to 30 90 3 4 and using state_init = 20
-
-kla2 = read.csv("../../../data/algorithm/perf-adp2.csv", header = TRUE, sep = ",");
-kla2$algorithm = revalue(kla2$algorithm, c("algorithm_13k" = "KLA", "algorithm_lsp" = "LSPI", "algorithm_ksp" = "KLSPI"))
-
-kla3 = read.csv("../../../data/algorithm/perf-adp3.csv", header = TRUE, sep = ",");
-kla3$algorithm = revalue(kla3$algorithm, c("algorithm_13k" = "KLA", "algorithm_lsp" = "LSPI", "algorithm_ksp" = "KLSPI"))
-
-kla4 = read.csv("../../../data/algorithm/perf-adp4.csv", header = TRUE, sep = ",");
-kla4$algorithm = revalue(kla4$algorithm, c("algorithm_13ks" = "KLA", "algorithm_13kx" = "KLA", "algorithm_lsp" = "LSPI", "algorithm_ksp" = "KLSPI"))
+kla = read.csv("../../../data/algorithm/kla.csv", header = TRUE, sep = ",");
+kla$algorithm = revalue(kla$algorithm, c("random"="Random", "kla" = "KLA", "lspi" = "LSPI", "klspi" = "KLSPI"))
 #kla performance
 
 #reward functions
