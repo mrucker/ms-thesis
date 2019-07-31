@@ -72,7 +72,6 @@ irl = filter_irl(irl)
 
 #kla performance
 kla = read.csv("../../../data/algorithm/kla.csv", header = TRUE, sep = ",");
-kla$algorithm = revalue(kla$algorithm, c("random"="Random", "kla" = "KLA", "lspi" = "LSPI", "klspi" = "KLSPI"))
 #kla performance
 
 #reward functions
