@@ -1,3 +1,4 @@
+library("ggplot2"); #not strictly necessary here, but we'll use it to make plots in other scripts
 library("plyr"); #for revalue()
 
 figs_path = "C:/Users/Mark/Desktop"

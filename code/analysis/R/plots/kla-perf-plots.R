@@ -18,7 +18,7 @@ ggplot(v, aes(iteration, avg, colour = algorithm)) +
     labs(x = "Iteration", y = "Avg Value", title = "Average Value By Iteration")
 
 v = ddply(kla, .(iteration, algorithm), summarize, med = median(value), avg = mean(value), var = var(time), se = sd(value) / sqrt(length(time)))
-v$algorithm = revalue(v$algorithm, c("random" = "Random", "kla, exploit, W=2" = "KLA, Exploit, W=2", "kla, explore, W=2" = "KLA, Explore, W=2", "lspi" = "LSPI", "klspi" = "KLSPI"))
+v$algorithm = revalue(v$algorithm, c("random" = "Random", "kla, exploit, monte, W=2" = "KLA, Exploit, Monte Carlo, W=2", "kla, explore, monte, W=2" = "KLA, Explore, Monte Carlo, W=2", "lspi" = "LSPI", "klspi" = "KLSPI", "kla, explore, boot, W=2" = "KLA, Explore, Bootstrap, W=2" ))
 v = v[!grepl("kla", v$algorithm), ]
 ggplot(v, aes(iteration, avg, colour = algorithm)) +
     geom_point(aes(shape = algorithm)) +
