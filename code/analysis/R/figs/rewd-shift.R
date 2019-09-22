@@ -15,7 +15,7 @@ plot1 <- function(r_f, name) {
             geom_histogram(binwidth = bin_width) +
             xlim(-20 * bin_width, 45 * bin_width) +
             ylim(0, 1100) +
-            labs(x = "Reward Value", y = "Count", fill = "", title = bquote(paste("Distribution of ",italic(R)[italic(.(name))], " Shifted")))
+            labs(x = "Reward Value", y = "Count", fill = "", title = bquote(paste("Histogram of ",italic(R)[italic(.(name))], " Shifted")))
     )
 }
 
