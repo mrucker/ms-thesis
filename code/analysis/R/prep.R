@@ -4,11 +4,11 @@ library("plyr"); #for revalue()
 figs_path = "C:/Users/Mark/Desktop"
 
 #study results
-a1_df = read.csv("../../../data/studies/_misc/studies1.csv", header = TRUE, sep = ",")
-a2_df = read.csv("../../../data/studies/_misc/studies2.csv", header = TRUE, sep = ",")
-a3_df = read.csv("../../../data/studies/_misc/studies3.csv", header = TRUE, sep = ",")
+exp_1 = read.csv("../../../data/studies/_misc/studies1.csv", header = TRUE, sep = ",")
+exp_2 = read.csv("../../../data/studies/_misc/studies2.csv", header = TRUE, sep = ",")
+exp_3 = read.csv("../../../data/studies/_misc/studies3.csv", header = TRUE, sep = ",")
 
-clean_a_df <- function(a_df) {
+clean_f_df <- function(a_df) {
     a_df$TWO_R = revalue(a_df$TWO_R, c("c4op" = "LL", "b4op" = "LH", "1" = "CT", "a3op" = "HL", "b3op" = "HH"))
     a_df$TWO_R = factor(a_df$TWO_R, levels = c("HH", "HL", "CT", "LH", "LL"))
 
@@ -29,7 +29,7 @@ clean_a_df <- function(a_df) {
     return(a_df)
 }
 
-filter_a_df <- function(a_df) {
+filter_f_df <- function(a_df) {
 
     f_df = a_df[
         a_df$First == "yes" &
@@ -43,13 +43,12 @@ filter_a_df <- function(a_df) {
     return(f_df)
 }
 
-a1_df = clean_a_df(a1_df)
-a2_df = clean_a_df(a2_df)
-a3_df = clean_a_df(a3_df)
+exp_1 = filter_f_df(clean_f_df(exp_1))
+exp_2 = filter_f_df(clean_f_df(exp_2))
+exp_3 = filter_f_df(clean_f_df(exp_3))
 
-f1_df = filter_a_df(a1_df)
-f2_df = filter_a_df(a2_df)
-f3_df = filter_a_df(a3_df)
+rm(clean_f_df)
+rm(filter_f_df)
 #study results
 
 #irl performance
@@ -67,21 +66,22 @@ filter_irl <- function(irl) {
     return (irl)
 }
 
-irl = clean_irl(irl)
-irl = filter_irl(irl)
+irl = filter_irl(clean_irl(irl))
+
+rm(clean_irl)
+rm(filter_irl)
 #irl performance
 
 #kla performance
 kla = read.csv("../../../data/algorithm/kla.csv", header = TRUE, sep = ",");
-#kla_old = read.csv("../../../data/algorithm/kla_old.csv", header = TRUE, sep = ",");
 #kla performance
 
 #reward functions
-HH = read.csv("../../../data/algorithm/b3op.csv", header = TRUE, sep = ",")
-HH$worth_f = factor((HH$reward > HH$reward[1]) + 0, levels = c(0, 1), labels = c("not worth touching", "worth touching"))
+R_HH = read.csv("../../../data/algorithm/b3op.csv", header = TRUE, sep = ",")
+R_HH$worth_f = factor((R_HH$reward > R_HH$reward[1]) + 0, levels = c(0, 1), labels = c("not worth touching", "worth touching"))
 
-LL = read.csv("../../../data/algorithm/c4op.csv", header = TRUE, sep = ",")
-LL$worth_f = factor((LL$reward > LL$reward[1]) + 0, levels = c(0, 1), labels = c("not worth touching", "worth touching"))
+R_LL = read.csv("../../../data/algorithm/c4op.csv", header = TRUE, sep = ",")
+R_LL$worth_f = factor((R_LL$reward > R_LL$reward[1]) + 0, levels = c(0, 1), labels = c("not worth touching", "worth touching"))
 #reward functions
 
 #utility functions used for making plots

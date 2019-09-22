@@ -246,3 +246,4 @@
 
 # expex forward references with \gathertags
 **/latex/**/*-tags.tex
+.Rproj.user

@@ -21,5 +21,5 @@ plot1 <- function(r_f, name) {
 }
 
 my_dev(file="rewd-clip", width=1215, height=300)
-grid.arrange(plot1(LL,"LL"), plot1(HH,"HH"), ncol = 2)
+grid.arrange(plot1(R_LL,"LL"), plot1(R_HH,"HH"), ncol = 2)
 dev.off()

@@ -24,5 +24,5 @@ plot2 <- function(f_df) {
 }
 
 my_dev(file = "exp1-qq-normal", width = 1215, height = 475)
-grid.arrange(plot1(f1_df), plot2(f1_df), nrow = 2)
+grid.arrange(plot1(exp_1), plot2(exp_1), nrow = 2)
 dev.off()
