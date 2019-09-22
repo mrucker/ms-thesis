@@ -5,8 +5,8 @@ plot1 <- function(f_df) {
     return(
         ggplot(f_df, aes(x = Age)) +
             my_theme() +
-            geom_bar() +            
-            facet_grid(rows = vars(TWO_R)) +
+            geom_bar() +
+            facet_grid(rows = vars(TWO_R), labeller = label_bquote(rows = italic(R[.(as.character(TWO_R))]))) +
             labs(x = "Age", y = "Participants", title = count_title("Participant Count by Age", f_df), fill = "Group")
     )
 }
@@ -16,7 +16,7 @@ plot2 <- function(f_df) {
         ggplot(f_df[f_df$Gender != "other",], aes(x = Gender)) +
             my_theme() +
             geom_bar() +
-            facet_grid(~TWO_R) +
+            facet_grid(cols = vars(TWO_R), labeller = label_bquote(cols = italic(R[.(as.character(TWO_R))]))) +
             labs(x = "Gender", y = "Participants", title = count_title("Participant Count by Gender", f_df), fill = "Group")
     )
 }

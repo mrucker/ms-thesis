@@ -1,0 +1,38 @@
+#done, liked this even less than ubuntu-desktop no recommends but it did run better
+sudo apt install --no-install-recommends ubuntu-mate-desktop
+
+#done, it's meh, a little sluggish and now icons
+sudo apt install --no-install-recommends ubuntu-desktop
+
+#done, I like it but it feels a little sluggish
+sudo apt install xorg
+sudo apt install --no-install-recommends xubuntu-core
+
+#done, my favorite, small and responsive.
+sudo passwd ubuntu
+sudo apt install xorg
+sudo apt install --no-install-recommends lubuntu-core
+sudo apt install firefox
+sudo apt install xrdp
+echo 'lxsession -e LXDE -s Lubuntu' > ~/.xsession
+sudo vim /etc/xrdp/xrdp.ini
+
+2.9GB = sudo apt install ubuntu-mate-desktop
+2.1GB = sudo apt install ubuntu-desktop
+2.5GB = sudo apt install xubuntu-desktop
+2.1GB = sudo apt install lubuntu-desktop
+
+0.8GB = sudo apt install --no-install-recommends ubuntu-desktop
+0.9GB = sudo apt install --no-install-recommends ubuntu-mate-desktop
+0.6GB = sudo apt install --no-install-recommends xubuntu-desktop
+1.4GB = sudo apt install --no-install-recommends lubuntu-desktop
+
+2.2GB = sudo apt install ubuntu-mate-core
+1.3GB = sudo apt install xubuntu-core
+0.9GB = sudo apt install lubuntu-core
+
+0.5GB = sudo apt install xorg
++ 0.5GB = sudo apt install --no-install-recommends ubuntu-mate-core
++ 0.2GB = sudo apt install --no-install-recommends xubuntu-core
++ 0.1GB = sudo apt install --no-install-recommends lubuntu-core
+

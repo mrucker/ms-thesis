@@ -3,14 +3,24 @@ library("gridExtra");
 
 plot1 <- function(r_f, name) {
 
+    raw_reward         = r_f$reward
+    no_touch_reward    = r_f$reward[1]
+    aff_reward         = raw_reward - no_touch_reward
+    clp_aff_reward     = pmax(0, pmin(quantile(aff_reward, .97), aff_reward))
+    scl_clp_aff_reward = clp_aff_reward * 2 / max(clp_aff_reward)
+
+    bin_width = 2.05 / 45
+
     return(
-        ggplot(LL, aes(x = ((reward * (reward < quantile(reward, .97)) + quantile(reward, .97) * (reward >= quantile(reward, .97)) - reward[1]) * (reward > reward[1])), fill = worth_f)) +
+        ggplot(r_f, aes(x = scl_clp_aff_reward, fill = worth_f)) +
             my_theme() +
-            geom_histogram(binwidth = .0001) +
-            labs(x = "Reward Value", y = "Count", title = sprintf("Clipped and Shifted Reward Distribution for %s", name) , fill = "")
+            xlim(-20 * bin_width, 45 * bin_width) +
+            ylim(0, 1100) +
+            geom_histogram(binwidth = bin_width) +
+            labs(x = "Reward Value", y = "Count", fill = "", title = bquote(paste("Distribution of ",italic(R)[italic(.(name))], " Scaled, Clipped and Shifted")))
     )
 }
 
-my_dev(file="rewd-final", width=1215, height=475)
+my_dev(file="rewd-final", width=1215, height=300)
 grid.arrange(plot1(LL,"LL"), plot1(HH,"HH"), ncol = 2)
 dev.off()

@@ -73,6 +73,7 @@ irl = filter_irl(irl)
 
 #kla performance
 kla = read.csv("../../../data/algorithm/kla.csv", header = TRUE, sep = ",");
+#kla_old = read.csv("../../../data/algorithm/kla_old.csv", header = TRUE, sep = ",");
 #kla performance
 
 #reward functions
