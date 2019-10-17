@@ -8,7 +8,7 @@ plot1 <- function(f_df) {
         stat_qq() +
         stat_qq_line() +
         facet_grid(cols = vars(TWO_R), labeller = label_bquote(cols = italic(R[.(as.character(TWO_R))]))) +
-        labs(title = count_title("Pre-Test QQ-Plot Against Normal", f_df))
+        labs(title = count_title("Pretest Q-Q Plot Against Normal", f_df))
     )
 }
 
@@ -19,7 +19,7 @@ plot2 <- function(f_df) {
         stat_qq() +
         stat_qq_line() +
         facet_grid(cols = vars(TWO_R), labeller = label_bquote(cols = italic(R[.(as.character(TWO_R))]))) +
-        labs(title = count_title("Post-Test QQ-Plot Against Normal", f_df))
+        labs(title = count_title("Posttest Q-Q Plot Against Normal", f_df))
     )
 }
 

@@ -1,6 +1,6 @@
-library("multcomp");
-library("clinfun");
-library("effsize");
+library("multcomp")
+library("clinfun")
+library("effsize")
 
 #the kruskal test shows that there is likely not a difference between test one groups
 kruskal.test(ONE_T ~ TWO_R, data = exp_1)

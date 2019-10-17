@@ -19,7 +19,7 @@ plot2 <- function(f_df) {
             geom_bar() +
             #geom_vline(aes(xintercept = median(ONE_T), col = TWO_R), size = 1, linetype = "dotted") +
             facet_grid(rows = vars(TWO_R), labeller = label_bquote(rows = italic(R[.(as.character(TWO_R))]))) +
-            labs(x = "Pre-Test Touches", y = "Participants", title = count_title("Participant Count by Pre-Test Touches", f_df), fill = "Group", color = "Median")
+            labs(x = "Pretest Performance", y = "Participants", title = count_title("Participant Count by Pretest Performance", f_df), fill = "Group", color = "Median")
     )
 }
 
