@@ -29,6 +29,8 @@ plot2 <- function(kla) {
     kla$algorithm = gsub("^.*bootstrap.*"  , "Bootstrap"  , kla$algorithm)
     kla$algorithm = gsub("^.*Monte Carlo.*", "Monte Carlo", kla$algorithm)
     
+    kla$algorithm = factor(kla$algorithm, levels = c("Monte Carlo","Bootstrap"))
+    
     return(
         ggplot(kla, aes(iteration, value, group=algorithm)) +
             my_theme(legend.position = c(0.66, 0.23), legend.key.width = unit(3,"cm")) +
@@ -44,6 +46,8 @@ plot3 <- function(kla) {
     
     kla$algorithm = gsub("^.*explore.*", "Explore"  , kla$algorithm)
     kla$algorithm = gsub("^.*exploit.*", "Exploit", kla$algorithm)
+    
+    kla$algorithm = factor(kla$algorithm, levels = c("Explore","Exploit"))
     
     return(
         ggplot(kla, aes(iteration, value, group=algorithm)) +
@@ -61,7 +65,9 @@ plot4 <- function(kla) {
     kla$algorithm = gsub("^.*T=10.*", "T=10, W=2", kla$algorithm)
     kla$algorithm = gsub("^.*W=1.*" , "T=04, W=1", kla$algorithm)
     kla$algorithm = gsub("^.*kla.*" , "T=04, W=2", kla$algorithm)
-
+    
+    kla$algorithm = factor(kla$algorithm, levels = c("T=04, W=2", "T=04, W=1", "T=10, W=2"))
+    
     return(
         ggplot(kla, aes(iteration, value, group=algorithm)) +
             my_theme(legend.position = c(0.66, 0.23), legend.key.width = unit(3,"cm")) +
