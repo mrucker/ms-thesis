@@ -14,13 +14,13 @@ plot1 <- function(r_f, name) {
     return(
         ggplot(r_f, aes(x = scl_clp_aff_reward, fill = worth_f)) +
             my_theme() +
-            xlim(-20 * bin_width, 45 * bin_width) +
-            ylim(0, 1100) +
+            coord_cartesian(xlim=c(-20 * bin_width, 45 * bin_width), ylim=c(0, 1100)) + 
             geom_histogram(binwidth = bin_width) +
-            labs(x = "Reward Value", y = "Count", fill = "", title = bquote(paste("Histogram of ",italic(R)[italic(.(name))], " Scaled, Clipped and Shifted")))
+            labs(x = "Reward Value", y = "State Count", fill = "")
+            #labs(x = "Reward Value", y = "State Count", fill = "", title = bquote(paste("Histogram of ",italic(R)[italic(.(name))], " Scaled, Clipped and Shifted")))
     )
 }
 
-my_dev(file="rewd-final", width=1215, height=300)
+my_dev(file="rewd-final", width=1215, height=250)
 grid.arrange(plot1(R_LL,"LL"), plot1(R_HH,"HH"), ncol = 2)
 dev.off()

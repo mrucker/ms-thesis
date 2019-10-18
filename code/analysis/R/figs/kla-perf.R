@@ -3,65 +3,71 @@ library("gridExtra");
 
 legend.title = "Algorithms & Parameters"
 
+size     = 4
+position = position=position_jitter(height=0.02, width=0.1)
+
 plot1 <- function(kla) {
-    v = ddply(kla[(grepl("W=2", kla$algorithm) & grepl("Monte", kla$algorithm) & !grepl("T=10", kla$algorithm)) | (grepl("bandwidth=1.0", kla$algorithm) & grepl("mu=0.3", kla$algorithm)) | grepl("polynomial=2", kla$algorithm),], .(iteration, algorithm), summarize, med = median(value), avg = mean(value), var = var(time), se = sd(value) / sqrt(length(time)))
-    v$algorithm = gsub("kla", "KLA", v$algorithm)
-    v$algorithm = gsub("klspi", "KLSPI", v$algorithm)
-    v$algorithm = gsub("lspi", "LSPI", v$algorithm)
+    kla = kla[(grepl("W=2", kla$algorithm) & grepl("Monte", kla$algorithm) & !grepl("T=10", kla$algorithm) & grepl("explore", kla$algorithm)) | (grepl("bandwidth=1.0", kla$algorithm) & grepl("mu=0.3", kla$algorithm)) | grepl("polynomial=2", kla$algorithm),]
+    kla = kla[kla$iteration > 1, ]
+    
+    kla$algorithm = gsub("^kla.*", "KLA", kla$algorithm)
+    kla$algorithm = gsub("^klspi.*", "KLSPI", kla$algorithm)
+    kla$algorithm = gsub("^lspi.*", "LSPI", kla$algorithm)
 
     return (
-        ggplot(v, aes(iteration, avg, colour = algorithm)) +
-            my_theme(legend.position = c(0.56, 0.28)) +
-            geom_point(aes(shape = algorithm), size = 2) +
-            geom_line(aes(group = algorithm)) +
-        #geom_errorbar(aes(ymin = avg - se, ymax = avg + se)) +
-        labs(x = "Policy Iteration", y = "Expected Value", title = "Expected Value By Policy Iteration", colour = legend.title, shape = legend.title)
+        ggplot(kla, aes(iteration, value, group=algorithm)) +
+            my_theme(legend.position = c(0.66, 0.23), legend.key.width = unit(3,"cm")) +
+            geom_smooth(aes(linetype=algorithm), color="black") +
+            coord_cartesian(ylim=c(.2,1.35)) + 
+            labs(x = "Policy Iteration", y = "Expected Value", linetype = "Algorithm", color="Algorithm")
     )
 }
 
 plot2 <- function(kla) {
-    v = ddply(kla[grepl("kla, ", kla$algorithm) & !grepl("T=10", kla$algorithm) & grepl("W=2", kla$algorithm),], .(iteration, algorithm), summarize, med = median(value), avg = mean(value), var = var(time), se = sd(value) / sqrt(length(time)))
-    v$algorithm = gsub("kla", "KLA", v$algorithm)
-
+    kla = kla[grepl("kla", kla$algorithm) & !grepl("T=10", kla$algorithm) & grepl("W=2", kla$algorithm) & grepl("explore", kla$algorithm),]
+    
+    kla$algorithm = gsub("^.*bootstrap.*"  , "Bootstrap"  , kla$algorithm)
+    kla$algorithm = gsub("^.*Monte Carlo.*", "Monte Carlo", kla$algorithm)
+    
     return(
-        ggplot(v, aes(iteration, avg, colour = algorithm)) +
-            my_theme(legend.position = c(0.56, 0.28)) +
-            geom_point(aes(shape = algorithm)) +
-            geom_line(aes(group = algorithm)) +
-        #geom_errorbar(aes(ymin = avg - se, ymax = avg + se)) +
-        labs(x = "Policy Iteration", y = "Expected Value", title = "Expected Value By Policy Iteration", colour = legend.title, shape = legend.title)
+        ggplot(kla, aes(iteration, value, group=algorithm)) +
+            my_theme(legend.position = c(0.66, 0.23), legend.key.width = unit(3,"cm")) +
+            geom_smooth(aes(linetype=algorithm), color="black") +
+            coord_cartesian(ylim=c(.2,1.35)) + 
+            labs(x = "Policy Iteration", y = "Expected Value", linetype = "KLA Sample Value")
     )
 }
 
 plot3 <- function(kla) {
-    v = ddply(kla[grepl("kla, ", kla$algorithm) & !grepl("T=10", kla$algorithm) & grepl("Monte Carlo", kla$algorithm) & grepl("explore", kla$algorithm),], .(iteration, algorithm), summarize, med = median(value), avg = mean(value), var = var(time), se = sd(value) / sqrt(length(time)))
-    v$algorithm = gsub("kla", "KLA", v$algorithm)
-
+    kla = kla[grepl("kla", kla$algorithm) & !grepl("T=10", kla$algorithm) & grepl("W=2", kla$algorithm) & grepl("Monte Carlo", kla$algorithm),]
+    kla = kla[kla$iteration > 1, ]
+    
+    kla$algorithm = gsub("^.*explore.*", "Explore"  , kla$algorithm)
+    kla$algorithm = gsub("^.*exploit.*", "Exploit", kla$algorithm)
+    
     return(
-        ggplot(v, aes(iteration, avg, colour = algorithm)) +
-            my_theme(legend.position = c(0.56, 0.28)) +
-            geom_point(aes(shape = algorithm)) +
-            geom_line(aes(group = algorithm)) +
-        #geom_errorbar(aes(ymin = avg - se, ymax = avg + se)) +
-        labs(x = "Policy Iteration", y = "Expected Value", title = "Expected Value By Policy Iteration as W Varies", colour = legend.title, shape = legend.title)
+        ggplot(kla, aes(iteration, value, group=algorithm)) +
+            my_theme(legend.position = c(0.66, 0.23), legend.key.width = unit(3,"cm")) +
+            geom_smooth(aes(linetype=algorithm), color="black") +
+            coord_cartesian(ylim=c(.2,1.35)) + 
+            labs(x = "Policy Iteration", y = "Expected Value", linetype = "KLA Sample Action")
     )
 }
-plot3(kla)
 
 plot4 <- function(kla) {
-    v = ddply(kla[grepl("kla", kla$algorithm) & grepl("Monte", kla$algorithm) & grepl("W=2", kla$algorithm) & grepl("explore", kla$algorithm),], .(iteration, algorithm), summarize, med = median(value), avg = mean(value), var = var(time), se = sd(value) / sqrt(length(time)))
-
-    v$algorithm = gsub("kla", "KLA", v$algorithm)
-    v$algorithm = gsub("W=2", "W=2, T=04", v$algorithm)
-    v$algorithm = gsub("T=04, T=10", "T=10", v$algorithm)
+    kla = kla[grepl("kla", kla$algorithm) & grepl("Monte", kla$algorithm) & (grepl("W=2", kla$algorithm) | grepl("W=1", kla$algorithm))  & grepl("explore", kla$algorithm),]
+    kla = kla[kla$iteration > 1, ]
+    
+    kla$algorithm = gsub("^.*T=10.*", "T=10, W=2", kla$algorithm)
+    kla$algorithm = gsub("^.*W=1.*" , "T=04, W=1", kla$algorithm)
+    kla$algorithm = gsub("^.*kla.*" , "T=04, W=2", kla$algorithm)
 
     return(
-        ggplot(v, aes(iteration, avg, colour = algorithm)) +
-            my_theme(legend.position = c(0.56, 0.28)) +
-            geom_point(aes(shape = algorithm)) +
-            geom_line(aes(group = algorithm)) +
-        #geom_errorbar(aes(ymin = avg - se, ymax = avg + se)) +
-        labs(x = "Policy Iteration", y = "Expected Value", title = "Expected Value By Policy Iteration As T Varies", colour = legend.title, shape = legend.title)
+        ggplot(kla, aes(iteration, value, group=algorithm)) +
+            my_theme(legend.position = c(0.66, 0.23), legend.key.width = unit(3,"cm")) +
+            coord_cartesian(ylim=c(.2,1.35)) + 
+            geom_smooth(aes(linetype=algorithm), color="black") +
+            labs(x = "Policy Iteration", y = "Expected Value", linetype = "KLA Sample Length")
     )
 }
 

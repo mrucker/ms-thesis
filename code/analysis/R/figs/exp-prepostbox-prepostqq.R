@@ -9,25 +9,24 @@ plot1 <- function(f_df) {
     return(
         ggplot(v, aes(x = reward, y = touches)) +
             my_theme() +
-            geom_boxplot(aes(color = test)) +
+            geom_boxplot(aes(color = test, fill=test)) +
             scale_x_discrete(labels = labels) +
-            labs(x = "Performance", y = "Touches", title = count_title("Boxplots of Performance by Treatment", f_df), color="")
+            labs(x = "Treatment", y = "Performance", color="", fill="")
     )
 }
 
 plot2 <- function(f_df) {
 
     v <- qq_dataframe_against_reward("CT", "TWO_T", f_df)
-    v = v[seq(1, nrow(v), by = 5),]
-    v$greater = factor(v$sample > v$theoretical, labels = c("Treatment > Control","Treatment < Control"))
+    v = v[seq(1, nrow(v), by = 2),]
+    v$greater = factor(v$sample > v$theoretical, labels = c("Increase","Decrease"))
 
     return(
         ggplot(v) +
             my_theme() +
-            geom_point(aes(x = theoretical, y = sample, color = v$greater)) +
-            #geom_abline(intercept = 0, slope = 1) +
+            geom_point(aes(x = theoretical, y = sample, color = v$greater), size=2, position=position_jitter(width=1)) +
             facet_grid(rows = vars(reward), labeller = label_bquote(rows=italic(R[.(as.character(reward))]))) +
-            labs(x = "Control Quantiles", y = "Treatment Quantiles", title = count_title("Q-Q of Treatments vs Control in Posttest", f_df), color = "", shape="")
+            labs(x = "Posttest Control Performance Quantile", y = "Posttest Performance Qunatile", color = "Performance", shape="Performance")
     )
 }
 

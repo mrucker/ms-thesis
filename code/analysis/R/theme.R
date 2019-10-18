@@ -1,18 +1,22 @@
 library("ggplot2");
 
-my_theme <- function(legend.labels = waiver(), legend.position="bottom") {
+update_geom_defaults("point", list(size = 7, fill="white", stroke=1.25))
+update_geom_defaults("smooth", list(size=1.25))
 
-    text_16 = element_text(size = 16)
-    text_18 = element_text(size = 18)
+my_theme <- function(legend.labels = waiver(), legend.position="bottom", legend.direction = NULL, legend.key.width = NULL) {
 
-    my_theme_base   = theme_gray(base_size = 15) #theme_minimal
-    my_theme_color  = scale_color_grey(end = 0.6, labels = legend.labels)
+    text_s = element_text(size = 18)
+    text_m = element_text(size = 21)
+    text_l = element_text(size = 25)
+
+    my_theme_base   = theme_bw(base_size = 15) #theme_minimal
+    my_theme_color  = scale_color_manual(values=c("gray0", "gray40", "gray60", "gray75", "gray100"), labels = legend.labels)
     my_theme_fill   = scale_fill_grey(end = 0.6, labels = legend.labels)
-    my_theme_shape  = scale_shape_manual(values = c(15, 16, 17, 18, 12, 10, 9), labels = legend.labels)
-    my_theme_size   = scale_size_manual(values = c(2))
-    my_theme_tweaks = theme(axis.text = text_16, axis.title = text_18, legend.text = text_16, legend.title = text_18, strip.text = text_18, legend.position = legend.position)
-
-    return(list(my_theme_base, my_theme_color, my_theme_fill, my_theme_shape, my_theme_size, my_theme_tweaks))
+    my_theme_shape  = scale_shape_manual(values = c(21, 22, 24, 23, 25), labels = legend.labels)
+    my_theme_line   = scale_linetype_manual(values = c("solid", "dashed", "dotted"), labels = legend.labels)
+    my_theme_tweaks = theme(plot.title=text_l, legend.title = text_l, axis.title = text_l, legend.text = text_m, axis.text = text_s, legend.position = legend.position, legend.direction = legend.direction, legend.key.width = legend.key.width, strip.text = text_m)
+    
+    return(list(my_theme_base, my_theme_color, my_theme_shape, my_theme_line, my_theme_tweaks, my_theme_fill))
 }
 
 my_dev <- function(file, width, height, type = "pdf") {

@@ -10,7 +10,7 @@ visualize.pois(0 , lambda = lambda * tau)
 visualize.pois(-1, lambda = lambda * 1000)
 
 my_dev(file = "game-dist-1", width = 607, height = 475, type="png")
-visualize.pois(0, lambda = lambda * tau)
+visualize.pois(-1, lambda = lambda * tau)
 dev.off()
 
 my_dev(file = "game-dist-2", width = 607, height = 475, type="png")
