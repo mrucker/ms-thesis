@@ -10,9 +10,9 @@ plot1 <- function(f_df) {
             my_theme() +
             geom_histogram(bins = 60) +
             scale_y_continuous(breaks=c(0,25,50)) +
-            scale_x_continuous(breaks=c(1*x_scale,2*x_scale,3*x_scale,4*x_scale)) +
+            scale_x_continuous(breaks=c(1*x_scale,2*x_scale,3*x_scale,4*x_scale), labels = scales::scientific) +
             facet_grid(rows = vars(TWO_R), labeller = label_bquote(rows = italic(R[.(as.character(TWO_R))]))) +
-            labs(x = expression(paste("Area (pixels" ^ "2", ")")), y = "Participant Count")
+            labs(x = expression(paste("Playing Field Area (px" ^ "2", ")")), y = "Participant Count")
     )
 }
 
@@ -32,7 +32,7 @@ plot2 <- function(f_df) {
             geom_bar() +
             scale_y_continuous(breaks=c(0,100,200)) +
             facet_grid(rows = vars(TWO_R), labeller = label_bquote(rows = italic(R[.(as.character(TWO_R))]))) +
-            labs(x = "Browser", y = "Participant Count")
+            labs(x = "Web Browser", y = "Participant Count")
     )
 }
 
