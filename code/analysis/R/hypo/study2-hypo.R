@@ -32,7 +32,13 @@ wilcox.test((exp_2$TWO_T[exp_2$TWO_R == "HH" | exp_2$TWO_R == "LH" | exp_2$TWO_R
 
 jonckheere.test(exp_2$ONE_T, as.numeric(exp_2$TWO_R), alternative = "decreasing")
 
-cliff.delta(exp_2$TWO_T[exp_2$TWO_R == "HH"], exp_2$TWO_T[exp_2$TWO_R == "CT"])$estimate
-cliff.delta(exp_2$TWO_T[exp_2$TWO_R == "HL"], exp_2$TWO_T[exp_2$TWO_R == "CT"])$estimate
-cliff.delta(exp_2$TWO_T[exp_2$TWO_R == "LH"], exp_2$TWO_T[exp_2$TWO_R == "CT"])$estimate
-cliff.delta(exp_2$TWO_T[exp_2$TWO_R == "LL"], exp_2$TWO_T[exp_2$TWO_R == "CT"])$estimate
+treament_cliff(exp_2, "HH", "CT")
+treament_cliff(exp_2, "HL", "CT")
+treament_cliff(exp_2, "LH", "CT")
+treament_cliff(exp_2, "LL", "CT")
+
+n_mean_median_var(exp_2, "HH")
+n_mean_median_var(exp_2, "HL")
+n_mean_median_var(exp_2, "LH")
+n_mean_median_var(exp_2, "LL")
+n_mean_median_var(exp_2, "CT")

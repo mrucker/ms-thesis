@@ -114,3 +114,14 @@ qq_dataframe_against_reward <- function(theoretical_reward, game, f_df) {
     return(result)
 }
 #utility functions used for making plots
+
+#utility functions for hypothesis testing
+treament_cliff <- function(exp, r1, r2) {
+    cd = cliff.delta(exp$TWO_T[exp$TWO_R == r1], exp$TWO_T[exp$TWO_R == r2])
+    round(c(cd$estimate, cd$conf.int),3)
+}
+
+n_mean_median_var <- function(exp, r) {
+    round(c(sum(exp$TWO_R == r), mean(exp$TWO_T[exp$TWO_R == r]), median(exp$TWO_T[exp$TWO_R == r]), var(exp$TWO_T[exp$TWO_R == r]) ),3)
+}
+#utility functions for hypothesis testing
