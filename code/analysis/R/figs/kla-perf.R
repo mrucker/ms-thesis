@@ -1,13 +1,14 @@
 library("ggplot2");
 library("gridExtra");
 
-legend.title = "Algorithms & Parameters"
+#ylim = c(.2,1.35)
+ylim = c(.2,3.00)
 
 size     = 4
 position = position=position_jitter(height=0.02, width=0.1)
 
 plot1 <- function(kla) {
-    kla = kla[(grepl("W=2", kla$algorithm) & grepl("Monte", kla$algorithm) & !grepl("T=10", kla$algorithm) & grepl("explore", kla$algorithm)) | (grepl("bandwidth=1.0", kla$algorithm) & grepl("mu=0.3", kla$algorithm)) | grepl("polynomial=2", kla$algorithm),]
+    kla = kla[(grepl("W=3", kla$algorithm) & grepl("Monte", kla$algorithm) & grepl("explore", kla$algorithm)) | grepl("klspi", kla$algorithm) | grepl("lspi", kla$algorithm),]
     kla = kla[kla$iteration > 1, ]
     
     kla$algorithm = gsub("^kla.*", "KLA", kla$algorithm)
@@ -18,13 +19,13 @@ plot1 <- function(kla) {
         ggplot(kla, aes(iteration, value, group=algorithm)) +
             my_theme(legend.position = c(0.66, 0.23), legend.key.width = unit(3,"cm")) +
             geom_smooth(aes(linetype=algorithm), color="black") +
-            coord_cartesian(ylim=c(.2,1.35)) + 
+            coord_cartesian(ylim=ylim) + 
             labs(x = "Policy Iteration", y = "Expected Value", linetype = "Algorithm", color="Algorithm")
     )
 }
 
 plot2 <- function(kla) {
-    kla = kla[grepl("kla", kla$algorithm) & !grepl("T=10", kla$algorithm) & grepl("W=2", kla$algorithm) & grepl("explore", kla$algorithm),]
+    kla = kla[grepl("kla", kla$algorithm) & grepl("W=3", kla$algorithm) & grepl("explore", kla$algorithm),]
     
     kla$algorithm = gsub("^.*bootstrap.*"  , "Bootstrap"  , kla$algorithm)
     kla$algorithm = gsub("^.*Monte Carlo.*", "Monte Carlo", kla$algorithm)
@@ -35,13 +36,13 @@ plot2 <- function(kla) {
         ggplot(kla, aes(iteration, value, group=algorithm)) +
             my_theme(legend.position = c(0.66, 0.23), legend.key.width = unit(3,"cm")) +
             geom_smooth(aes(linetype=algorithm), color="black") +
-            coord_cartesian(ylim=c(.2,1.35)) + 
-            labs(x = "Policy Iteration", y = "Expected Value", linetype = "KLA Sample Value")
+            coord_cartesian(ylim=ylim) + 
+            labs(x = "Policy Iteration", y = "Expected Value", linetype = "KLA T=3, W=3, Explore")
     )
 }
 
 plot3 <- function(kla) {
-    kla = kla[grepl("kla", kla$algorithm) & !grepl("T=10", kla$algorithm) & grepl("W=2", kla$algorithm) & grepl("Monte Carlo", kla$algorithm),]
+    kla = kla[grepl("kla", kla$algorithm) & grepl("W=3", kla$algorithm) & grepl("Monte", kla$algorithm),]
     kla = kla[kla$iteration > 1, ]
     
     kla$algorithm = gsub("^.*explore.*", "Explore"  , kla$algorithm)
@@ -53,27 +54,27 @@ plot3 <- function(kla) {
         ggplot(kla, aes(iteration, value, group=algorithm)) +
             my_theme(legend.position = c(0.66, 0.23), legend.key.width = unit(3,"cm")) +
             geom_smooth(aes(linetype=algorithm), color="black") +
-            coord_cartesian(ylim=c(.2,1.35)) + 
-            labs(x = "Policy Iteration", y = "Expected Value", linetype = "KLA Sample Action")
+            coord_cartesian(ylim=ylim) + 
+            labs(x = "Policy Iteration", y = "Expected Value", linetype = "KLA T=3, W=3, Monte Carlo")
     )
 }
 
 plot4 <- function(kla) {
-    kla = kla[grepl("kla", kla$algorithm) & grepl("Monte", kla$algorithm) & (grepl("W=2", kla$algorithm) | grepl("W=1", kla$algorithm))  & grepl("explore", kla$algorithm),]
+    kla = kla[grepl("kla", kla$algorithm) & grepl("Monte", kla$algorithm) & grepl("explore", kla$algorithm),]
     kla = kla[kla$iteration > 1, ]
     
-    kla$algorithm = gsub("^.*T=10.*", "T=10, W=2", kla$algorithm)
-    kla$algorithm = gsub("^.*W=1.*" , "T=04, W=1", kla$algorithm)
-    kla$algorithm = gsub("^.*kla.*" , "T=04, W=2", kla$algorithm)
+    kla$algorithm = gsub("^.*W=1.*", "T=3, W=1", kla$algorithm)
+    kla$algorithm = gsub("^.*W=2.*", "T=3, W=2", kla$algorithm)
+    kla$algorithm = gsub("^.*W=3.*", "T=3, W=3", kla$algorithm)
     
-    kla$algorithm = factor(kla$algorithm, levels = c("T=04, W=2", "T=04, W=1", "T=10, W=2"))
+    kla$algorithm = factor(kla$algorithm, levels = c("T=3, W=1", "T=3, W=2", "T=3, W=3"))
     
     return(
         ggplot(kla, aes(iteration, value, group=algorithm)) +
             my_theme(legend.position = c(0.66, 0.23), legend.key.width = unit(3,"cm")) +
-            coord_cartesian(ylim=c(.2,1.35)) + 
+            coord_cartesian(ylim=ylim) + 
             geom_smooth(aes(linetype=algorithm), color="black") +
-            labs(x = "Policy Iteration", y = "Expected Value", linetype = "KLA Sample Length")
+            labs(x = "Policy Iteration", y = "Expected Value", linetype = "KLA Monte Carlo, Explore")
     )
 }
 
