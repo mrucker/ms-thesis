@@ -7,13 +7,12 @@ plot1 <- function(n_one_dim_states) {
     return(
         ggplot(v, aes(s, avg, colour = algorithm, shape = algorithm)) +
             my_theme() +
-            geom_line() +
+            geom_line(size=1.5) +
             geom_point() +
             coord_cartesian(ylim=c(0,0.8)) + 
             scale_y_continuous(labels = scales::percent) +
             guides(shape = guide_legend(override.aes = list(linetype = 0))) +
             labs(x = "Number of Expert Samples", y = "Mean Value Loss", colour = "Algorithm", shape = "Algorithm")
-            #labs(x = bquote(paste("M")), y = bquote(frac(paste(E[d]^pi[E] ,"[", V[E], "]", "-", E[d]^pi[IRL] ,"[", V[E], "]"), paste(E[d]^pi[E] ,"[", V[E], "]"))) , title = bquote(paste("% of Value Loss by # of Expert Samples M")), colour = "Algorithm", shape = "Algorithm")
     )
 }
 
@@ -23,13 +22,12 @@ plot2 <- function(n_expert_trajectories) {
     return(        
         ggplot(v, aes(n ^ 2, avg, colour = algorithm, shape=algorithm)) +
             my_theme() +
-            geom_line() +
+            geom_line(size=1.5) +
             geom_point() +
             coord_cartesian(ylim=c(0,0.8)) + 
             scale_y_continuous(labels = scales::percent) +
             guides(shape = guide_legend(override.aes = list(linetype = 0))) +
             labs(x = "Number of States", y = "Mean Value Loss", colour = "Algorithm", shape = "Algorithm")
-            #labs(x = bquote(paste("|", italic(S), "|")), y = bquote(frac(paste(E[d]^pi[E] ,"[", V[E], "]", "-", E[d]^pi[IRL],"[", V[E], "]"),paste(E[d]^pi[E], "[", V[E], "]"))) , title = bquote(paste("% of Value Loss by # of States ", "|", italic(S), "|")), colour = "Algorithm", shape = "Algorithm")
     )
 }
 
