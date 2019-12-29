@@ -1,0 +1,7 @@
+1. Startup my MATLAB AMI instance as a spot instance (can be done without making a fleet now!)
+2. Make sure to turn on RDP permissions for my current ip address
+3. SSH into the instance and run `sudo passwd ubuntu` to set the RDP login
+4. RDP into the instance
+5. navigate to /usr/local/MATLAB/R2019/bin/
+6. run the register.sh script (if this doesn't work because of browse issues manually register online and donwload the .lic file)
+7. register as the ubuntu user then run `matlab` from the terminal without `root` permissions

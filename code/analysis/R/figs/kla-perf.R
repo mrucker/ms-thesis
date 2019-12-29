@@ -9,7 +9,7 @@ position = position=position_jitter(height=0.02, width=0.1)
 
 plot1 <- function(kla) {
     kla = kla[(grepl("W=3", kla$algorithm) & grepl("Monte", kla$algorithm) & grepl("explore", kla$algorithm)) | grepl("klspi", kla$algorithm) | grepl("lspi", kla$algorithm),]
-    kla = kla[kla$iteration > 1, ]
+    kla = kla[kla$iteration > 0, ]
     
     kla$algorithm = gsub("^kla.*", "KLA", kla$algorithm)
     kla$algorithm = gsub("^klspi.*", "KLSPI", kla$algorithm)
@@ -26,6 +26,7 @@ plot1 <- function(kla) {
 
 plot2 <- function(kla) {
     kla = kla[grepl("kla", kla$algorithm) & grepl("W=3", kla$algorithm) & grepl("explore", kla$algorithm),]
+    kla = kla[kla$iteration > 0, ]
     
     kla$algorithm = gsub("^.*bootstrap.*"  , "Bootstrap"  , kla$algorithm)
     kla$algorithm = gsub("^.*Monte Carlo.*", "Monte Carlo", kla$algorithm)
@@ -43,7 +44,7 @@ plot2 <- function(kla) {
 
 plot3 <- function(kla) {
     kla = kla[grepl("kla", kla$algorithm) & grepl("W=3", kla$algorithm) & grepl("Monte", kla$algorithm),]
-    kla = kla[kla$iteration > 1, ]
+    kla = kla[kla$iteration > 0, ]
     
     kla$algorithm = gsub("^.*explore.*", "Explore"  , kla$algorithm)
     kla$algorithm = gsub("^.*exploit.*", "Exploit", kla$algorithm)
@@ -61,7 +62,7 @@ plot3 <- function(kla) {
 
 plot4 <- function(kla) {
     kla = kla[grepl("kla", kla$algorithm) & grepl("Monte", kla$algorithm) & grepl("explore", kla$algorithm),]
-    kla = kla[kla$iteration > 1, ]
+    kla = kla[kla$iteration > 0, ]
     
     kla$algorithm = gsub("^.*W=1.*", "T=3, W=1", kla$algorithm)
     kla$algorithm = gsub("^.*W=2.*", "T=3, W=2", kla$algorithm)
