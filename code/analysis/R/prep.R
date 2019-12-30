@@ -1,5 +1,5 @@
 library("ggplot2"); #not strictly necessary here, but we'll use it to make plots in other scripts
-library("plyr"); #for revalue()
+library("forcats"); #for fct_recode() and fct_relevel()
 
 figs_path = "C:/Users/Mark/Desktop"
 
@@ -9,8 +9,8 @@ exp_2 = read.csv("../../../data/studies/_misc/studies2.csv", header = TRUE, sep 
 exp_3 = read.csv("../../../data/studies/_misc/studies3.csv", header = TRUE, sep = ",")
 
 clean_f_df <- function(a_df) {
-    a_df$TWO_R = revalue(a_df$TWO_R, c("c4op" = "LL", "b4op" = "LH", "1" = "CT", "a3op" = "HL", "b3op" = "HH"))
-    a_df$TWO_R = factor(a_df$TWO_R, levels = c("HH", "HL", "CT", "LH", "LL"))
+    a_df$TWO_R = fct_recode(a_df$TWO_R, LL = "c4op", LH = "b4op", CT = "1", HL = "a3op", HH = "b3op")
+    a_df$TWO_R = fct_relevel(a_df$TWO_R, "HH", "HL", "CT", "LH", "LL")
 
     a_df$ONE_DT = as.POSIXct(a_df$ONE_TS, tz = "", "%Y-%m-%dT%H:%M:%S")
 
@@ -55,7 +55,7 @@ rm(filter_f_df)
 irl = read.csv("../../../data/algorithm/irl.csv", header = TRUE, sep = ",")
 
 clean_irl <- function(irl) {
-    irl$algorithm = revalue(irl$algorithm, c("an" = "PIRL", "algorithm5" = "KPIRL", "gpirl" = "GPIRL"))
+    irl$algorithm = fct_recode(irl$algorithm, PIRL = "an", KPIRL = "algorithm5", GPIRL = "gpirl")
 
     return (irl)
 }

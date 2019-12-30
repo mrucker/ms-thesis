@@ -1,7 +1,8 @@
 library("ggplot2");
 
-update_geom_defaults("point", list(size = 7, fill="white", stroke=1.25))
-update_geom_defaults("smooth", list(size=1.25))
+update_geom_defaults("point" , list(size = 7, fill="white", stroke=1.25))
+update_geom_defaults("line"  , list(size=1.25))
+update_geom_defaults("ribbon", list(alpha=.15))
 
 my_theme <- function(legend.labels = waiver(), legend.position="bottom", legend.direction = NULL, legend.key.width = NULL) {
 
