@@ -9,10 +9,10 @@ plot1 <- function(n_states) {
         group_by(s, algorithm) %>% 
         summarise(
             cnt = n(), 
-            med = median(value), 
-            avg = mean(value), 
-            var = var(value), 
-            sem = sqrt(var(value) / n())
+            med = median(1-value), 
+            avg = mean(1-value), 
+            var = var(1-value), 
+            sem = sqrt(var(1-value) / n())
         )
 
     plot = ggplot(data, aes(s, avg, colour = algorithm, shape = algorithm)) +
