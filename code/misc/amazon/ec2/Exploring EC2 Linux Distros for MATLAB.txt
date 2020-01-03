@@ -1,3 +1,5 @@
+#run one of the below collection of commands on a basic AMI build to get RDP functionality
+
 #done, liked this even less than ubuntu-desktop no recommends but it did run better
 sudo apt install --no-install-recommends ubuntu-mate-desktop
 
@@ -9,14 +11,15 @@ sudo apt install xorg
 sudo apt install --no-install-recommends xubuntu-core
 
 #done, my favorite, small and responsive.
-sudo passwd ubuntu
 sudo apt install xorg
 sudo apt install --no-install-recommends lubuntu-core
 sudo apt install firefox
 sudo apt install xrdp
 echo 'lxsession -e LXDE -s Lubuntu' > ~/.xsession
 sudo vim /etc/xrdp/xrdp.ini
+sudo passwd ubuntu
 
+#various statistics on the installation footprint of the different commands
 2.9GB = sudo apt install ubuntu-mate-desktop
 2.1GB = sudo apt install ubuntu-desktop
 2.5GB = sudo apt install xubuntu-desktop
@@ -35,4 +38,3 @@ sudo vim /etc/xrdp/xrdp.ini
 + 0.5GB = sudo apt install --no-install-recommends ubuntu-mate-core
 + 0.2GB = sudo apt install --no-install-recommends xubuntu-core
 + 0.1GB = sudo apt install --no-install-recommends lubuntu-core
-
