@@ -129,7 +129,7 @@ function Mouse(canvas)
 		newVelocityX = x - oldPosition.x;
 		newVelocityY = y - oldPosition.y;
 		newVelocityM = Math.sqrt(Math.pow(newVelocityX,2) + Math.pow(newVelocityY,2));
-		newVelocityD = Math.atan2(-newVelocityY,newVelocityX);
+		newVelocityD = Math.atan2(-newVelocityY,-newVelocityX)+Math.PI;
 
 		newAccelerationX = x - oldPosition.x - velocity.x;
 		newAccelerationY = y - oldPosition.y - velocity.y;
